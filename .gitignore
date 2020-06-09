@@ -3,3 +3,5 @@
 /backend/venv/
 /backend/__pycache__
 /backend/.vscode
+/backend/models/__pycache__
+/backend/services/__pycache__
