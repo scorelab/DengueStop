@@ -1,4 +1,4 @@
-from models.user import User, user_schema
+from models.user import User, user_schema, users_schema
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
@@ -23,12 +23,9 @@ def hello_world():
     return jsonify({'name': 'hello'})
 
 
-@app.route('/register', methods=['POST'])
+@app.route('/register_user', methods=['POST'])
 def register_user():
-    print("HIT")
     telephone = request.json['telephone']
-    print(telephone)
-    print("TLEL")
     first_name = request.json['first_name']
     last_name = request.json['last_name']
     nic_number = request.json['nic_number']
@@ -41,6 +38,13 @@ def register_user():
     db.session.commit()
 
     return user_schema.jsonify(new_user)
+
+
+@app.route('/get_users', methods=['GET'])
+def get_users():
+    all_users = User.query.all()
+    result = users_schema.dump(all_users)
+    return jsonify(result)
 
 
 # running server
