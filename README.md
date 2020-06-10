@@ -13,6 +13,8 @@ Clone the repository
 
 ## Flutter Community App
 
+To be completed
+
 ## Flask Backend
 
 1. Install Python3
@@ -35,6 +37,8 @@ Clone the repository
    ```
 
 ## React Admin Panel
+
+To be completed
 
 # License
 
