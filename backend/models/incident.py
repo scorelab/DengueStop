@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 class Incident(db.model):
-    # class corresponding to the Incident Table in the database
+    # class corresponding to the incident table in the database
     id = db.Column(db.Integer, primary_key=True)
     province = db.Column(db.String(45), nullable=False)
     district = db.Column(db.String(45), nullable=False)
