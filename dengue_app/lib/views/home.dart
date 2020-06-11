@@ -16,7 +16,7 @@ class Home extends StatelessWidget {
             child: FloatingActionButton(
               onPressed: () {
                 // routing to report incident screen
-                print('report_incident');
+                Navigator.pushNamed(context, 'report_incident');
               },
               child: Icon(Icons.add, size: 40.0),
               backgroundColor: Colors.lightBlue[500],
