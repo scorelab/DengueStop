@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:dengue_app/models/incident.dart';
 
 // global styling for form labels
 TextStyle formLabelStyle =
@@ -105,6 +106,27 @@ class IncidentFormField extends StatefulWidget {
 
 class _IncidentFormFieldState extends State<IncidentFormField> {
   final _incidentFormKey = GlobalKey<FormState>();
+  Incident incident = Incident();
+
+  setIncidentProvince(String province) {
+    print('province');
+    print(province);
+  }
+
+  setIncidentDistrict(String district){
+    print('district');
+    print(district);
+  }
+
+  setPatientGender(String gender){
+    print('gender');
+    print(gender);
+  }
+
+  setPatientDob(DateTime dob){
+    print('dob');
+    print(dob);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +146,7 @@ class _IncidentFormFieldState extends State<IncidentFormField> {
                   child: Column(
                     children: <Widget>[
                       Text('Province', style: formLabelStyle),
-                      ProvinceDropdown(),
+                      ProvinceDropdown(setProvinceFunction: setIncidentProvince),
                     ],
                   ),
                 ),
@@ -133,7 +155,7 @@ class _IncidentFormFieldState extends State<IncidentFormField> {
                   child: Column(
                     children: <Widget>[
                       Text('District', style: formLabelStyle),
-                      DistrictDropdown(),
+                      DistrictDropdown(setDistrictFunction: setIncidentDistrict),
                     ],
                   ),
                 )
@@ -174,7 +196,7 @@ class _IncidentFormFieldState extends State<IncidentFormField> {
                   child: Column(
                     children: <Widget>[
                       Text('Patient Gender', style: formLabelStyle),
-                      GenderDropdown()
+                      GenderDropdown(setGenderFunction: setPatientGender)
                     ],
                   ),
                 ),
@@ -183,7 +205,7 @@ class _IncidentFormFieldState extends State<IncidentFormField> {
                   child: Column(
                     children: <Widget>[
                       Text('Date of Birth', style: formLabelStyle),
-                      BirthDatePicker()
+                      BirthDatePicker(setBirthDateFunction: setPatientDob)
                     ],
                   ),
                 ),
@@ -219,9 +241,9 @@ class IncidentFormButtons extends StatelessWidget {
 // custom dropdown created for province, district and gender
 class CustomDropdown extends StatefulWidget {
   final List<String> dropdownData;
-  // todo have to figure out a method to make it final
-  String selectedData;
-  CustomDropdown({Key key, this.dropdownData, this.selectedData})
+  final selectFunction;
+  final String selectedData;
+  CustomDropdown({Key key, this.dropdownData, this.selectedData, this.selectFunction})
       : super(key: key);
 
   @override
@@ -229,7 +251,6 @@ class CustomDropdown extends StatefulWidget {
 }
 
 class _CustomDropdownState extends State<CustomDropdown> {
-  String selectedData;
   @override
   Widget build(BuildContext context) {
     // todo better approach to handle selected data other than widget.selectedData
@@ -258,7 +279,7 @@ class _CustomDropdownState extends State<CustomDropdown> {
           ),
           onChanged: (String newValue) {
             setState(() {
-              widget.selectedData = newValue;
+              widget.selectFunction(newValue);
             });
           },
           // todo add province data to dropdown
@@ -276,6 +297,10 @@ class _CustomDropdownState extends State<CustomDropdown> {
 }
 
 class ProvinceDropdown extends StatefulWidget {
+  final setProvinceFunction;
+  ProvinceDropdown({Key key, this.setProvinceFunction})
+      : super(key: key);
+
   @override
   _ProvinceDropdownState createState() => _ProvinceDropdownState();
 }
@@ -287,11 +312,15 @@ class _ProvinceDropdownState extends State<ProvinceDropdown> {
   @override
   Widget build(BuildContext context) {
     return CustomDropdown(
-        dropdownData: provinceDropdown, selectedData: selectedProvince);
+        dropdownData: provinceDropdown, selectedData: selectedProvince, selectFunction: widget.setProvinceFunction);
   }
 }
 
 class DistrictDropdown extends StatefulWidget {
+  final setDistrictFunction;
+  DistrictDropdown({Key key, this.setDistrictFunction})
+      : super(key: key);
+
   @override
   _DistrictDropdownState createState() => _DistrictDropdownState();
 }
@@ -303,7 +332,7 @@ class _DistrictDropdownState extends State<DistrictDropdown> {
   @override
   Widget build(BuildContext context) {
     return CustomDropdown(
-        dropdownData: districtDropdown, selectedData: selectedDistrict);
+        dropdownData: districtDropdown, selectedData: selectedDistrict, selectFunction: widget.setDistrictFunction,);
   }
 }
 
@@ -357,6 +386,21 @@ class GetLocationButton extends StatelessWidget {
 
 class PatientNameField extends StatelessWidget{
   // todo getting the patient name
+
+  String validatePatientName(String value){
+    if (value.isEmpty) {
+      return 'Please enter the patient name';
+    }
+
+    Pattern pattern =
+        r"^[\\p{L} .'-]+$";
+    RegExp regex = new RegExp(pattern);
+    if (!regex.hasMatch(value))
+      return 'Please Enter a Valid Name Format';
+    else
+      return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -364,14 +408,20 @@ class PatientNameField extends StatelessWidget{
       child: TextFormField(
         focusNode: patientNameFocusNode,
         textInputAction: TextInputAction.done,
+        // determines the type of keyboard to show
+        keyboardType: TextInputType.text,
         onEditingComplete: () => FocusScope.of(context).requestFocus(descriptionFocusNode),
         decoration: formFieldStyle,
+        validator: validatePatientName,
       ),
     );
   }
 }
 
 class GenderDropdown extends StatefulWidget {
+  final setGenderFunction;
+  GenderDropdown({Key key, this.setGenderFunction})
+      : super(key: key);
   @override
   _GenderDropdownState createState() => _GenderDropdownState();
 }
@@ -383,11 +433,14 @@ class _GenderDropdownState extends State<GenderDropdown> {
   @override
   Widget build(BuildContext context) {
     return CustomDropdown(
-        dropdownData: genderDropdown, selectedData: selectedGender);
+        dropdownData: genderDropdown, selectedData: selectedGender, selectFunction: widget.setGenderFunction);
   }
 }
 
 class BirthDatePicker extends StatefulWidget {
+  final setBirthDateFunction;
+  BirthDatePicker({Key key, this.setBirthDateFunction})
+      : super(key: key);
   @override
   _BirthDatePickerState createState() => _BirthDatePickerState();
 }
@@ -407,6 +460,7 @@ class _BirthDatePickerState extends State<BirthDatePicker> {
     if (picked != null && picked != selectedDate)
       setState(() {
         selectedDate = picked;
+        widget.setBirthDateFunction(picked);
       });
   }
 
@@ -456,6 +510,10 @@ class FormButton extends StatelessWidget {
   final String buttonText;
   final String buttonType;
   FormButton({this.buttonText, this.buttonType});
+  
+  submitIncidentReport() {
+    print('submit called');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -484,6 +542,7 @@ class FormButton extends StatelessWidget {
           // on press will trigger different functions based on the type of button
           if (buttonType == 'send') {
             // send report
+            submitIncidentReport();
             // todo logic to send the report
           } else if (buttonType == 'cancel') {
             // routing back to home screen
