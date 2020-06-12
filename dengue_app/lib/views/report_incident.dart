@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:dengue_app/models/incident.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 // global styling for form labels
 TextStyle formLabelStyle =
@@ -101,15 +103,16 @@ class _IncidentFormFieldState extends State<IncidentFormField> {
     Widget cancelButton = FlatButton(
       child: Text("No"),
       textColor: Colors.red,
-      onPressed:  () {
+      onPressed: () {
         // dismiss the popup
         Navigator.of(context).pop();
       },
     );
     Widget continueButton = FlatButton(
       child: Text("Yes"),
-      onPressed:  () {
-        // sends the report to the server
+      onPressed: () {
+        // sends the report to the server and dismiss the popup
+        Navigator.of(context).pop();
         sendReport();
       },
     );
@@ -160,6 +163,7 @@ class _IncidentFormFieldState extends State<IncidentFormField> {
 
   setPatientDob(DateTime dob) {
     incident.patientDob = dob;
+    print(dob);
   }
 
   setIncidentDescription(String description) {
@@ -181,12 +185,40 @@ class _IncidentFormFieldState extends State<IncidentFormField> {
     incident.patientStatusId = 1;
     // initially report is not verified
     incident.isVerified = false;
-    // verified by 0 means no admin have verified it
-    incident.verifiedBy = 0;
+    // verified by will be null, which means no admin have verified it
     // todo get orgId based on province and district and plug here
     incident.orgId = 1;
+    createReport(incident);
+  }
 
-    // todo send the incident object to flask backend
+  dynamic dateTimeEncode(dynamic item) {
+    // this converts DateTime objects to JSON
+    if (item is DateTime) {
+      return item.toIso8601String();
+    }
+    return item;
+  }
+
+  // sends the report to the API endpoint after JSON serialization
+  void createReport(Incident incident) async {
+    var url = 'http://0.0.0.0:5000/report_incident';
+    String jsonIncident =
+        jsonEncode(incident.toJson(), toEncodable: dateTimeEncode);
+    print(jsonIncident);
+    var response = await http.post(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonIncident,
+    );
+
+    // todo add snack bar to denote success or failure
+    if (response.statusCode == 200) {
+      print('Request successful with status: ${response.statusCode}.');
+    } else {
+      print('Request failed with status: ${response.statusCode}.');
+    }
   }
 
   @override
@@ -211,9 +243,8 @@ class _IncidentFormFieldState extends State<IncidentFormField> {
                 ),
                 SizedBox(width: 20.0),
                 Expanded(
-                  child: DistrictDropdown(
-                      setDistrictFunction: setIncidentDistrict)
-                )
+                    child: DistrictDropdown(
+                        setDistrictFunction: setIncidentDistrict))
               ],
             ),
             // province dropdown
@@ -231,9 +262,7 @@ class _IncidentFormFieldState extends State<IncidentFormField> {
                 Expanded(
                   flex: 3,
                   child: Column(
-                    children: <Widget>[
-                      GetLocationButton()
-                    ],
+                    children: <Widget>[GetLocationButton()],
                   ),
                 )
               ],
@@ -305,7 +334,11 @@ class CustomDropdown extends StatefulWidget {
   // todo find a way to make selectedData final
   String selectedData;
   CustomDropdown(
-      {Key key, this.dropdownData, this.selectedData, this.selectFunction, this.label})
+      {Key key,
+      this.dropdownData,
+      this.selectedData,
+      this.selectFunction,
+      this.label})
       : super(key: key);
 
   @override
@@ -326,11 +359,7 @@ class _CustomDropdownState extends State<CustomDropdown> {
       decoration: InputDecoration(
           labelText: widget.label,
           labelStyle: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w500,
-            color: Colors.black
-          )
-      ),
+              fontSize: 20, fontWeight: FontWeight.w500, color: Colors.black)),
 //        decoration: InputDecoration.collapsed(
 //          border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(50.0)))
 //        ),
@@ -343,8 +372,7 @@ class _CustomDropdownState extends State<CustomDropdown> {
         });
       },
       // todo add province data to dropdown
-      items:
-          widget.dropdownData.map<DropdownMenuItem<String>>((String value) {
+      items: widget.dropdownData.map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(
           value: value,
           child: Text(value),
@@ -425,10 +453,8 @@ class _CityAutoCompleteFieldState extends State<CityAutoCompleteField> {
       child: TextFormField(
         focusNode: cityFocusNode,
         textInputAction: TextInputAction.done,
-        decoration: InputDecoration(
-            labelText: 'City',
-            labelStyle: formLabelStyle
-        ),
+        decoration:
+            InputDecoration(labelText: 'City', labelStyle: formLabelStyle),
         // change focus to patient name on press of enter
         onEditingComplete: () =>
             FocusScope.of(context).requestFocus(patientNameFocusNode),
@@ -494,9 +520,7 @@ class PatientNameField extends StatelessWidget {
       padding: EdgeInsets.symmetric(vertical: 5.0),
       child: TextFormField(
         decoration: InputDecoration(
-            labelText: 'Patient Name',
-            labelStyle: formLabelStyle
-        ),
+            labelText: 'Patient Name', labelStyle: formLabelStyle),
         focusNode: patientNameFocusNode,
         textInputAction: TextInputAction.done,
         // determines the type of keyboard to show
@@ -530,10 +554,10 @@ class _GenderDropdownState extends State<GenderDropdown> {
   @override
   Widget build(BuildContext context) {
     return CustomDropdown(
-        dropdownData: genderDropdown,
-        selectedData: selectedGender,
-        selectFunction: widget.setGenderFunction,
-        label: 'Gender',
+      dropdownData: genderDropdown,
+      selectedData: selectedGender,
+      selectFunction: widget.setGenderFunction,
+      label: 'Gender',
     );
   }
 }
@@ -567,11 +591,8 @@ class _BirthDatePickerState extends State<BirthDatePicker> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        decoration: BoxDecoration(
-            border: Border(bottom: BorderSide(
-              color: Colors.grey
-            ))
-        ),
+      decoration:
+          BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey))),
       child: OutlineButton(
           onPressed: () => _selectDate(context),
           //
@@ -610,9 +631,7 @@ class IncidentDescriptionField extends StatelessWidget {
         focusNode: descriptionFocusNode,
         textInputAction: TextInputAction.done,
         decoration: InputDecoration(
-            labelText: 'Description',
-            labelStyle: formLabelStyle
-        ),
+            labelText: 'Description', labelStyle: formLabelStyle),
         onEditingComplete: () => FocusScope.of(context).unfocus(),
         maxLines: null,
         keyboardType: TextInputType.multiline,
@@ -637,7 +656,7 @@ class FormButton extends StatelessWidget {
   showCancelConfirmation(BuildContext context) {
     Widget cancelButton = FlatButton(
       child: Text("No"),
-      onPressed:  () {
+      onPressed: () {
         // dismiss the popup
         Navigator.of(context).pop();
       },
@@ -645,7 +664,7 @@ class FormButton extends StatelessWidget {
     Widget continueButton = FlatButton(
       child: Text("Yes"),
       textColor: Colors.red,
-      onPressed:  () {
+      onPressed: () {
         // routing back to home screen
         print('go back');
         // this will pop the alert as well as the report incident screen and go to home screen

@@ -1,9 +1,12 @@
-from backend.init import db
 from datetime import datetime
+from flask_sqlalchemy import SQLAlchemy
+from flask_marshmallow import Marshmallow
+db = SQLAlchemy()
+ma = Marshmallow()
 
 
-class Incident(db.model):
-    # class corresponding to the incident table in the database
+class Incident(db.Model):
+    # class corresponding to the Incident Table in the database
     id = db.Column(db.Integer, primary_key=True)
     province = db.Column(db.String(45), nullable=False)
     district = db.Column(db.String(45), nullable=False)
@@ -12,9 +15,9 @@ class Incident(db.model):
     location_long = db.Column(db.Float, nullable=True)
     patient_name = db.Column(db.String(45), nullable=False)
     # stores the gender ID
-    patient_gender = city = db.Column(db.Integer, nullable=False)
+    patient_gender = db.Column(db.Integer, nullable=False)
     patient_dob = db.Column(db.DateTime, nullable=False)
-    description = city = db.Column(db.String(200), nullable=True)
+    description = db.Column(db.String(200), nullable=True)
     # reported time will automatically assign at the time of creation
     reported_time = db.Column(db.DateTime, default=datetime.now)
     reported_user_id = db.Column(db.Integer, nullable=False)
@@ -22,7 +25,33 @@ class Incident(db.model):
     patient_status_id = db.Column(db.Integer, nullable=False, default=0)
     # by default incident is not verified and is set to False until verified by the admin
     is_verified = db.Column(db.Boolean, nullable=False, default=False)
-    # verified user ID is set to zero to indicate no admin have verified the incident yet
-    verified_by = db.Column(db.Integer, nullable=False, default=0)
+    verified_by = db.Column(db.Integer, nullable=True)
     # must set the org id checking the province and district
     org_id = db.Column(db.Integer, nullable=False)
+
+    def __init__(self, province, district, city, location_lat, location_long, patient_name, patient_gender, patient_dob, description, reported_user_id, patient_status_id, is_verified, verified_by, org_id):
+        self.province = province
+        self.district = district
+        self.city = city
+        self.location_lat = location_lat
+        self.location_long = location_long
+        self.patient_name = patient_name
+        self.patient_gender = patient_gender
+        self.patient_dob = patient_dob
+        self.description = description
+        self.reported_user_id = reported_user_id
+        self.patient_status_id = patient_status_id
+        self.is_verified = is_verified
+        self.verified_by = verified_by
+        self.org_id = org_id
+
+
+class IncidentSchema(ma.Schema):
+    class Meta:
+        fields = ('id', 'province', 'district', 'city', 'location_lat', 'location_long', 'patient_name', 'patient_gender', 'patient_dob',
+                  'description', 'reported_time', 'reported_user_id', 'patient_status_id', 'is_verified', 'verified_by', 'org_id')
+
+
+# init schema
+incident_schema = IncidentSchema()
+incidents_schema = IncidentSchema(many=True)

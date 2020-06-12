@@ -1,4 +1,5 @@
 from models.user import User, user_schema, users_schema
+from models.incident import Incident, incident_schema, incidents_schema
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
@@ -23,21 +24,37 @@ def hello_world():
     return jsonify({'name': 'hello'})
 
 
-@app.route('/register_user', methods=['POST'])
-def register_user():
-    telephone = request.json['telephone']
-    first_name = request.json['first_name']
-    last_name = request.json['last_name']
-    nic_number = request.json['nic_number']
-    email = request.json['email']
-    password = request.json['password']
+@app.route('/report_incident', methods=['POST'])
+# endpoint to add a new report
+def report_incident():
+    try:
+        province = request.json['province']
+        district = request.json['district']
+        city = request.json['city']
+        location_lat = request.json['locationLat']
+        location_long = request.json['locationLong']
+        patient_name = request.json['patientName']
+        patient_gender = request.json['patientGender']
+        patient_dob = request.json['patientDob']
+        description = request.json['description']
+        reported_user_id = request.json['reportedUserId']
+        patient_status_id = request.json['patientStatusId']
+        is_verified = request.json['isVerified']
+        verified_by = request.json['verifiedBy']
+        org_id = request.json['orgId']
+        new_incident = Incident(province, district, city, location_lat, location_long, patient_name, patient_gender,
+                                patient_dob, description, reported_user_id, patient_status_id, is_verified, verified_by, org_id)
+        db.session.add(new_incident)
+        db.session.commit()
+        return incident_schema.jsonify(new_incident)
 
-    new_user = User(telephone, first_name, last_name,
-                    nic_number, email, password)
-    db.session.add(new_user)
-    db.session.commit()
-
-    return user_schema.jsonify(new_user)
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise
 
 
 @app.route('/get_users', methods=['GET'])
