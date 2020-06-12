@@ -13,11 +13,11 @@ void main() {
         primaryColor: Colors.cyan[800],
         accentColor: Colors.cyanAccent[700]
     ),
-    initialRoute: '/',
+    initialRoute: 'home',
     routes: {
       // defines the routing for the different components
       // todo add other routing components
-      '/': (context) => Home(), // ONLY FOR TESTING PURPOSES! change back to login()
+      '/': (context) => Login(), // ONLY FOR TESTING PURPOSES! change back to login()
       'login': (context) => Login(),
       'home': (context) => Home(),
       'report_incident': (context) => ReportIncident(),
