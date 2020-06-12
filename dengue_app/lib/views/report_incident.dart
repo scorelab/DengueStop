@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:dengue_app/models/incident.dart';
+import 'package:flutter/services.dart';
 
 // global styling for form labels
 TextStyle formLabelStyle =
-TextStyle(fontSize: 18.0, fontWeight: FontWeight.w500);
+    TextStyle(fontSize: 18.0, fontWeight: FontWeight.w500);
 // global styling for form fields
 InputDecoration formFieldStyle = InputDecoration(
   contentPadding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),
@@ -25,7 +26,6 @@ FocusNode cityFocusNode = new FocusNode();
 FocusNode patientNameFocusNode = new FocusNode();
 // focus node for description
 FocusNode descriptionFocusNode = new FocusNode();
-
 
 // white background encapsulating the form
 class ReportIncident extends StatelessWidget {
@@ -91,8 +91,6 @@ class IncidentForm extends StatelessWidget {
             children: <Widget>[
               // contains the form field
               IncidentFormField(),
-              // contains the form action buttons
-              IncidentFormButtons(),
             ],
           ),
         ));
@@ -106,34 +104,69 @@ class IncidentFormField extends StatefulWidget {
 
 class _IncidentFormFieldState extends State<IncidentFormField> {
   final _incidentFormKey = GlobalKey<FormState>();
+  final incidentCityController = TextEditingController();
+  final patientNameController = TextEditingController();
+  final incidentDescriptionController = TextEditingController();
   Incident incident = Incident();
 
   setIncidentProvince(String province) {
-    print('province');
-    print(province);
+    incident.province = province;
   }
 
-  setIncidentDistrict(String district){
-    print('district');
-    print(district);
+  setIncidentDistrict(String district) {
+    incident.district = district;
   }
 
-  setPatientGender(String gender){
-    print('gender');
-    print(gender);
+  setIncidentCity(String city) {
+    incident.city = incidentCityController.text;
   }
 
-  setPatientDob(DateTime dob){
-    print('dob');
-    print(dob);
+  setPatientName(String name) {
+    incident.patientName = patientNameController.text;
+  }
+
+  setPatientGender(String gender) {
+    // id 0 for Female
+    // id 1 for Male
+    if (gender == 'Male') {
+      incident.patientGender = 1;
+    } else if (gender == 'Female') {
+      incident.patientGender = 0;
+    }
+  }
+
+  setPatientDob(DateTime dob) {
+    incident.patientDob = dob;
+  }
+
+  setIncidentDescription(String description) {
+    incident.description = incidentDescriptionController.text;
+  }
+
+  submitIncidentReport() {
+    if (_incidentFormKey.currentState.validate()) {
+      _incidentFormKey.currentState.save();
+      // todo handle sending data to the server
+      print('###########################');
+      print(incident.province);
+      print(incident.district);
+      print(incident.city);
+      print(incident.patientName);
+      print(incident.patientGender);
+      print(incident.patientDob);
+      print(incident.description);
+    } else {
+      // todo show error message
+      print('Form is invalid');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _incidentFormKey,
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 15.0),
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 15.0),
+      child: Form(
+        key: _incidentFormKey,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -146,7 +179,8 @@ class _IncidentFormFieldState extends State<IncidentFormField> {
                   child: Column(
                     children: <Widget>[
                       Text('Province', style: formLabelStyle),
-                      ProvinceDropdown(setProvinceFunction: setIncidentProvince),
+                      ProvinceDropdown(
+                          setProvinceFunction: setIncidentProvince),
                     ],
                   ),
                 ),
@@ -155,7 +189,8 @@ class _IncidentFormFieldState extends State<IncidentFormField> {
                   child: Column(
                     children: <Widget>[
                       Text('District', style: formLabelStyle),
-                      DistrictDropdown(setDistrictFunction: setIncidentDistrict),
+                      DistrictDropdown(
+                          setDistrictFunction: setIncidentDistrict),
                     ],
                   ),
                 )
@@ -170,7 +205,9 @@ class _IncidentFormFieldState extends State<IncidentFormField> {
                   child: Column(
                     children: <Widget>[
                       Text('City', style: formLabelStyle),
-                      CityAutoCompleteField(),
+                      CityAutoCompleteField(
+                          controller: incidentCityController,
+                          onSavedFunction: setIncidentCity),
                     ],
                   ),
                 ),
@@ -188,7 +225,9 @@ class _IncidentFormFieldState extends State<IncidentFormField> {
             ),
             SizedBox(height: 10.0),
             Text('Patient Name', style: formLabelStyle),
-            PatientNameField(),
+            PatientNameField(
+                controller: patientNameController,
+                onSavedFunction: setPatientName),
             SizedBox(height: 10.0),
             Row(
               children: <Widget>[
@@ -213,7 +252,11 @@ class _IncidentFormFieldState extends State<IncidentFormField> {
             ),
             SizedBox(height: 10.0),
             Text('Description of the Incident', style: formLabelStyle),
-            IncidentDescriptionField(),
+            IncidentDescriptionField(
+                controller: incidentDescriptionController,
+                onSavedFunction: setIncidentDescription),
+            // contains the form action buttons
+            IncidentFormButtons(submitFunction: submitIncidentReport),
           ],
         ),
       ),
@@ -222,6 +265,10 @@ class _IncidentFormFieldState extends State<IncidentFormField> {
 }
 
 class IncidentFormButtons extends StatelessWidget {
+  final submitFunction;
+
+  IncidentFormButtons({this.submitFunction});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -230,7 +277,10 @@ class IncidentFormButtons extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          FormButton(buttonText: 'Send Report', buttonType: 'send'),
+          FormButton(
+              buttonText: 'Send Report',
+              buttonType: 'send',
+              buttonFunction: submitFunction),
           FormButton(buttonText: 'Cancel', buttonType: 'cancel')
         ],
       ),
@@ -242,8 +292,10 @@ class IncidentFormButtons extends StatelessWidget {
 class CustomDropdown extends StatefulWidget {
   final List<String> dropdownData;
   final selectFunction;
-  final String selectedData;
-  CustomDropdown({Key key, this.dropdownData, this.selectedData, this.selectFunction})
+  // todo find a way to make selectedData final
+  String selectedData;
+  CustomDropdown(
+      {Key key, this.dropdownData, this.selectedData, this.selectFunction})
       : super(key: key);
 
   @override
@@ -251,6 +303,7 @@ class CustomDropdown extends StatefulWidget {
 }
 
 class _CustomDropdownState extends State<CustomDropdown> {
+  String selectedData = '';
   @override
   Widget build(BuildContext context) {
     // todo better approach to handle selected data other than widget.selectedData
@@ -268,7 +321,7 @@ class _CustomDropdownState extends State<CustomDropdown> {
         ),
         child: DropdownButton<String>(
           isExpanded: true,
-          value: widget.selectedData,
+          value: selectedData,
           icon: Icon(Icons.keyboard_arrow_down),
           iconSize: 30,
           elevation: 16,
@@ -279,12 +332,13 @@ class _CustomDropdownState extends State<CustomDropdown> {
           ),
           onChanged: (String newValue) {
             setState(() {
+              selectedData = newValue;
               widget.selectFunction(newValue);
             });
           },
           // todo add province data to dropdown
           items:
-          widget.dropdownData.map<DropdownMenuItem<String>>((String value) {
+              widget.dropdownData.map<DropdownMenuItem<String>>((String value) {
             return DropdownMenuItem<String>(
               value: value,
               child: Text(value),
@@ -298,8 +352,7 @@ class _CustomDropdownState extends State<CustomDropdown> {
 
 class ProvinceDropdown extends StatefulWidget {
   final setProvinceFunction;
-  ProvinceDropdown({Key key, this.setProvinceFunction})
-      : super(key: key);
+  ProvinceDropdown({Key key, this.setProvinceFunction}) : super(key: key);
 
   @override
   _ProvinceDropdownState createState() => _ProvinceDropdownState();
@@ -307,19 +360,20 @@ class ProvinceDropdown extends StatefulWidget {
 
 class _ProvinceDropdownState extends State<ProvinceDropdown> {
   String selectedProvince = "Western";
-  List<String> provinceDropdown = ['Western', 'Two', 'Free', 'Four'];
+  List<String> provinceDropdown = ['', 'Western', 'Two', 'Free', 'Four'];
   // todo retrieve provinces
   @override
   Widget build(BuildContext context) {
     return CustomDropdown(
-        dropdownData: provinceDropdown, selectedData: selectedProvince, selectFunction: widget.setProvinceFunction);
+        dropdownData: provinceDropdown,
+        selectedData: selectedProvince,
+        selectFunction: widget.setProvinceFunction);
   }
 }
 
 class DistrictDropdown extends StatefulWidget {
   final setDistrictFunction;
-  DistrictDropdown({Key key, this.setDistrictFunction})
-      : super(key: key);
+  DistrictDropdown({Key key, this.setDistrictFunction}) : super(key: key);
 
   @override
   _DistrictDropdownState createState() => _DistrictDropdownState();
@@ -327,22 +381,37 @@ class DistrictDropdown extends StatefulWidget {
 
 class _DistrictDropdownState extends State<DistrictDropdown> {
   String selectedDistrict = "Colombo";
-  List<String> districtDropdown = ['Colombo', 'Two', 'Free', 'Four'];
+  List<String> districtDropdown = ['', 'Colombo', 'Two', 'Free', 'Four'];
   // todo retrieve districts
   @override
   Widget build(BuildContext context) {
     return CustomDropdown(
-        dropdownData: districtDropdown, selectedData: selectedDistrict, selectFunction: widget.setDistrictFunction,);
+      dropdownData: districtDropdown,
+      selectedData: selectedDistrict,
+      selectFunction: widget.setDistrictFunction,
+    );
   }
 }
 
 class CityAutoCompleteField extends StatefulWidget {
+  final controller;
+  final onSavedFunction;
+  CityAutoCompleteField({Key key, this.controller, this.onSavedFunction})
+      : super(key: key);
   @override
   _CityAutoCompleteFieldState createState() => _CityAutoCompleteFieldState();
 }
 
 class _CityAutoCompleteFieldState extends State<CityAutoCompleteField> {
-  // todo integrating with google maps API to autocomplete the location
+  // todo integrating with geo encoding API to autocomplete the location
+
+  String validateCityName(String value) {
+    if (value.isEmpty) {
+      return 'Please enter a city';
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -350,8 +419,17 @@ class _CityAutoCompleteFieldState extends State<CityAutoCompleteField> {
       child: TextFormField(
         focusNode: cityFocusNode,
         textInputAction: TextInputAction.done,
-        onEditingComplete: () => FocusScope.of(context).requestFocus(patientNameFocusNode),
+        // change focus to patient name on press of enter
+        onEditingComplete: () =>
+            FocusScope.of(context).requestFocus(patientNameFocusNode),
+        controller: widget.controller,
         decoration: formFieldStyle,
+        validator: validateCityName,
+        onSaved: widget.onSavedFunction,
+        // limiting characters to 45 corresponding to the database
+        inputFormatters: [
+          LengthLimitingTextInputFormatter(45),
+        ],
       ),
     );
   }
@@ -365,8 +443,8 @@ class GetLocationButton extends StatelessWidget {
       child: RaisedButton(
           elevation: 5,
           onPressed: () => {
-            // todo handle location retrieving logic
-          },
+                // todo handle location retrieving logic
+              },
 //          borderSide: BorderSide(
 //              width: 1.0, style: BorderStyle.solid, color: Colors.grey
 //          ),
@@ -378,27 +456,27 @@ class GetLocationButton extends StatelessWidget {
           // showing the selected date on the button
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[Icon(Icons.my_location, color: Colors.white70,)],
+            children: <Widget>[
+              Icon(
+                Icons.my_location,
+                color: Colors.white70,
+              )
+            ],
           )),
     );
   }
 }
 
-class PatientNameField extends StatelessWidget{
-  // todo getting the patient name
+class PatientNameField extends StatelessWidget {
+  final controller;
+  final onSavedFunction;
+  PatientNameField({this.controller, this.onSavedFunction});
 
-  String validatePatientName(String value){
+  String validatePatientName(String value) {
     if (value.isEmpty) {
       return 'Please enter the patient name';
     }
-
-    Pattern pattern =
-        r"^[\\p{L} .'-]+$";
-    RegExp regex = new RegExp(pattern);
-    if (!regex.hasMatch(value))
-      return 'Please Enter a Valid Name Format';
-    else
-      return null;
+    return null;
   }
 
   @override
@@ -410,9 +488,17 @@ class PatientNameField extends StatelessWidget{
         textInputAction: TextInputAction.done,
         // determines the type of keyboard to show
         keyboardType: TextInputType.text,
-        onEditingComplete: () => FocusScope.of(context).requestFocus(descriptionFocusNode),
+        // changing focus to description text field upon pressing enter
+        onEditingComplete: () =>
+            FocusScope.of(context).requestFocus(descriptionFocusNode),
+        controller: controller,
         decoration: formFieldStyle,
         validator: validatePatientName,
+        // limiting characters to 45 corresponding to the database
+        inputFormatters: [
+          LengthLimitingTextInputFormatter(45),
+        ],
+        onSaved: onSavedFunction,
       ),
     );
   }
@@ -420,27 +506,27 @@ class PatientNameField extends StatelessWidget{
 
 class GenderDropdown extends StatefulWidget {
   final setGenderFunction;
-  GenderDropdown({Key key, this.setGenderFunction})
-      : super(key: key);
+  GenderDropdown({Key key, this.setGenderFunction}) : super(key: key);
   @override
   _GenderDropdownState createState() => _GenderDropdownState();
 }
 
 class _GenderDropdownState extends State<GenderDropdown> {
   String selectedGender = 'Male';
-  List<String> genderDropdown = ['Male', 'Female'];
+  List<String> genderDropdown = ['', 'Male', 'Female'];
 
   @override
   Widget build(BuildContext context) {
     return CustomDropdown(
-        dropdownData: genderDropdown, selectedData: selectedGender, selectFunction: widget.setGenderFunction);
+        dropdownData: genderDropdown,
+        selectedData: selectedGender,
+        selectFunction: widget.setGenderFunction);
   }
 }
 
 class BirthDatePicker extends StatefulWidget {
   final setBirthDateFunction;
-  BirthDatePicker({Key key, this.setBirthDateFunction})
-      : super(key: key);
+  BirthDatePicker({Key key, this.setBirthDateFunction}) : super(key: key);
   @override
   _BirthDatePickerState createState() => _BirthDatePickerState();
 }
@@ -489,6 +575,10 @@ class _BirthDatePickerState extends State<BirthDatePicker> {
 }
 
 class IncidentDescriptionField extends StatelessWidget {
+  final controller;
+  final onSavedFunction;
+  IncidentDescriptionField({this.controller, this.onSavedFunction});
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -500,6 +590,12 @@ class IncidentDescriptionField extends StatelessWidget {
         decoration: formFieldStyle,
         maxLines: null,
         keyboardType: TextInputType.multiline,
+        controller: controller,
+        // limiting characters to 200 corresponding to the database
+        inputFormatters: [
+          LengthLimitingTextInputFormatter(200),
+        ],
+        onSaved: onSavedFunction,
       ),
     );
   }
@@ -509,11 +605,8 @@ class FormButton extends StatelessWidget {
   // create buttons for the form with same appearance with different text and different functions
   final String buttonText;
   final String buttonType;
-  FormButton({this.buttonText, this.buttonType});
-  
-  submitIncidentReport() {
-    print('submit called');
-  }
+  final buttonFunction;
+  FormButton({this.buttonText, this.buttonType, this.buttonFunction});
 
   @override
   Widget build(BuildContext context) {
@@ -529,7 +622,7 @@ class FormButton extends StatelessWidget {
               fontWeight: FontWeight.w600,
               // change font color of the button based on the button type
               color:
-              (buttonType == 'send') ? Colors.indigo[900] : Colors.red[900],
+                  (buttonType == 'send') ? Colors.indigo[900] : Colors.red[900],
             ),
           ),
         ),
@@ -542,7 +635,7 @@ class FormButton extends StatelessWidget {
           // on press will trigger different functions based on the type of button
           if (buttonType == 'send') {
             // send report
-            submitIncidentReport();
+            buttonFunction();
             // todo logic to send the report
           } else if (buttonType == 'cancel') {
             // routing back to home screen
