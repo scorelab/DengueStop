@@ -1,4 +1,5 @@
 import 'dart:core';
+import 'package:intl/intl.dart';
 
 // this class corresponds to the incident table
 class Incident {
@@ -39,7 +40,7 @@ class Incident {
       this.verifiedBy,
       this.orgId});
 
-  Map<String, dynamic> toJson() => {
+  Map toJson() => {
         'id': id,
         'province': province,
         'district': district,
@@ -64,17 +65,18 @@ class Incident {
         province: json['province'] as String,
         district: json['district'] as String,
         city: json['city'] as String,
-        locationLat: json['locationLat'] as double,
-        locationLong: json['locationLong'] as double,
-        patientName: json['patientName'] as String,
-        patientGender: json['patientGender'] as int,
-        patientDob: json['patientDob'] as DateTime,
-        reportedTime: json['reportedTime'] as DateTime,
+        locationLat: json['location_lat'] as double,
+        locationLong: json['location_long'] as double,
+        patientName: json['patient_name'] as String,
+        patientGender: json['patient_gender'] as int,
+        // parsing string values to DateTime format
+        patientDob: DateFormat('yyyy-M-dd').parse(json['patient_dob']) as DateTime,
+        reportedTime: DateTime.parse(json['reported_time']) as DateTime,
         description: json['description'] as String,
-        reportedUserId: json['reportedUserId'] as int,
-        patientStatusId: json['patientStatusId'] as int,
-        isVerified: json['isVerified'] as bool,
-        verifiedBy: json['verifiedBy'] as int,
-        orgId: json['orgId'] as int);
+        reportedUserId: json['reported_user_id'] as int,
+        patientStatusId: json['patient_status_id'] as int,
+        isVerified: json['is_verified'] as bool,
+        verifiedBy: json['verified_by'] as int,
+        orgId: json['org_id'] as int);
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:dengue_app/models/incident.dart';
+import 'package:dengue_app/services/incident_service.dart';
 
 class Reports extends StatefulWidget {
   @override
@@ -8,6 +9,14 @@ class Reports extends StatefulWidget {
 }
 
 class _ReportsState extends State<Reports> {
+  final IncidentService incidentService = IncidentService();
+  Future<List<Incident>> futureIncidentList;
+  @override
+  void initState() {
+    super.initState();
+    futureIncidentList = incidentService.getIncidentsByUser(1);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,9 +34,28 @@ class _ReportsState extends State<Reports> {
           child: SafeArea(
             child: Column(
               children: <Widget>[
+                SizedBox(height: 10.0),
+                Center(
+                  child: Text('Events',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 25.0,
+                          color: Colors.white)),
+                ),
                 Expanded(
                   flex: 13,
-                  child: ReportList(),
+                  child: FutureBuilder<List<Incident>>(
+                    future: futureIncidentList,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          return ReportList(incidentList: snapshot.data,);
+                        } else if (snapshot.hasError) {
+                          return Text("${snapshot.error}");
+                        } else {
+                          return Text("Something else");
+                        }
+
+                      }),
                 ),
                 Expanded(
                   flex: 2,
@@ -43,23 +71,9 @@ class _ReportsState extends State<Reports> {
 }
 
 class ReportList extends StatelessWidget {
-  final Incident incident = Incident(
-      id: 1,
-      province: 'Western',
-      district: 'Colombo',
-      city: 'Bambalapitiya',
-      locationLat: 21222.3434,
-      locationLong: 22323.1232,
-      patientName: 'Tony Stark',
-      patientGender: 1,
-      patientDob: DateTime(1995, 05, 04),
-      description: 'Im Iron Man',
-      reportedTime: DateTime(2020, 03, 06, 8, 35, 45),
-      reportedUserId: 3434343,
-      patientStatusId: 2,
-      isVerified: false,
-      verifiedBy: 323232,
-      orgId: 343434);
+  final List<Incident> incidentList;
+
+  ReportList({this.incidentList});
 
   @override
   Widget build(BuildContext context) {
@@ -68,23 +82,15 @@ class ReportList extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           SizedBox(height: 10.0),
-          Center(
-            child: Text('Events',
-                style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 25.0,
-                    color: Colors.white)),
-          ),
-          SizedBox(height: 10.0),
           Expanded(
             child: Container(
 //              padding: EdgeInsets.symmetric(horizontal: 10.0),
               child: ListView.builder(
-                  itemCount: 10,
+                  itemCount: incidentList.length,
                   itemBuilder: (context, index) {
                     // todo pass data to event card from backend
                     // todo calculate and parse time formats according to the required format
-                    return ReportCard(incident: incident);
+                    return ReportCard(incident: incidentList[index]);
                   }),
             ),
           )
@@ -233,7 +239,7 @@ class ReportCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Text("$formattedTimestamp", style: reportBoldStyle),
+                Text('$formattedTimestamp', style: reportBoldStyle),
                 getVerificationStatusText(incident.isVerified)
               ],
             ),
