@@ -12,13 +12,18 @@ class Incident {
   double locationLat;
   double locationLong;
   String patientName;
+  // if patientGender = 1, for Male
+  // if patientGender = 2, for Female
   int patientGender;
   DateTime patientDob;
   DateTime reportedTime;
   String description;
   int reportedUserId;
   int patientStatusId;
-  bool isVerified;
+  // if isVerified = 0, it is not verified
+  // if isVerified = 1, it is verified
+  // is isVerified = 2, it is declined by admin
+  int isVerified;
   int verifiedBy;
   int orgId;
 
@@ -75,7 +80,7 @@ class Incident {
         description: json['description'] as String,
         reportedUserId: json['reported_user_id'] as int,
         patientStatusId: json['patient_status_id'] as int,
-        isVerified: json['is_verified'] as bool,
+        isVerified: json['is_verified'] as int,
         verifiedBy: json['verified_by'] as int,
         orgId: json['org_id'] as int);
   }

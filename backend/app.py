@@ -67,7 +67,8 @@ def get_users():
 @app.route('/get_incidents_by_user/<int:user_id>', methods=['GET'])
 def get_incidents_by_user(user_id):
     # returns all the incidents that was reported by the user of the user_id
-    incidents = Incident.query.filter_by(reported_user_id=user_id).all()
+    incidents = Incident.query.filter_by(
+        reported_user_id=user_id).order_by(Incident.reported_time.desc()).all()
     result = incidents_schema.dump(incidents)
     return jsonify(result)
 

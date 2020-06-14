@@ -152,12 +152,12 @@ class _IncidentFormFieldState extends State<IncidentFormField> {
   }
 
   setPatientGender(String gender) {
-    // id 0 for Female
+    // id 2 for Female
     // id 1 for Male
     if (gender == 'Male') {
       incident.patientGender = 1;
     } else if (gender == 'Female') {
-      incident.patientGender = 0;
+      incident.patientGender = 2;
     }
   }
 
@@ -183,8 +183,8 @@ class _IncidentFormFieldState extends State<IncidentFormField> {
     incident.reportedUserId = 1;
     // status 1 means patient is pending verification
     incident.patientStatusId = 1;
-    // initially report is not verified
-    incident.isVerified = false;
+    // initially report is not verified, therefore status zero. For all statuses check incident.dart file
+    incident.isVerified = 0;
     // verified by will be null, which means no admin have verified it
     // todo get orgId based on province and district and plug here
     incident.orgId = 1;

@@ -24,7 +24,7 @@ class Incident(db.Model):
     # patient status is is set to 0 which corresponds to that the patient is pending treatment by default
     patient_status_id = db.Column(db.Integer, nullable=False, default=0)
     # by default incident is not verified and is set to False until verified by the admin
-    is_verified = db.Column(db.Boolean, nullable=False, default=False)
+    is_verified = db.Column(db.Integer, nullable=False, default=0)
     verified_by = db.Column(db.Integer, nullable=True)
     # must set the org id checking the province and district
     org_id = db.Column(db.Integer, nullable=False)

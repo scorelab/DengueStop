@@ -174,7 +174,7 @@ class DrawerButton extends StatelessWidget {
 class ReportCard extends StatelessWidget {
   // styles for report name label
   final TextStyle reportBoldStyle = TextStyle(
-      fontSize: 18.0, fontWeight: FontWeight.w700, color: Colors.black);
+      fontSize: 16.0, fontWeight: FontWeight.w700, color: Colors.black);
   // styles for report details
   final TextStyle reportThinStyle = TextStyle(
       fontSize: 16.0, fontWeight: FontWeight.w500, color: Colors.black);
@@ -187,23 +187,113 @@ class ReportCard extends StatelessWidget {
     // returns the text with styling based on the verification status id
     if (isVerified == 0) {
       // pending verification
-      return Text('Pending Verfication',
+      return Text('Not Verified',
           style: TextStyle(
-              fontSize: 18.0,
+              fontSize: 15.0,
               fontWeight: FontWeight.w700,
               color: Colors.orange[500]));
     } else if (isVerified == 1) {
       // verified
       return Text('Verified',
           style: TextStyle(
-              fontSize: 18.0,
+              fontSize: 15.0,
               fontWeight: FontWeight.w700,
               color: Colors.green[500]));
     } else {
       // declined or error
-      return Text('Not Verified',
+      return Text('Declined',
           style: TextStyle(
-              fontSize: 18.0,
+              fontSize: 15.0,
+              fontWeight: FontWeight.w700,
+              color: Colors.red[500]));
+    }
+  }
+
+  Text getPatientStatusText(status) {
+    // returns the text with styling based on the verification status id
+    switch(status) {
+      case 1: {
+        return Text('Pending Verification',
+            style: TextStyle(
+                fontSize: 15.0,
+                fontWeight: FontWeight.w700,
+                color: Colors.deepOrange[500]));
+      }
+      break;
+      case 2: {
+        return Text('Pending Treatment',
+            style: TextStyle(
+                fontSize: 15.0,
+                fontWeight: FontWeight.w700,
+                color: Colors.orange[500]));
+      }
+      break;
+      case 3: {
+        return Text('Under Treatment',
+            style: TextStyle(
+                fontSize: 15.0,
+                fontWeight: FontWeight.w700,
+                color: Colors.green[700]));
+      }
+      break;
+      case 4: {
+        return Text('Recovering',
+            style: TextStyle(
+                fontSize: 15.0,
+                fontWeight: FontWeight.w700,
+                color: Colors.teal[700]));
+      }
+      break;
+      case 5: {
+        return Text('Recovered ',
+            style: TextStyle(
+                fontSize: 15.0,
+                fontWeight: FontWeight.w700,
+                color: Colors.blue[500]));
+      }
+      break;
+      case 6: {
+        return Text('Death ',
+            style: TextStyle(
+                fontSize: 15.0,
+                fontWeight: FontWeight.w700,
+                color: Colors.red[500]));
+      }
+      break;
+      case 7: {
+        return Text('Declined ',
+            style: TextStyle(
+                fontSize: 15.0,
+                fontWeight: FontWeight.w700,
+                color: Colors.orange[500]));
+      }
+      break;
+      default: {
+        return null;
+      }
+      break;
+    }
+  }
+
+  Text getPatientGenderText(gender) {
+    // returns the text with styling based on the verification status id
+    if (gender == 1) {
+      // pending verification
+      return Text('Male',
+          style: TextStyle(
+              fontSize: 15.0,
+              fontWeight: FontWeight.w700));
+    } else if (gender == 2) {
+      // verified
+      return Text('Female',
+          style: TextStyle(
+              fontSize: 15.0,
+              fontWeight: FontWeight.w700));
+    } else {
+      // declined or error
+      return Text('',
+          style: TextStyle(
+              fontSize: 15.0,
               fontWeight: FontWeight.w700,
               color: Colors.red[500]));
     }
@@ -247,10 +337,10 @@ class ReportCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text("${incident.patientName}", style: reportBoldStyle),
-                Text("${incident.patientStatusId}", style: reportBoldStyle)
+                getPatientStatusText(incident.patientStatusId)
               ],
             ),
-            Text("${incident.patientGender}", style: reportThinStyle),
+            getPatientGenderText(incident.patientGender),
             Text("$formattedDob", style: reportThinStyle),
             Text("${incident.province} | ${incident.district}",
                 style: reportThinStyle),
