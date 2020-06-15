@@ -14,7 +14,7 @@ void main() {
         primaryColor: Colors.cyan[800],
         accentColor: Colors.cyanAccent[700]
     ),
-    initialRoute: 'reports', // ONLY FOR TESTING PURPOSES! change back to '/'
+    initialRoute: 'report_incident', // ONLY FOR TESTING PURPOSES! change back to '/'
     routes: {
       // defines the routing for the different components
       // todo add other routing components

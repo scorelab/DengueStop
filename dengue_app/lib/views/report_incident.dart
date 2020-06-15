@@ -4,6 +4,7 @@ import 'package:dengue_app/models/incident.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:geolocator/geolocator.dart';
 
 // global styling for form labels
 TextStyle formLabelStyle =
@@ -135,6 +136,11 @@ class _IncidentFormFieldState extends State<IncidentFormField> {
     );
   }
 
+  setCoordinates(double lat, double long) {
+    incident.locationLat = lat;
+    incident.locationLong = long;
+  }
+
   setIncidentProvince(String province) {
     incident.province = province;
   }
@@ -214,6 +220,8 @@ class _IncidentFormFieldState extends State<IncidentFormField> {
     );
 
     // todo add snack bar to denote success or failure
+    // todo migrate to incident service
+    // todo go back upon successful response
     if (response.statusCode == 200) {
       print('Request successful with status: ${response.statusCode}.');
     } else {
@@ -261,9 +269,7 @@ class _IncidentFormFieldState extends State<IncidentFormField> {
                 SizedBox(width: 10.0),
                 Expanded(
                   flex: 3,
-                  child: Column(
-                    children: <Widget>[GetLocationButton()],
-                  ),
+                  child: GetLocationButton(textController: incidentCityController, setCoordinateFunction: setCoordinates),
                 )
               ],
             ),
@@ -280,12 +286,7 @@ class _IncidentFormFieldState extends State<IncidentFormField> {
                 ),
                 SizedBox(width: 20.0),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      BirthDatePicker(setBirthDateFunction: setPatientDob)
-                    ],
-                  ),
+                  child: BirthDatePicker(setBirthDateFunction: setPatientDob),
                 ),
               ],
             ),
@@ -351,7 +352,6 @@ class _CustomDropdownState extends State<CustomDropdown> {
   Widget build(BuildContext context) {
     // todo better approach to handle selected data other than widget.selectedData
     return DropdownButtonFormField<String>(
-      isExpanded: true,
       value: selectedData,
       icon: Icon(Icons.keyboard_arrow_down),
       iconSize: 30,
@@ -392,7 +392,7 @@ class ProvinceDropdown extends StatefulWidget {
 
 class _ProvinceDropdownState extends State<ProvinceDropdown> {
   String selectedProvince = "Western";
-  List<String> provinceDropdown = ['', 'Western', 'Two', 'Free', 'Four'];
+  List<String> provinceDropdown = ['', 'Western', 'Central', 'North Eastern', 'Southern'];
   // todo retrieve provinces
   @override
   Widget build(BuildContext context) {
@@ -414,7 +414,7 @@ class DistrictDropdown extends StatefulWidget {
 
 class _DistrictDropdownState extends State<DistrictDropdown> {
   String selectedDistrict = "Colombo";
-  List<String> districtDropdown = ['', 'Colombo', 'Two', 'Free', 'Four'];
+  List<String> districtDropdown = ['', 'Colombo', 'Kelaniya', 'Galle', 'Kandy'];
   // todo retrieve districts
   @override
   Widget build(BuildContext context) {
@@ -437,8 +437,6 @@ class CityAutoCompleteField extends StatefulWidget {
 }
 
 class _CityAutoCompleteFieldState extends State<CityAutoCompleteField> {
-  // todo integrating with geo encoding API to autocomplete the location
-
   String validateCityName(String value) {
     if (value.isEmpty) {
       return 'Please enter a city';
@@ -470,24 +468,65 @@ class _CityAutoCompleteFieldState extends State<CityAutoCompleteField> {
   }
 }
 
-class GetLocationButton extends StatelessWidget {
+class GetLocationButton extends StatefulWidget {
+  final TextEditingController textController;
+  final setCoordinateFunction;
+  @override
+  _GetLocationButtonState createState() => _GetLocationButtonState();
+  GetLocationButton({Key key, this.textController, this.setCoordinateFunction})
+      : super(key: key);
+}
+
+class _GetLocationButtonState extends State<GetLocationButton> {
+  Future<bool> getLocation() async {
+    Position position = await Geolocator()
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    if (position?.latitude != null && position?.longitude != null) {
+      // setting coordinates received in the incident object
+      widget.setCoordinateFunction(position.latitude, position.longitude);
+      List<Placemark> p = await Geolocator().placemarkFromCoordinates(position.latitude, position.longitude);
+      Placemark placemark = p[0];
+      String locationName = "";
+      if(placemark?.thoroughfare != "" && placemark?.name != "") {
+        locationName = locationName + placemark.thoroughfare + ", " + placemark.name;
+      }
+      else if(placemark?.thoroughfare == "" && placemark?.name != "") {
+        locationName = locationName + placemark.name;
+      }
+      else if(placemark?.thoroughfare != "" && placemark?.name == "") {
+        locationName = locationName + placemark.thoroughfare;
+      } else {
+        locationName = "";
+      }
+      widget.textController.text = locationName;
+      return true;
+    } else {
+      // todo notification sticker to say an error has occured
+      print("Error has occured");
+      return false;
+    }
+  }
+
+  Color btnColor = Colors.lightBlue[700];
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 5.0),
+    return Container(
+      padding: EdgeInsets.only(top: 15.0),
       child: RaisedButton(
           elevation: 5,
-          onPressed: () => {
-                // todo handle location retrieving logic
-              },
-//          borderSide: BorderSide(
-//              width: 1.0, style: BorderStyle.solid, color: Colors.grey
-//          ),
-          color: Colors.lightBlue[700],
+          color: btnColor,
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(50.0),
-              side: BorderSide(color: Colors.blue)),
+              side: BorderSide(color: btnColor)),
           padding: EdgeInsets.symmetric(vertical: 13, horizontal: 15),
+          onPressed: () async {
+            bool result = await getLocation();
+            print(result);
+            setState(() {
+              // changes color based on whether the location is retrieved successfully or not
+              btnColor = result == true? Colors.green: Colors.red;
+            });
+          },
           // showing the selected date on the button
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,

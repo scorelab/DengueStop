@@ -183,6 +183,7 @@ class ReportCard extends StatelessWidget {
 
   ReportCard({this.incident});
 
+
   Text getVerificationStatusText(isVerified) {
     // returns the text with styling based on the verification status id
     if (isVerified == 0) {
@@ -210,7 +211,7 @@ class ReportCard extends StatelessWidget {
   }
 
   Text getPatientStatusText(status) {
-    // returns the text with styling based on the verification status id
+    // returns the text with styling based on the patient status id
     switch(status) {
       case 1: {
         return Text('Pending Verification',
@@ -276,7 +277,7 @@ class ReportCard extends StatelessWidget {
   }
 
   Text getPatientGenderText(gender) {
-    // returns the text with styling based on the verification status id
+    // returns the text with styling based on the patient gender id
     if (gender == 1) {
       // pending verification
       return Text('Male',
@@ -344,7 +345,7 @@ class ReportCard extends StatelessWidget {
             Text("$formattedDob", style: reportThinStyle),
             Text("${incident.province} | ${incident.district}",
                 style: reportThinStyle),
-            Text("${incident.description}", style: reportThinStyle)
+            Text("${incident.description}", overflow: TextOverflow.ellipsis, style: reportThinStyle)
           ],
         ),
       ),
