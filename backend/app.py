@@ -57,6 +57,30 @@ def report_incident():
         raise
 
 
+@app.route('/create_user', methods=['POST'])
+def create_user():
+    try:
+        telephone = request.json['telephone']
+        first_name = request.json['firstName']
+        last_name = request.json['lastName']
+        nic_number = request.json['nicNumber']
+        email = request.json['email']
+        password = request.json['password']
+        new_user = User(telephone, first_name, last_name,
+                        nic_number, email, password)
+        db.session.add(new_user)
+        db.session.commit()
+        return user_schema.jsonify(new_user)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise
+
+
 @app.route('/get_users', methods=['GET'])
 def get_users():
     all_users = User.query.all()

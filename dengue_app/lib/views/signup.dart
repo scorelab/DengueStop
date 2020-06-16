@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dengue_app/models/user.dart';
+import 'package:dengue_app/services/user_service.dart';
 
 class Signup extends StatelessWidget {
   @override
@@ -83,8 +84,9 @@ class SignupForm extends StatefulWidget {
 }
 
 class _SignupFormState extends State<SignupForm> {
-  final _signupFormKey = GlobalKey<FormState>();
   User user = User();
+  final _signupFormKey = GlobalKey<FormState>();
+  final userService = UserService();
   // focus nodes to change focus in the form
   FocusNode lastNameFocusNode = new FocusNode();
   FocusNode telephoneFocusNode = new FocusNode();
@@ -128,11 +130,69 @@ class _SignupFormState extends State<SignupForm> {
     }
   }
 
-  saveUser() {
+  showUserCreatedAlert(BuildContext context) {
+    Widget okButton = FlatButton(
+      child: Text("Ok"),
+      onPressed: () {
+        // sends the user back to login
+        Navigator.popUntil(context, ModalRoute.withName('/'));
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Success"),
+      content: Text("You have successfully registered in Dengue Stop! Please sign in to continue."),
+      actions: [
+        okButton,
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  showErrorAlert(BuildContext context) {
+    Widget okButton = FlatButton(
+      child: Text("Ok"),
+      onPressed: () {
+        // dismiss the popup
+        Navigator.of(context).pop();
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Oops!"),
+      content: Text("Something went wrong! Please try again"),
+      actions: [
+        okButton,
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  saveUser() async {
     user.firstName = firstNameController.text;
     user.lastName = lastNameController.text;
     user.telephone = int.tryParse(telephoneController.text) ?? 0;
     user.password = passwordController.text;
+    // todo password should be encrypted either by the app or the backend
+    if( await userService.createUser(user)) {
+      showUserCreatedAlert(context);
+    } else {
+      showErrorAlert(context);
+    }
   }
 
   String validateName(String value) {

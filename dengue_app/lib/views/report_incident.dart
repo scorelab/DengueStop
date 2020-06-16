@@ -705,7 +705,6 @@ class FormButton extends StatelessWidget {
       textColor: Colors.red,
       onPressed: () {
         // routing back to home screen
-        print('go back');
         // this will pop the alert as well as the report incident screen and go to home screen
         Navigator.popUntil(context, ModalRoute.withName('home'));
       },
