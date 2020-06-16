@@ -4,7 +4,7 @@ import 'package:dengue_app/networking/ApiProvider.dart';
 class IncidentService {
   final apiProvider = ApiProvider();
 
-  List<Incident> incidentList = new List<Incident>();
+  List<Incident> incidentList = List<Incident>();
 
   Future<List<Incident>> getIncidentsByUser(int userId) async {
     var url = 'get_incidents_by_user/' + userId.toString();

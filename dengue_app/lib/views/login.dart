@@ -169,7 +169,7 @@ class _LoginFormState extends State<LoginForm> {
                 GestureDetector(
                   onTap: () {
                     // go to sign up page
-                    print('signup');
+                    Navigator.pushNamed(context, 'signup');
                   },
                   child: Text('Sign up here',
                       style: TextStyle(

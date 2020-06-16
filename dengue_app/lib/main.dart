@@ -3,6 +3,7 @@ import 'package:dengue_app/views/login.dart';
 import 'package:dengue_app/views/home.dart';
 import 'package:dengue_app/views/report_incident.dart';
 import 'package:dengue_app/views/reports.dart';
+import 'package:dengue_app/views/signup.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -19,6 +20,7 @@ void main() {
       // defines the routing for the different components
       // todo add other routing components
       '/': (context) => Login(),
+      'signup': (context) => Signup(),
       'login': (context) => Login(),
       'home': (context) => Home(),
       'report_incident': (context) => ReportIncident(),

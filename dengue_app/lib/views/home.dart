@@ -212,7 +212,7 @@ class DrawerButton extends StatelessWidget {
           // on press will trigger different name routes based on the type of button
           if (buttonType == 'report') {
             // routing to reports screen
-            print('report');
+            Navigator.pushNamed(context, 'reports');
           } else if (buttonType == 'profile'){
             // routing to profile screen
             print('profile');
