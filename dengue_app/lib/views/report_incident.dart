@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:geolocator/geolocator.dart';
+import 'package:dengue_app/services/incident_service.dart';
 
 // global styling for form labels
 TextStyle formLabelStyle =
@@ -94,11 +95,12 @@ class IncidentFormField extends StatefulWidget {
 }
 
 class _IncidentFormFieldState extends State<IncidentFormField> {
+  Incident incident = Incident();
   final _incidentFormKey = GlobalKey<FormState>();
   final incidentCityController = TextEditingController();
   final patientNameController = TextEditingController();
   final incidentDescriptionController = TextEditingController();
-  Incident incident = Incident();
+  final incidentService = IncidentService();
 
   showSaveConfirmation(BuildContext context) {
     Widget cancelButton = FlatButton(
@@ -183,7 +185,7 @@ class _IncidentFormFieldState extends State<IncidentFormField> {
     }
   }
 
-  sendReport() {
+  sendReport() async {
     // setting other required attributes of the object
     // todo authentication and get user id and plug here
     incident.reportedUserId = 1;
@@ -194,39 +196,63 @@ class _IncidentFormFieldState extends State<IncidentFormField> {
     // verified by will be null, which means no admin have verified it
     // todo get orgId based on province and district and plug here
     incident.orgId = 1;
-    createReport(incident);
-  }
-
-  dynamic dateTimeEncode(dynamic item) {
-    // this converts DateTime objects to JSON
-    if (item is DateTime) {
-      return item.toIso8601String();
+    if(await incidentService.createReport(incident)) {
+      showReportCreatedAlert(context);
+    } else {
+      showErrorAlert(context);
     }
-    return item;
   }
 
-  // sends the report to the API endpoint after JSON serialization
-  void createReport(Incident incident) async {
-    var url = 'http://0.0.0.0:5000/report_incident';
-    String jsonIncident =
-        jsonEncode(incident.toJson(), toEncodable: dateTimeEncode);
-    print(jsonIncident);
-    var response = await http.post(
-      url,
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
+  showReportCreatedAlert(BuildContext context) {
+    Widget okButton = FlatButton(
+      child: Text("Ok"),
+      onPressed: () {
+        // sends the user back to login
+        Navigator.popUntil(context, ModalRoute.withName('home'));
       },
-      body: jsonIncident,
     );
 
-    // todo add snack bar to denote success or failure
-    // todo migrate to incident service
-    // todo go back upon successful response
-    if (response.statusCode == 200) {
-      print('Request successful with status: ${response.statusCode}.');
-    } else {
-      print('Request failed with status: ${response.statusCode}.');
-    }
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Success"),
+      content: Text("Report Sent to Authorities!"),
+      actions: [
+        okButton,
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  showErrorAlert(BuildContext context) {
+    Widget okButton = FlatButton(
+      child: Text("Ok"),
+      onPressed: () {
+        // dismiss the popup
+        Navigator.of(context).pop();
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Oops!"),
+      content: Text("Something went wrong! Please try again"),
+      actions: [
+        okButton,
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 
   @override
@@ -611,7 +637,7 @@ class BirthDatePicker extends StatefulWidget {
 class _BirthDatePickerState extends State<BirthDatePicker> {
   DateTime selectedDate = DateTime.now();
   DateTime endDate = DateTime.now();
-
+  Color underlineColor = Colors.red;
   Future<Null> _selectDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(
         context: context,
@@ -631,9 +657,14 @@ class _BirthDatePickerState extends State<BirthDatePicker> {
   Widget build(BuildContext context) {
     return Container(
       decoration:
-          BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey))),
+          BoxDecoration(border: Border(bottom: BorderSide(color: underlineColor))),
       child: OutlineButton(
-          onPressed: () => _selectDate(context),
+          onPressed: () {
+            _selectDate(context);
+            setState(() {
+              underlineColor = Colors.grey;
+            });
+          },
           //
           borderSide: BorderSide(
               width: 1.0, style: BorderStyle.solid, color: Colors.transparent),
