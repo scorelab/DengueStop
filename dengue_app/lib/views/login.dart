@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-
-class Login extends StatefulWidget {
-  @override
-  _LoginState createState() => _LoginState();
-}
+import 'package:flutter/services.dart';
+import 'package:dengue_app/services/user_service.dart';
 
 // main view of the login screen
-class _LoginState extends State<Login> {
+class Login extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,11 +75,15 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<LoginForm> {
+  final userService = UserService();
+  final _loginFormKey = GlobalKey<FormState>();
+  final telephoneController = TextEditingController();
+  final passwordController = TextEditingController();
   // uses focus node to change focus from telephone field to password field on the press of enter in the keyboard
   FocusNode passwordFocusNode = new FocusNode();
   // styling for form labels
   TextStyle formLabelStyle =
-  TextStyle(fontSize: 18.0, fontWeight: FontWeight.w500);
+      TextStyle(fontSize: 18.0, fontWeight: FontWeight.w500);
   // styling for form fields
   InputDecoration formFieldStyle = InputDecoration(
     enabledBorder: OutlineInputBorder(
@@ -95,6 +96,33 @@ class _LoginFormState extends State<LoginForm> {
     ),
   );
 
+  String validatePassword(String value) {
+    if (value.isEmpty) {
+      return 'Password Required';
+    }
+    return null;
+  }
+
+  String validateTelephone(String value) {
+    if (value.isEmpty) {
+      return 'Telephone Required';
+    } else {
+      if (value.length < 10) {
+        return 'Telephone should contain 10 digits';
+      }
+    }
+    return null;
+  }
+
+  submitLogin() {
+//    Navigator.pushNamed(context, 'home');
+    if (_loginFormKey.currentState.validate()) {
+      var username = telephoneController.text;
+      var password = passwordController.text;
+      var result = userService.loginUser(username: username, password: password);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -103,83 +131,100 @@ class _LoginFormState extends State<LoginForm> {
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(10.0))),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: <Widget>[
-            Text(
-              'Welcome to Dengue-Stop',
-              style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.w700),
-            ),
-            SizedBox(height: 30.0),
-            Text('Telephone Number', style: formLabelStyle),
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 15.0),
-              child: TextFormField(
-                // changing focus to the password text field on pressing enter
-                textInputAction: TextInputAction.next,
-                onEditingComplete: () =>
-                    FocusScope.of(context).requestFocus(passwordFocusNode),
-                decoration: formFieldStyle,
+        child: Form(
+          key: _loginFormKey,
+          child: Column(
+            children: <Widget>[
+              Text(
+                'Welcome to Dengue-Stop',
+                style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.w700),
               ),
-            ),
-            SizedBox(height: 20.0),
-            Text('Password', style: formLabelStyle),
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 15.0),
-              child: TextFormField(
-                // unfocussing the password text field on pressing enter allowing the user to login
-                textInputAction: TextInputAction.done,
-                focusNode: passwordFocusNode,
-                onEditingComplete: () => FocusScope.of(context).unfocus(),
-                decoration: formFieldStyle,
-              ),
-            ),
-            SizedBox(height: 30.0),
-            SizedBox(
-              width: double.infinity,
-              height: 70,
-              child: Padding(
+              SizedBox(height: 30.0),
+              Text('Telephone Number', style: formLabelStyle),
+              Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 15.0),
-                child: RaisedButton(
-                  elevation: 5.0,
-                  color: Theme.of(context).primaryColor,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30.0)),
-                  child: Text(
-                    'Sign In',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.w700),
-                  ),
-                  onPressed: () {
-                    // todo handle authentication before sending to homescreen
-                    Navigator.pushNamed(context, 'home');
-                  },
+                child: TextFormField(
+                  // changing focus to the password text field on pressing enter
+                  textInputAction: TextInputAction.next,
+                  keyboardType: TextInputType.number,
+                  validator: validateTelephone,
+                  onEditingComplete: () =>
+                      FocusScope.of(context).requestFocus(passwordFocusNode),
+                  inputFormatters: [
+                    WhitelistingTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(10),
+                  ],
+                  controller: telephoneController,
                 ),
               ),
-            ),
-            SizedBox(height: 50.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  "Don't have an account? ",
-                  style: TextStyle(fontSize: 16.0),
+              SizedBox(height: 30.0),
+              Text('Password', style: formLabelStyle),
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 15.0),
+                child: TextFormField(
+                  // unfocussing the password text field on pressing enter allowing the user to login
+                  textInputAction: TextInputAction.done,
+                  obscureText: true,
+                  focusNode: passwordFocusNode,
+                  validator: validatePassword,
+                  onEditingComplete: () => FocusScope.of(context).unfocus(),
+                  inputFormatters: [
+                    LengthLimitingTextInputFormatter(40),
+                    // resticting whitespaces
+                    BlacklistingTextInputFormatter(RegExp('[ *]'))
+                  ],
+                  controller: passwordController,
                 ),
-                GestureDetector(
-                  onTap: () {
-                    // go to sign up page
-                    Navigator.pushNamed(context, 'signup');
-                  },
-                  child: Text('Sign up here',
+              ),
+              SizedBox(height: 30.0),
+              SizedBox(
+                width: double.infinity,
+                height: 70,
+                child: Padding(
+                  padding:
+                      EdgeInsets.symmetric(vertical: 5.0, horizontal: 15.0),
+                  child: RaisedButton(
+                    elevation: 5.0,
+                    color: Theme.of(context).primaryColor,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0)),
+                    child: Text(
+                      'Sign In',
                       style: TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).primaryColor)),
-                )
-              ],
-            )
-          ],
+                          color: Colors.white,
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.w700),
+                    ),
+                    onPressed: () {
+                      // todo handle authentication before sending to homescreen
+                      submitLogin();
+                    },
+                  ),
+                ),
+              ),
+              SizedBox(height: 50.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    "Don't have an account? ",
+                    style: TextStyle(fontSize: 16.0),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      // go to sign up page
+                      Navigator.pushNamed(context, 'signup');
+                    },
+                    child: Text('Sign up here',
+                        style: TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).primaryColor)),
+                  )
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );

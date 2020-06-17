@@ -185,7 +185,7 @@ class _SignupFormState extends State<SignupForm> {
   saveUser() async {
     user.firstName = firstNameController.text;
     user.lastName = lastNameController.text;
-    user.telephone = int.tryParse(telephoneController.text) ?? 0;
+    user.telephone = telephoneController.text;
     user.password = passwordController.text;
     // todo password should be encrypted either by the app or the backend
     if( await userService.createUser(user)) {

@@ -4,7 +4,7 @@ import 'dart:core';
 class User {
   // id is auto incremented in the database
   int id;
-  int telephone;
+  String telephone;
   String firstName;
   String lastName;
   String nicNumber; // not required
@@ -33,7 +33,7 @@ class User {
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
         id: json['id'] as int,
-        telephone: json['telephone'] as int,
+        telephone: json['telephone'] as String,
         firstName: json['first_name'] as String,
         lastName: json['last_name'] as String,
         nicNumber: json['nic_number'] as String,

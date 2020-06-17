@@ -24,7 +24,8 @@ class ApiProvider {
       final response = await http.post(
         _baseUrl + url,
         headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
+          HttpHeaders.authorizationHeader: '',
+          HttpHeaders.contentTypeHeader: 'application/json; charset=UTF-8',
         },
         body: jsonObject,
       );

@@ -7,7 +7,7 @@ ma = Marshmallow()
 class User(db.Model):
     # class corresponding to the Incident Table in the database
     id = db.Column(db.Integer, primary_key=True)
-    telephone = db.Column(db.Integer, nullable=False)
+    telephone = db.Column(db.String(10), nullable=False)
     first_name = db.Column(db.String(45), nullable=False)
     last_name = db.Column(db.String(45), nullable=False)
     nic_number = db.Column(db.String(20), nullable=True)

@@ -1,9 +1,10 @@
 from models.user import User, user_schema, users_schema
 from models.incident import Incident, incident_schema, incidents_schema
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
-
+import jwt
+import datetime
 import os
 
 # init app
@@ -81,11 +82,38 @@ def create_user():
         raise
 
 
-@app.route('/get_users', methods=['GET'])
-def get_users():
-    all_users = User.query.all()
-    result = users_schema.dump(all_users)
-    return jsonify(result)
+@app.route('/login_user', methods=['POST'])
+def login_user():
+    auth = request.authorization
+    try:
+        username = request.json['username']
+        password = request.json['password']
+        current_user = User.query.filter_by(telephone=username).first()
+        result = user_schema.dump(current_user)
+        if(result != {}):
+            if(password == result['password']):
+                print('Login Successful')
+            else:
+                print('Password is incorrect')
+        else:
+            print('username is incorrect')
+        return jsonify(result)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise
+    # secret_key = "thisneedstobechanged"
+    # if auth and auth.password == 'password':
+    #     # setting the token to expire after 30 mins
+    #     return jwt.encode({'user': auth.username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, secret_key)
+
+    #     return jsonify({'token': token.decode('UTF-8')})
+
+    # return make_response('Could Not Authenticate', 401)
 
 
 @app.route('/get_incidents_by_user/<int:user_id>', methods=['GET'])
