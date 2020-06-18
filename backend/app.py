@@ -67,8 +67,9 @@ def create_user():
         nic_number = request.json['nicNumber']
         email = request.json['email']
         password = request.json['password']
+        salt = request.json['salt']
         new_user = User(telephone, first_name, last_name,
-                        nic_number, email, password)
+                        nic_number, email, password, salt)
         db.session.add(new_user)
         db.session.commit()
         return user_schema.jsonify(new_user)
@@ -84,20 +85,22 @@ def create_user():
 
 @app.route('/login_user', methods=['POST'])
 def login_user():
-    auth = request.authorization
     try:
         username = request.json['username']
         password = request.json['password']
         current_user = User.query.filter_by(telephone=username).first()
         result = user_schema.dump(current_user)
         if(result != {}):
+            # checking whether the hashed password matches the database
             if(password == result['password']):
-                print('Login Successful')
-            else:
-                print('Password is incorrect')
-        else:
-            print('username is incorrect')
-        return jsonify(result)
+                # returning a jwt to the app
+                # using the REVERSED salt as the secret key
+                secret_key = result['salt'][::-1]
+                token = jwt.encode({'user': username, 'exp': datetime.datetime.utcnow(
+                ) + datetime.timedelta(minutes=30)}, secret_key)
+                return jsonify({'token': token.decode('UTF-8')})
+        # returning 401 error to the app
+        return make_response('Could Not Authenticate', 401)
 
     except IOError:
         print("I/O error")
@@ -106,17 +109,31 @@ def login_user():
     except:
         print("Unexpected error")
         raise
-    # secret_key = "thisneedstobechanged"
-    # if auth and auth.password == 'password':
-    #     # setting the token to expire after 30 mins
-    #     return jwt.encode({'user': auth.username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, secret_key)
-
-    #     return jsonify({'token': token.decode('UTF-8')})
-
-    # return make_response('Could Not Authenticate', 401)
 
 
-@app.route('/get_incidents_by_user/<int:user_id>', methods=['GET'])
+@ app.route('/get_user_salt', methods=['POST'])
+def get_user_salt():
+    # user will get their salt to generate the hash required to the provided password
+    try:
+        username = request.json['username']
+        user_hash = User.query.with_entities(User.salt).filter_by(
+            telephone=username).first()
+        db.session.commit()
+        result = user_schema.dump(user_hash)
+        if(result != {}):
+            return jsonify(result)
+        return make_response('User Not Found', 404)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise
+
+
+@ app.route('/get_incidents_by_user/<int:user_id>', methods=['GET'])
 def get_incidents_by_user(user_id):
     # returns all the incidents that was reported by the user of the user_id
     incidents = Incident.query.filter_by(

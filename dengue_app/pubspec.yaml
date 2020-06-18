@@ -18,6 +18,7 @@ dependencies:
   date_format: ^1.0.8
   geolocator: ^5.3.2+2
   flutter_secure_storage: ^3.3.3
+  password_hash: ^2.0.0
 
 dev_dependencies:
   flutter_test:

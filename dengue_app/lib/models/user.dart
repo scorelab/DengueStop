@@ -10,6 +10,7 @@ class User {
   String nicNumber; // not required
   String email; // not required
   String password;
+  String salt;
 
   User(
       {this.id,
@@ -18,7 +19,8 @@ class User {
       this.lastName,
       this.nicNumber,
       this.email,
-      this.password});
+      this.password,
+      this.salt});
 
   Map toJson() => {
     'id': id,
@@ -27,7 +29,8 @@ class User {
     'lastName': lastName,
     'nicNumber': nicNumber,
     'email': email,
-    'password': password
+    'password': password,
+    'salt': salt
   };
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -38,6 +41,8 @@ class User {
         lastName: json['last_name'] as String,
         nicNumber: json['nic_number'] as String,
         email: json['email'] as String,
-        password: json['password'] as String);
+        password: json['password'] as String,
+        salt: json['salt'] as String
+    );
   }
 }

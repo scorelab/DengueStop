@@ -24,7 +24,6 @@ class ApiProvider {
       final response = await http.post(
         _baseUrl + url,
         headers: <String, String>{
-          HttpHeaders.authorizationHeader: '',
           HttpHeaders.contentTypeHeader: 'application/json; charset=UTF-8',
         },
         body: jsonObject,
@@ -40,18 +39,27 @@ class ApiProvider {
     switch (response.statusCode) {
       case 200:
         var responseJson = json.decode(response.body);
-        return {'reponse': responseJson, 'code': response.statusCode};
+        return {'data': responseJson, 'code': response.statusCode};
       case 400:
-        return {'reponse': BadRequestException(response.body.toString()), 'code': response.statusCode};
+        return {
+          'data': BadRequestException(response.body.toString()),
+          'code': response.statusCode
+        };
       case 401:
 
       case 403:
-        return {'reponse': UnauthorisedException(response.body.toString()), 'code': response.statusCode};
+        return {
+          'data': UnauthorisedException(response.body.toString()),
+          'code': response.statusCode
+        };
       case 500:
 
       default:
-        return {'reponse': FetchDataException(
-            'Error occured while Communication with Server with StatusCode : ${response.statusCode}'), 'code': response.statusCode};
+        return {
+          'data': FetchDataException(
+              'Error occured while Communication with Server with StatusCode : ${response.statusCode}'),
+          'code': response.statusCode
+        };
     }
   }
 }

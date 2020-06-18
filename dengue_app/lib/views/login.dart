@@ -99,6 +99,8 @@ class _LoginFormState extends State<LoginForm> {
   String validatePassword(String value) {
     if (value.isEmpty) {
       return 'Password Required';
+    } if (value.length < 8) {
+      return 'Password should at least contain 8 digits';
     }
     return null;
   }
@@ -114,12 +116,16 @@ class _LoginFormState extends State<LoginForm> {
     return null;
   }
 
-  submitLogin() {
+  submitLogin() async {
 //    Navigator.pushNamed(context, 'home');
     if (_loginFormKey.currentState.validate()) {
       var username = telephoneController.text;
       var password = passwordController.text;
-      var result = userService.loginUser(username: username, password: password);
+//      handling authentication and auth will return true when the user is authenticated
+      var result = await userService.loginUser(username: username, password: password);
+      if (result == true) {
+        Navigator.pushNamed(context, 'home');
+      }
     }
   }
 
@@ -196,7 +202,6 @@ class _LoginFormState extends State<LoginForm> {
                           fontWeight: FontWeight.w700),
                     ),
                     onPressed: () {
-                      // todo handle authentication before sending to homescreen
                       submitLogin();
                     },
                   ),
