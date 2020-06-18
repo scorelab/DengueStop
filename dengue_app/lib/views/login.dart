@@ -125,8 +125,37 @@ class _LoginFormState extends State<LoginForm> {
       var result = await userService.loginUser(username: username, password: password);
       if (result == true) {
         Navigator.pushNamed(context, 'home');
+      } else {
+        // todo handle error messages for each instance
+        showAuthErrorAlert(context);
       }
     }
+  }
+
+  showAuthErrorAlert(BuildContext context) {
+    Widget okButton = FlatButton(
+      child: Text("Ok"),
+      onPressed: () {
+        // dismiss the popup
+        Navigator.of(context).pop();
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Auth Failed"),
+      content: Text("Something went wrong please try again."),
+      actions: [
+        okButton,
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 
   @override

@@ -89,6 +89,7 @@ def login_user():
         username = request.json['username']
         password = request.json['password']
         current_user = User.query.filter_by(telephone=username).first()
+        db.session.commit()
         result = user_schema.dump(current_user)
         if(result != {}):
             # checking whether the hashed password matches the database
@@ -138,6 +139,7 @@ def get_incidents_by_user(user_id):
     # returns all the incidents that was reported by the user of the user_id
     incidents = Incident.query.filter_by(
         reported_user_id=user_id).order_by(Incident.reported_time.desc()).all()
+    db.session.commit()
     result = incidents_schema.dump(incidents)
     return jsonify(result)
 
