@@ -4,6 +4,7 @@ import 'package:dengue_app/views/home.dart';
 import 'package:dengue_app/views/report_incident.dart';
 import 'package:dengue_app/views/reports.dart';
 import 'package:dengue_app/views/signup.dart';
+import 'package:dengue_app/views/profile.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -15,7 +16,7 @@ void main() {
         primaryColor: Colors.cyan[800],
         accentColor: Colors.cyanAccent[700]
     ),
-    initialRoute: '/', // ONLY FOR TESTING PURPOSES! change back to '/'
+    initialRoute: 'home', // ONLY FOR TESTING PURPOSES! change back to '/'
     routes: {
       // defines the routing for the different components
       // todo add other routing components
@@ -25,6 +26,7 @@ void main() {
       'home': (context) => Home(),
       'report_incident': (context) => ReportIncident(),
       'reports': (context) => Reports(),
+      'profile': (context) => Profile(),
     },
   ));
 }
