@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:dengue_app/services/user_service.dart';
+import 'package:dengue_app/models/user.dart';
 
 // global styling for form labels
 TextStyle formLabelStyle =
@@ -32,12 +34,7 @@ InputDecoration disabledFormFieldStyle = InputDecoration(
 );
 
 
-class Profile extends StatefulWidget {
-  @override
-  _ProfileState createState() => _ProfileState();
-}
-
-class _ProfileState extends State<Profile> {
+class Profile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,7 +73,19 @@ class _ProfileState extends State<Profile> {
 }
 
 // profile details form
-class ProfileForm extends StatelessWidget {
+class ProfileForm extends StatefulWidget {
+  @override
+  _ProfileFormState createState() => _ProfileFormState();
+}
+
+class _ProfileFormState extends State<ProfileForm> {
+  final UserService userService = UserService();
+  Future<User> currentUser;
+  void initState() {
+    super.initState();
+    currentUser = userService.getUserData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -95,36 +104,48 @@ class ProfileForm extends StatelessWidget {
           ],
         ),
         child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
+          child: FutureBuilder<User>(
+              future: currentUser,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
 //              // contains the form field
-              ProfileFormField(),
+                      ProfileFormField(currentUserData: snapshot.data),
 //              // contains the form action buttons
-              ProfileFormButtons(),
-            ],
-          ),
+                      ProfileFormButtons(),
+                    ],
+                  );
+                } else if (snapshot.hasError) {
+                  return Text("${snapshot.error}");
+                } else {
+                  return Text("Something else");
+                }
+
+              }),
         ));
   }
 }
 
 class ProfileFormField extends StatefulWidget {
+  final User currentUserData;
+  ProfileFormField({Key key, @required this.currentUserData}) : super(key: key);
   @override
   _ProfileFormFieldState createState() => _ProfileFormFieldState();
 }
 
 class _ProfileFormFieldState extends State<ProfileFormField> {
-  final _profileFormKey = GlobalKey<FormState>();
-  // todo data handling
-  // todo data validation
   // adding text controllers to get data from the text fields
   TextEditingController firstNameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
-  TextEditingController telephoneNumberController = TextEditingController()..text = '0778755176';
+  TextEditingController telephoneNumberController = TextEditingController();
   TextEditingController nicNumberController = TextEditingController();
   TextEditingController emailController = TextEditingController();
-
-
+  final _profileFormKey = GlobalKey<FormState>();
+  // setting data fields with current user data;
+  // todo data handling
+  // todo data validation
   // focus node for first name field
   FocusNode firstNameFocusNode = new FocusNode();
   // focus node for last name field
@@ -134,8 +155,18 @@ class _ProfileFormFieldState extends State<ProfileFormField> {
   // focus node for email field
   FocusNode emailFocusNode = new FocusNode();
 
+  setUserDataFields(User user){
+    telephoneNumberController.text = user.telephone;
+    firstNameController.text = user.firstName;
+    lastNameController.text = user.lastName;
+    nicNumberController.text = user.nicNumber;
+    emailController.text = user.nicNumber;
+  }
+
+
   @override
   Widget build(BuildContext context) {
+    setUserDataFields(widget.currentUserData);
     return Form(
       key: _profileFormKey,
       child: Padding(
@@ -145,12 +176,12 @@ class _ProfileFormFieldState extends State<ProfileFormField> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
           children: <Widget>[
+            SizedBox(height: 10.0),
+            TelephoneField(textFieldLabel: 'Telephone Number', textData: telephoneNumberController),
             SizedBox(height: 20.0),
             CustomProfileTextField(textData: firstNameController, focusNodeName: firstNameFocusNode, textFieldLabel: 'First Name'),
             SizedBox(height: 10.0),
             CustomProfileTextField(textData: lastNameController, focusNodeName: lastNameFocusNode, textFieldLabel: 'Last Name'),
-            SizedBox(height: 10.0),
-            TelephoneField(textFieldLabel: 'Telephone Number', textData: telephoneNumberController),
             SizedBox(height: 10.0),
             CustomProfileTextField(textData: nicNumberController, focusNodeName: nicNumberFocusNode, textFieldLabel: 'NIC Number'),
             SizedBox(height: 10.0),

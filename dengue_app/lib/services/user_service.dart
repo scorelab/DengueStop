@@ -3,13 +3,13 @@ import 'package:dengue_app/networking/ApiProvider.dart';
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:password_hash/password_hash.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserService {
   final apiProvider = ApiProvider();
   final storage = FlutterSecureStorage();
   final generator = PBKDF2();
-  User user = User();
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
   Future<bool> createUser(User user) async {
     var url = 'create_user';
@@ -40,9 +40,39 @@ class UserService {
     }
   }
 
+  saveUserData(User user) async {
+    final SharedPreferences prefs = await _prefs;
+    final userId = user.id;
+    final userFirstName = user.firstName;
+    final userLastName = user.lastName;
+    final userEmail = user.email;
+    final userTelephone = user.telephone;
+    final userNicNumber = user.nicNumber;
+    // storing user data in shared preferences
+    await prefs.setInt('userId', userId);
+    await prefs.setString('userFirstName', userFirstName);
+    await prefs.setString('userLastName', userLastName);
+    await prefs.setString('userEmail', userEmail);
+    await prefs.setString('userTelephone', userTelephone);
+    await prefs.setString('userNicNumber', userNicNumber);
+  }
+
+  Future<User> getUserData() async {
+    final SharedPreferences prefs = await _prefs;
+    User currentUser = User();
+    currentUser.id = prefs.getInt('userId');
+    currentUser.firstName = prefs.getString('userFirstName');
+    currentUser.lastName = prefs.getString('userLastName');
+    currentUser.email = prefs.getString('userEmail');
+    currentUser.telephone = prefs.getString('userTelephone');
+    currentUser.nicNumber = prefs.getString('userNicNumber');
+    return currentUser;
+  }
+
 
   Future<bool> loginUser({String username, String password}) async {
     String userSalt = await getUserSalt(username);
+    User currentUser = User();
     String hash;
     if(userSalt != '') {
       // generating the hash using the provided password
@@ -57,6 +87,11 @@ class UserService {
         var jwt = response['data']['token'];
         // stores the jwt in flutter secure storage
         await storage.write(key: 'userToken', value: jwt);
+        // received user data
+        var userData = response['data']['userData'];
+        currentUser = User.fromJson(userData);
+        // saving session data of the user
+        saveUserData(currentUser);
         return true;
       }
     }

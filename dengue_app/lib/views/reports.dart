@@ -88,8 +88,6 @@ class ReportList extends StatelessWidget {
               child: ListView.builder(
                   itemCount: incidentList.length,
                   itemBuilder: (context, index) {
-                    // todo pass data to event card from backend
-                    // todo calculate and parse time formats according to the required format
                     return ReportCard(incident: incidentList[index]);
                   }),
             ),

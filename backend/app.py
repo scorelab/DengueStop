@@ -88,9 +88,11 @@ def login_user():
     try:
         username = request.json['username']
         password = request.json['password']
+        # selecting data without the password and salt as they are not required for the user session
         current_user = User.query.filter_by(telephone=username).first()
         db.session.commit()
         result = user_schema.dump(current_user)
+        print(result)
         if(result != {}):
             # checking whether the hashed password matches the database
             if(password == result['password']):
@@ -99,7 +101,9 @@ def login_user():
                 secret_key = result['salt'][::-1]
                 token = jwt.encode({'user': username, 'exp': datetime.datetime.utcnow(
                 ) + datetime.timedelta(minutes=30)}, secret_key)
-                return jsonify({'token': token.decode('UTF-8')})
+                userData = {'id': result['id'], 'first_name': result['first_name'], 'last_name': result['last_name'],
+                            'email': result['email'], 'telephone': result['telephone'], 'nic_number': result['nic_number']}
+                return jsonify({'token': token.decode('UTF-8'), 'userData': userData})
         # returning 401 error to the app
         return make_response('Could Not Authenticate', 401)
 
