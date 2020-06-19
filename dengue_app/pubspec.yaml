@@ -20,6 +20,7 @@ dependencies:
   flutter_secure_storage: ^3.3.3
   password_hash: ^2.0.0
   shared_preferences: ^0.5.7+3
+  email_validator: ^1.0.4
 
 dev_dependencies:
   flutter_test:

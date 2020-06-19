@@ -83,6 +83,32 @@ def create_user():
         raise
 
 
+@app.route('/update_user', methods=['POST'])
+def update_user():
+    try:
+        user_id = request.json['id']
+        first_name = request.json['firstName']
+        last_name = request.json['lastName']
+        nic_number = request.json['nicNumber']
+        email = request.json['email']
+        updated_user = User.query.filter_by(id=user_id).first()
+        updated_user.first_name = first_name
+        updated_user.last_name = last_name
+        updated_user.nic_number = nic_number
+        updated_user.email = email
+        db.session.merge(updated_user)
+        db.session.commit()
+        return user_schema.jsonify(updated_user)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise
+
+
 @app.route('/login_user', methods=['POST'])
 def login_user():
     try:
@@ -92,7 +118,6 @@ def login_user():
         current_user = User.query.filter_by(telephone=username).first()
         db.session.commit()
         result = user_schema.dump(current_user)
-        print(result)
         if(result != {}):
             # checking whether the hashed password matches the database
             if(password == result['password']):

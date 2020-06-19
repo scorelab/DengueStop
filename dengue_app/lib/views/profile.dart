@@ -1,38 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:dengue_app/services/user_service.dart';
 import 'package:dengue_app/models/user.dart';
+import 'package:flutter/services.dart';
 
 // global styling for form labels
 TextStyle formLabelStyle =
 TextStyle(fontSize: 18.0, fontWeight: FontWeight.w500);
-// global styling for form fields
-InputDecoration formFieldStyle = InputDecoration(
-  contentPadding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),
-  enabledBorder: OutlineInputBorder(
-    borderRadius: BorderRadius.all(Radius.circular(30.0)),
-    borderSide: BorderSide(color: Colors.grey),
-  ),
-  focusedBorder: OutlineInputBorder(
-    borderRadius: BorderRadius.all(Radius.circular(30.0)),
-    borderSide: BorderSide(color: Colors.grey),
-  ),
-);
-
-// global styling for disabled form fields
-InputDecoration disabledFormFieldStyle = InputDecoration(
-  filled: true,
-  fillColor: Colors.grey[300],
-  contentPadding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),
-  enabledBorder: OutlineInputBorder(
-    borderRadius: BorderRadius.all(Radius.circular(30.0)),
-    borderSide: BorderSide(color: Colors.grey),
-  ),
-  focusedBorder: OutlineInputBorder(
-    borderRadius: BorderRadius.all(Radius.circular(30.0)),
-    borderSide: BorderSide(color: Colors.grey),
-  ),
-);
-
 
 class Profile extends StatelessWidget {
   @override
@@ -54,7 +28,7 @@ class Profile extends StatelessWidget {
             children: <Widget>[
               SizedBox(height: 10.0),
               Center(
-                child: Text('Report Incident',
+                child: Text('My Profile',
                     style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 25.0,
@@ -79,12 +53,7 @@ class ProfileForm extends StatefulWidget {
 }
 
 class _ProfileFormState extends State<ProfileForm> {
-  final UserService userService = UserService();
-  Future<User> currentUser;
-  void initState() {
-    super.initState();
-    currentUser = userService.getUserData();
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -104,33 +73,19 @@ class _ProfileFormState extends State<ProfileForm> {
           ],
         ),
         child: SingleChildScrollView(
-          child: FutureBuilder<User>(
-              future: currentUser,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return Column(
+          child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-//              // contains the form field
-                      ProfileFormField(currentUserData: snapshot.data),
-//              // contains the form action buttons
-                      ProfileFormButtons(),
+                // contains the form field
+                      ProfileFormField(),
                     ],
-                  );
-                } else if (snapshot.hasError) {
-                  return Text("${snapshot.error}");
-                } else {
-                  return Text("Something else");
-                }
-
-              }),
-        ));
+                  )
+              ),
+        );
   }
 }
 
 class ProfileFormField extends StatefulWidget {
-  final User currentUserData;
-  ProfileFormField({Key key, @required this.currentUserData}) : super(key: key);
   @override
   _ProfileFormFieldState createState() => _ProfileFormFieldState();
 }
@@ -143,9 +98,7 @@ class _ProfileFormFieldState extends State<ProfileFormField> {
   TextEditingController nicNumberController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   final _profileFormKey = GlobalKey<FormState>();
-  // setting data fields with current user data;
-  // todo data handling
-  // todo data validation
+  final UserService userService = UserService();
   // focus node for first name field
   FocusNode firstNameFocusNode = new FocusNode();
   // focus node for last name field
@@ -155,37 +108,159 @@ class _ProfileFormFieldState extends State<ProfileFormField> {
   // focus node for email field
   FocusNode emailFocusNode = new FocusNode();
 
+  void initState() {
+    super.initState();
+    // setting current user data from the shared preferences
+    userService.getUserData().then((value) {
+      setUserDataFields(value);
+    });
+  }
+
   setUserDataFields(User user){
     telephoneNumberController.text = user.telephone;
     firstNameController.text = user.firstName;
     lastNameController.text = user.lastName;
     nicNumberController.text = user.nicNumber;
-    emailController.text = user.nicNumber;
+    emailController.text = user.email;
   }
+
+  String validateFirstName(String value) {
+    if (value.isEmpty) {
+      return 'Required';
+    }
+    return null;
+  }
+
+  String validateLastName(String value) {
+    if (value.isEmpty) {
+      return 'Required';
+    }
+    return null;
+  }
+
+  String validateNicNumber(String value) {
+    return null;
+  }
+
+  String validateEmail(String value) {
+    if (!EmailValidator.validate(value) && value.isNotEmpty) {
+      return 'Enter proper email format';
+    }
+    return null;
+  }
+
+  submitUserDetails() {
+    if(_profileFormKey.currentState.validate()) {
+      // submitting updated details
+      showEditConfirmation(context);
+    }
+  }
+
+  saveUserDetails() async {
+    // getting the updated user info from text controllers
+    User updatedUser = User();
+    updatedUser.firstName = firstNameController.text;
+    updatedUser.lastName = lastNameController.text;
+    updatedUser.nicNumber = nicNumberController.text;
+    updatedUser.email = emailController.text;
+    bool result = await userService.updateUser(updatedUser);
+    if (result) {
+      // show success message
+      showUpdateStatus(context: context, titleText: 'Success', messageText: 'Your profile have successfully updated!');
+    } else {
+      // show error message
+      showUpdateStatus(context: context, titleText: 'Oops', messageText: 'Something has gone wrong. Please try again.');
+    }
+  }
+
+  showEditConfirmation(BuildContext context) {
+    Widget yesButton = FlatButton(
+      child: Text("Yes", style: TextStyle(color: Colors.red)),
+      onPressed: () {
+        // save new details on confirmation
+        saveUserDetails();
+        Navigator.of(context).pop();
+      },
+    );
+
+    Widget noButton = FlatButton(
+      child: Text("No"),
+      onPressed: () {
+        // dismiss the popup
+        Navigator.of(context).pop();
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Confirm Changes!"),
+      content: Text("Do you want to change the profile information?"),
+      actions: [
+        noButton,
+        yesButton
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  showUpdateStatus({BuildContext context, String messageText, String titleText}) {
+    Widget okButton = FlatButton(
+      child: Text("Ok"),
+      onPressed: () {
+        // save new details on confirmation
+        Navigator.of(context).pop();
+      },
+    );
+
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text(titleText),
+      content: Text(messageText),
+      actions: [
+        okButton,
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
 
 
   @override
   Widget build(BuildContext context) {
-    setUserDataFields(widget.currentUserData);
     return Form(
       key: _profileFormKey,
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 15.0),
+        padding: EdgeInsets.symmetric(horizontal: 20.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
           children: <Widget>[
-            SizedBox(height: 10.0),
-            TelephoneField(textFieldLabel: 'Telephone Number', textData: telephoneNumberController),
             SizedBox(height: 20.0),
-            CustomProfileTextField(textData: firstNameController, focusNodeName: firstNameFocusNode, textFieldLabel: 'First Name'),
+            TelephoneField(textFieldLabel: 'Telephone Number', textData: telephoneNumberController),
             SizedBox(height: 10.0),
-            CustomProfileTextField(textData: lastNameController, focusNodeName: lastNameFocusNode, textFieldLabel: 'Last Name'),
+            CustomProfileTextField(textData: firstNameController, focusNodeName: firstNameFocusNode, textFieldLabel: 'First Name', validatorFunction: validateFirstName),
             SizedBox(height: 10.0),
-            CustomProfileTextField(textData: nicNumberController, focusNodeName: nicNumberFocusNode, textFieldLabel: 'NIC Number'),
+            CustomProfileTextField(textData: lastNameController, focusNodeName: lastNameFocusNode, textFieldLabel: 'Last Name', validatorFunction: validateLastName),
             SizedBox(height: 10.0),
-            CustomProfileTextField(textData: emailController, focusNodeName: emailFocusNode, textFieldLabel: 'Email'),
+            CustomProfileTextField(textData: nicNumberController, focusNodeName: nicNumberFocusNode, textFieldLabel: 'NIC Number', validatorFunction: validateNicNumber),
+            SizedBox(height: 10.0),
+            CustomProfileTextField(textData: emailController, focusNodeName: emailFocusNode, textFieldLabel: 'Email', validatorFunction: validateEmail),
+            // contains the form action buttons
+            ProfileFormButtons(submitFunction: submitUserDetails),
           ],
         ),
       ),
@@ -195,17 +270,18 @@ class _ProfileFormFieldState extends State<ProfileFormField> {
 
 class CustomProfileTextField extends StatefulWidget {
   // holds the data of the text Field
-  final TextEditingController textData;
+  TextEditingController textData;
   final FocusNode focusNodeName;
   final String textFieldLabel;
-  CustomProfileTextField({Key key, @required this.textData, @required this.focusNodeName, @required this.textFieldLabel}) : super(key: key);
+  final validatorFunction;
+  CustomProfileTextField({Key key, @required this.textData, @required this.focusNodeName, @required this.textFieldLabel, @required this.validatorFunction}) : super(key: key);
 
   @override
   _CustomProfileTextFieldState createState() => _CustomProfileTextFieldState();
 }
 
 class _CustomProfileTextFieldState extends State<CustomProfileTextField> {
-  bool readOnly = true;
+  bool isDisabled = true;
   // todo fix warnings coming from the text fields
   @override
   Widget build(BuildContext context) {
@@ -218,22 +294,29 @@ class _CustomProfileTextFieldState extends State<CustomProfileTextField> {
             flex: 9,
             child: Column(
               children: <Widget>[
-                Text(widget.textFieldLabel, style: formLabelStyle),
-                SizedBox(height: 5.0),
                 TextFormField(
+                  decoration: InputDecoration(
+                      labelText: widget.textFieldLabel,
+                      labelStyle: formLabelStyle),
                   controller: widget.textData,
-                  readOnly: readOnly,
                   focusNode: widget.focusNodeName,
+                  validator: widget.validatorFunction,
+                  readOnly: isDisabled,
+                  inputFormatters: [
+                    // restricting whitespaces
+                    BlacklistingTextInputFormatter(RegExp('[ *]')),
+                    // restricting length of input based on the field, 20 chars for NIC and 40 chars for others
+                    LengthLimitingTextInputFormatter(widget.textFieldLabel == 'NIC Number'? 20: 40)
+                  ],
                   textInputAction: TextInputAction.done,
                   onEditingComplete: () {
                     // removing focus from the text field upon pressing enter
                     FocusScope.of(context).unfocus();
                     setState(() {
                       // lock the field by disabling it
-                      readOnly = true;
+                      isDisabled = true;
                     });
                   },
-                  decoration: readOnly? disabledFormFieldStyle: formFieldStyle,
                 )
               ],
             ),
@@ -244,16 +327,15 @@ class _CustomProfileTextFieldState extends State<CustomProfileTextField> {
           Expanded(
             flex: 2,
             child: Container(
-              padding: EdgeInsets.only(top: 20),
+              padding: EdgeInsets.only(top: 25),
               child: Material(
                 color: Colors.transparent,
                 child: IconButton(
-                    icon: readOnly? Icon(Icons.edit): Icon(Icons.save),
+                    icon: isDisabled? Icon(Icons.edit): Icon(Icons.save),
                     onPressed: () {
                       setState(() {
                         // toggles edit on the field
-                        readOnly = !readOnly;
-                        FocusScope.of(context).requestFocus(widget.focusNodeName);
+                        isDisabled = !isDisabled;
                       });
                     }),
               ),
@@ -282,13 +364,13 @@ class TelephoneField extends StatelessWidget {
             flex: 9,
             child: Column(
               children: <Widget>[
-                Text(textFieldLabel, style: formLabelStyle),
-                SizedBox(height: 5.0),
                 TextFormField(
+                  decoration: InputDecoration(
+                      labelText: textFieldLabel,
+                      labelStyle: formLabelStyle),
                   controller: textData,
                   readOnly: true,
                   textInputAction: TextInputAction.done,
-                  decoration: disabledFormFieldStyle,
                 )
               ],
             ),
@@ -300,6 +382,10 @@ class TelephoneField extends StatelessWidget {
 }
 
 class ProfileFormButtons extends StatelessWidget {
+  final submitFunction;
+  ProfileFormButtons({this.submitFunction});
+
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -308,7 +394,7 @@ class ProfileFormButtons extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          FormButton(buttonText: 'Change Details', buttonType: 'change'),
+          FormButton(buttonText: 'Change Details', buttonType: 'change', buttonFunction: submitFunction),
           FormButton(buttonText: 'Cancel', buttonType: 'cancel')
         ],
       ),
@@ -320,7 +406,8 @@ class FormButton extends StatelessWidget {
   // create buttons for the form with same appearance with different text and different functions
   final String buttonText;
   final String buttonType;
-  FormButton({this.buttonText, this.buttonType});
+  final buttonFunction;
+  FormButton({this.buttonText, this.buttonType, this.buttonFunction});
 
   @override
   Widget build(BuildContext context) {
@@ -348,7 +435,7 @@ class FormButton extends StatelessWidget {
         onPressed: () {
           // on press will trigger different functions based on the type of button
           if (buttonType == 'change') {
-            // todo logic to change the profile
+            buttonFunction();
           } else if (buttonType == 'cancel') {
             // routing back to home screen
             Navigator.pop(context);
