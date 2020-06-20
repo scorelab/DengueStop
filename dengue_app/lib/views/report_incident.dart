@@ -1,9 +1,9 @@
+import 'package:dengue_app/models/user.dart';
+import 'package:dengue_app/services/user_service.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:dengue_app/models/incident.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:geolocator/geolocator.dart';
 import 'package:dengue_app/services/incident_service.dart';
 
@@ -101,6 +101,7 @@ class _IncidentFormFieldState extends State<IncidentFormField> {
   final patientNameController = TextEditingController();
   final incidentDescriptionController = TextEditingController();
   final incidentService = IncidentService();
+  final userService = UserService();
 
   showSaveConfirmation(BuildContext context) {
     Widget cancelButton = FlatButton(
@@ -187,16 +188,18 @@ class _IncidentFormFieldState extends State<IncidentFormField> {
 
   sendReport() async {
     // setting other required attributes of the object
-    // todo authentication and get user id and plug here
-    incident.reportedUserId = 1;
+    // getting the current user Id to set as the reported user's id
+    User currentUser = await userService.getUserData();
+    incident.reportedUserId = currentUser.id;
     // status 1 means patient is pending verification
     incident.patientStatusId = 1;
     // initially report is not verified, therefore status zero. For all statuses check incident.dart file
     incident.isVerified = 0;
     // verified by will be null, which means no admin have verified it
+    // todo date validation properly
     // todo get orgId based on province and district and plug here
     incident.orgId = 1;
-    if(await incidentService.createReport(incident)) {
+    if (await incidentService.createReport(incident)) {
       showReportCreatedAlert(context);
     } else {
       showErrorAlert(context);
@@ -295,7 +298,9 @@ class _IncidentFormFieldState extends State<IncidentFormField> {
                 SizedBox(width: 10.0),
                 Expanded(
                   flex: 3,
-                  child: GetLocationButton(textController: incidentCityController, setCoordinateFunction: setCoordinates),
+                  child: GetLocationButton(
+                      textController: incidentCityController,
+                      setCoordinateFunction: setCoordinates),
                 )
               ],
             ),
@@ -418,7 +423,13 @@ class ProvinceDropdown extends StatefulWidget {
 
 class _ProvinceDropdownState extends State<ProvinceDropdown> {
   String selectedProvince = "Western";
-  List<String> provinceDropdown = ['', 'Western', 'Central', 'North Eastern', 'Southern'];
+  List<String> provinceDropdown = [
+    '',
+    'Western',
+    'Central',
+    'North Eastern',
+    'Southern'
+  ];
   // todo retrieve provinces
   @override
   Widget build(BuildContext context) {
@@ -510,16 +521,16 @@ class _GetLocationButtonState extends State<GetLocationButton> {
     if (position?.latitude != null && position?.longitude != null) {
       // setting coordinates received in the incident object
       widget.setCoordinateFunction(position.latitude, position.longitude);
-      List<Placemark> p = await Geolocator().placemarkFromCoordinates(position.latitude, position.longitude);
+      List<Placemark> p = await Geolocator()
+          .placemarkFromCoordinates(position.latitude, position.longitude);
       Placemark placemark = p[0];
       String locationName = "";
-      if(placemark?.thoroughfare != "" && placemark?.name != "") {
-        locationName = locationName + placemark.thoroughfare + ", " + placemark.name;
-      }
-      else if(placemark?.thoroughfare == "" && placemark?.name != "") {
+      if (placemark?.thoroughfare != "" && placemark?.name != "") {
+        locationName =
+            locationName + placemark.thoroughfare + ", " + placemark.name;
+      } else if (placemark?.thoroughfare == "" && placemark?.name != "") {
         locationName = locationName + placemark.name;
-      }
-      else if(placemark?.thoroughfare != "" && placemark?.name == "") {
+      } else if (placemark?.thoroughfare != "" && placemark?.name == "") {
         locationName = locationName + placemark.thoroughfare;
       } else {
         locationName = "";
@@ -550,7 +561,7 @@ class _GetLocationButtonState extends State<GetLocationButton> {
             print(result);
             setState(() {
               // changes color based on whether the location is retrieved successfully or not
-              btnColor = result == true? Colors.green: Colors.red;
+              btnColor = result == true ? Colors.green : Colors.red;
             });
           },
           // showing the selected date on the button
@@ -656,8 +667,8 @@ class _BirthDatePickerState extends State<BirthDatePicker> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration:
-          BoxDecoration(border: Border(bottom: BorderSide(color: underlineColor))),
+      decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: underlineColor))),
       child: OutlineButton(
           onPressed: () {
             _selectDate(context);

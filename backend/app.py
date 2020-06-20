@@ -14,48 +14,34 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 # to supress the warning on the terminal, specify this line
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:test1234@localhost/dengue_stop'
+SECRET_KEY = "thisisasecretkeythatmustbechangedlater"
 # init DB
 db = SQLAlchemy(app)
 # init marshmallow
 ma = Marshmallow(app)
 
+# running server
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
+def authenticate_token(token):
+    try:
+        # removing bearer value
+        tokenValue = token.split(" ")[1]
+        payload = jwt.decode(tokenValue, SECRET_KEY)
+        return(payload)
+    except jwt.ExpiredSignatureError:
+        print('Signature expired. Please log in again.')
+        return False
+    except jwt.InvalidTokenError:
+        print('Invalid token. Please log in again.')
+        return False
+
 
 @app.route('/', methods=['GET'])
 def hello_world():
     return jsonify({'name': 'hello'})
-
-
-@app.route('/report_incident', methods=['POST'])
-# endpoint to add a new report
-def report_incident():
-    try:
-        province = request.json['province']
-        district = request.json['district']
-        city = request.json['city']
-        location_lat = request.json['locationLat']
-        location_long = request.json['locationLong']
-        patient_name = request.json['patientName']
-        patient_gender = request.json['patientGender']
-        patient_dob = request.json['patientDob']
-        description = request.json['description']
-        reported_user_id = request.json['reportedUserId']
-        patient_status_id = request.json['patientStatusId']
-        is_verified = request.json['isVerified']
-        verified_by = request.json['verifiedBy']
-        org_id = request.json['orgId']
-        new_incident = Incident(province, district, city, location_lat, location_long, patient_name, patient_gender,
-                                patient_dob, description, reported_user_id, patient_status_id, is_verified, verified_by, org_id)
-        db.session.add(new_incident)
-        db.session.commit()
-        return incident_schema.jsonify(new_incident)
-
-    except IOError:
-        print("I/O error")
-    except ValueError:
-        print("Value Error")
-    except:
-        print("Unexpected error")
-        raise
 
 
 @app.route('/create_user', methods=['POST'])
@@ -83,32 +69,6 @@ def create_user():
         raise
 
 
-@app.route('/update_user', methods=['POST'])
-def update_user():
-    try:
-        user_id = request.json['id']
-        first_name = request.json['firstName']
-        last_name = request.json['lastName']
-        nic_number = request.json['nicNumber']
-        email = request.json['email']
-        updated_user = User.query.filter_by(id=user_id).first()
-        updated_user.first_name = first_name
-        updated_user.last_name = last_name
-        updated_user.nic_number = nic_number
-        updated_user.email = email
-        db.session.merge(updated_user)
-        db.session.commit()
-        return user_schema.jsonify(updated_user)
-
-    except IOError:
-        print("I/O error")
-    except ValueError:
-        print("Value Error")
-    except:
-        print("Unexpected error")
-        raise
-
-
 @app.route('/login_user', methods=['POST'])
 def login_user():
     try:
@@ -122,10 +82,9 @@ def login_user():
             # checking whether the hashed password matches the database
             if(password == result['password']):
                 # returning a jwt to the app
-                # using the REVERSED salt as the secret key
-                secret_key = result['salt'][::-1]
-                token = jwt.encode({'user': username, 'exp': datetime.datetime.utcnow(
-                ) + datetime.timedelta(minutes=30)}, secret_key)
+                secret_key = SECRET_KEY
+                token = jwt.encode({'user': username, 'userId': result['id'], 'exp': datetime.datetime.utcnow(
+                ) + datetime.timedelta(hours=1)}, secret_key)
                 userData = {'id': result['id'], 'first_name': result['first_name'], 'last_name': result['last_name'],
                             'email': result['email'], 'telephone': result['telephone'], 'nic_number': result['nic_number']}
                 return jsonify({'token': token.decode('UTF-8'), 'userData': userData})
@@ -163,16 +122,85 @@ def get_user_salt():
         raise
 
 
+@app.route('/update_user', methods=['POST'])
+def update_user():
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        try:
+            user_id = request.json['id']
+            if (auth_res['userId'] == user_id):
+                first_name = request.json['firstName']
+                last_name = request.json['lastName']
+                nic_number = request.json['nicNumber']
+                email = request.json['email']
+                updated_user = User.query.filter_by(id=user_id).first()
+                updated_user.first_name = first_name
+                updated_user.last_name = last_name
+                updated_user.nic_number = nic_number
+                updated_user.email = email
+                db.session.merge(updated_user)
+                db.session.commit()
+                return user_schema.jsonify(updated_user)
+
+        except IOError:
+            print("I/O error")
+        except ValueError:
+            print("Value Error")
+        except:
+            print("Unexpected error")
+            raise
+
+    return make_response('Request Forbidden', 403)
+
+
+@app.route('/report_incident', methods=['POST'])
+# endpoint to add a new report
+def report_incident():
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        try:
+            user_id = request.json['reportedUserId']
+            if (auth_res['userId'] == user_id):
+                province = request.json['province']
+                district = request.json['district']
+                city = request.json['city']
+                location_lat = request.json['locationLat']
+                location_long = request.json['locationLong']
+                patient_name = request.json['patientName']
+                patient_gender = request.json['patientGender']
+                patient_dob = request.json['patientDob']
+                description = request.json['description']
+                reported_user_id = request.json['reportedUserId']
+                patient_status_id = request.json['patientStatusId']
+                is_verified = request.json['isVerified']
+                verified_by = request.json['verifiedBy']
+                org_id = request.json['orgId']
+                new_incident = Incident(province, district, city, location_lat, location_long, patient_name, patient_gender,
+                                        patient_dob, description, reported_user_id, patient_status_id, is_verified, verified_by, org_id)
+                db.session.add(new_incident)
+                db.session.commit()
+                return incident_schema.jsonify(new_incident)
+
+        except IOError:
+            print("I/O error")
+        except ValueError:
+            print("Value Error")
+        except:
+            print("Unexpected error")
+            raise
+
+    return make_response('Request Forbidden', 403)
+
+
 @ app.route('/get_incidents_by_user/<int:user_id>', methods=['GET'])
 def get_incidents_by_user(user_id):
-    # returns all the incidents that was reported by the user of the user_id
-    incidents = Incident.query.filter_by(
-        reported_user_id=user_id).order_by(Incident.reported_time.desc()).all()
-    db.session.commit()
-    result = incidents_schema.dump(incidents)
-    return jsonify(result)
-
-
-# running server
-if __name__ == '__main__':
-    app.run(debug=True)
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False and (auth_res['userId'] == user_id)):
+        # returns all the incidents that was reported by the user of the user_id
+        incidents = Incident.query.filter_by(
+            reported_user_id=user_id).order_by(Incident.reported_time.desc()).all()
+        db.session.commit()
+        result = incidents_schema.dump(incidents)
+        return jsonify(result)
+    else:
+        return make_response('Request Forbidden', 403)

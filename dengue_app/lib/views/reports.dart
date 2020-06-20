@@ -14,7 +14,7 @@ class _ReportsState extends State<Reports> {
   @override
   void initState() {
     super.initState();
-    futureIncidentList = incidentService.getIncidentsByUser(1);
+    futureIncidentList = incidentService.getIncidentsByUser();
   }
 
   @override
@@ -36,7 +36,7 @@ class _ReportsState extends State<Reports> {
               children: <Widget>[
                 SizedBox(height: 10.0),
                 Center(
-                  child: Text('Events',
+                  child: Text('My Reports',
                       style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 25.0,
@@ -160,8 +160,6 @@ class DrawerButton extends StatelessWidget {
           if (buttonType == 'cancel') {
             // routing back to home screen
             Navigator.pop(context);
-          } else {
-            // todo handle the error
           }
         },
       ),

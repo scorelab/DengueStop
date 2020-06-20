@@ -66,6 +66,8 @@ class UserService {
     final userEmail = user.email;
     final userTelephone = user.telephone;
     final userNicNumber = user.nicNumber;
+    // clearing shared preferences
+    await prefs.clear();
     // storing user data in shared preferences
     await prefs.setInt('userId', userId);
     await prefs.setString('userFirstName', userFirstName);
@@ -87,7 +89,6 @@ class UserService {
     return currentUser;
   }
 
-
   Future<bool> loginUser({String username, String password}) async {
     String userSalt = await getUserSalt(username);
     User currentUser = User();
@@ -104,6 +105,7 @@ class UserService {
         // we will receive the jwt in the response
         var jwt = response['data']['token'];
         // stores the jwt in flutter secure storage
+        await storage.deleteAll();
         await storage.write(key: 'userToken', value: jwt);
         // received user data
         var userData = response['data']['userData'];

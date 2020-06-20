@@ -336,6 +336,13 @@ class _CustomProfileTextFieldState extends State<CustomProfileTextField> {
                       setState(() {
                         // toggles edit on the field
                         isDisabled = !isDisabled;
+                        if(!isDisabled) {
+                          // changing the focus to the enabled text field
+                          FocusScope.of(context).requestFocus(widget.focusNodeName);
+                        } else {
+                          // removing the focus of disabled text field
+                          FocusScope.of(context).unfocus();
+                        }
                       });
                     }),
               ),
