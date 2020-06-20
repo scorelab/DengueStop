@@ -20,10 +20,6 @@ db = SQLAlchemy(app)
 # init marshmallow
 ma = Marshmallow(app)
 
-# running server
-if __name__ == '__main__':
-    app.run(debug=True)
-
 
 def authenticate_token(token):
     try:
@@ -204,3 +200,8 @@ def get_incidents_by_user(user_id):
         return jsonify(result)
     else:
         return make_response('Request Forbidden', 403)
+
+
+# running server
+if __name__ == '__main__':
+    app.run(debug=True)
