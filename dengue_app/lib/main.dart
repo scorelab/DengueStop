@@ -10,12 +10,11 @@ void main() {
   runApp(MaterialApp(
     title: 'Dengue Stop',
     theme: ThemeData(
-      // adding custom theme data globally to the app
+        // adding custom theme data globally to the app
         fontFamily: 'Raleway',
         brightness: Brightness.light,
         primaryColor: Colors.cyan[800],
-        accentColor: Colors.cyanAccent[700]
-    ),
+        accentColor: Colors.cyanAccent[700]),
     initialRoute: '/', // ONLY FOR TESTING PURPOSES! change back to '/'
     routes: {
       // defines the routing for the different components

@@ -99,7 +99,8 @@ class _LoginFormState extends State<LoginForm> {
   String validatePassword(String value) {
     if (value.isEmpty) {
       return 'Password Required';
-    } if (value.length < 8) {
+    }
+    if (value.length < 8) {
       return 'Password should at least contain 8 digits';
     }
     return null;
@@ -122,7 +123,8 @@ class _LoginFormState extends State<LoginForm> {
       var username = telephoneController.text;
       var password = passwordController.text;
 //      handling authentication and auth will return true when the user is authenticated
-      var result = await userService.loginUser(username: username, password: password);
+      var result =
+          await userService.loginUser(username: username, password: password);
       if (result == true) {
         Navigator.pushNamed(context, 'home');
       } else {

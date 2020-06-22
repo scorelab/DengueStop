@@ -13,7 +13,35 @@ Clone the repository
 
 ## Flutter Community App
 
-To be completed
+1. Install Flutter  
+   Follow the official [guide](https://flutter.dev/docs/get-started/install) from the flutter team.
+
+2. Run `flutter doctor`
+
+   ```
+   flutter doctor
+   ```
+
+   If all are ok, jump-in to the next step.
+
+3. Go to the `dengue_app` folder
+
+   ```
+   cd dengue_app/
+   ```
+
+4. Install all the dependent flutter packages.  
+   Run `flutter pub get` in the terminal, or click **Packages get** in IntelliJ or Android Studio.
+
+   ```
+   flutter pub get
+   ```
+
+5. Run the application.
+
+   ```
+   flutter run
+   ```
 
 ## Flask Backend
 
