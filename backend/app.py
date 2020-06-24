@@ -1,5 +1,8 @@
 from models.user import User, user_schema, users_schema
 from models.incident import Incident, incident_schema, incidents_schema
+from models.province import Province, province_schema, provinces_schema
+from models.district import District, district_schema, districts_schema
+from models.org_unit import OrgUnit, org_unit_schema, org_units_schema
 from flask import Flask, request, jsonify, make_response
 from database import db
 from database import ma
@@ -151,6 +154,47 @@ def report_incident():
     return make_response('Request Forbidden', 403)
 
 
+@ app.route('/get_provinces', methods=['GET'])
+def get_provinces():
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        # returns all the provinces in the db
+        provinces = Province.query.all()
+        db.session.commit()
+        result = provinces_schema.dump(provinces)
+        return jsonify(result)
+    else:
+        return make_response('Request Forbidden', 403)
+        
+
+@ app.route('/get_districts', methods=['GET'])
+def get_districts():
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        # returns all the procinces in the db
+        districts = District.query.all()
+        db.session.commit()
+        result = districts_schema.dump(districts)
+        return jsonify(result)
+    else:
+        return make_response('Request Forbidden', 403)
+
+
+@ app.route('/get_org_unit/<province>/<district>', methods=['GET'])
+def get_incident_org_unit(province, district):
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        # returns all the procinces in the db
+        orgUnit = OrgUnit.query.filter_by(
+            province=province, district=district).first()
+        db.session.commit()
+        result = org_unit_schema.dump(orgUnit)
+        return jsonify(result)
+    else:
+        return make_response('Request Forbidden', 403)
 # running server
 if __name__ == '__main__':
     app.run(debug=True)
