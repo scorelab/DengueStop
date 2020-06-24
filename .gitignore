@@ -5,3 +5,5 @@
 /backend/.vscode
 /backend/models/__pycache__
 /backend/services/__pycache__
+/backend/tests/__pycache__
+/backend/tests/.pytest_cache 

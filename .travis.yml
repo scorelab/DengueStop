@@ -3,7 +3,7 @@ matrix:
   include:
     - language: dart
       dart: stable
-      stage: Flutter Test
+      stage: Flutter Mobile Application Test
       before_install:
         - "cd dengue_app"
       addons:
@@ -18,3 +18,14 @@ matrix:
       cache:
         directories:
           - $HOME/.pub-cache
+
+    - language: python
+      python:
+        - "3.7"
+      stage: Flask API Test
+      before_install:
+        - "cd backend"
+      install:
+        - pip install -r requirements.txt
+      script:
+        - pytest
