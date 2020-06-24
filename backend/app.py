@@ -15,6 +15,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:test1234@localhost/dengue_
 # init extensions
 db.init_app(app)
 ma.init_app(app)
+<<<<<<< HEAD
 
 
 @app.route('/create_user', methods=['POST'])
@@ -40,6 +41,8 @@ def create_user():
     except:
         print("Unexpected error")
         raise
+=======
+>>>>>>> Move sqlalchemy and marshmallow initialization to database.py to avoid cyclic dependency
 
 
 
