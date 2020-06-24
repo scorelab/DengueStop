@@ -134,38 +134,6 @@ def get_user_salt():
         raise
 
 
-@app.route('/update_user', methods=['POST'])
-def update_user():
-    # checking for authentication
-    auth_res = authenticate_token(request.headers['authorization'])
-    if(auth_res != False):
-        try:
-            user_id = request.json['id']
-            if (auth_res['userId'] == user_id):
-                first_name = request.json['firstName']
-                last_name = request.json['lastName']
-                nic_number = request.json['nicNumber']
-                email = request.json['email']
-                updated_user = User.query.filter_by(id=user_id).first()
-                updated_user.first_name = first_name
-                updated_user.last_name = last_name
-                updated_user.nic_number = nic_number
-                updated_user.email = email
-                db.session.merge(updated_user)
-                db.session.commit()
-                return user_schema.jsonify(updated_user)
-
-        except IOError:
-            print("I/O error")
-        except ValueError:
-            print("Value Error")
-        except:
-            print("Unexpected error")
-            raise
-
-    return make_response('Request Forbidden', 403)
-    
-
 @app.route('/report_incident', methods=['POST'])
 # endpoint to add a new report
 def report_incident():
