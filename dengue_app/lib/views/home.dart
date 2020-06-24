@@ -16,7 +16,7 @@ class Home extends StatelessWidget {
             child: FloatingActionButton(
               onPressed: () {
                 // routing to report incident screen
-                print('report_incident');
+                Navigator.pushNamed(context, 'report_incident');
               },
               child: Icon(Icons.add, size: 40.0),
               backgroundColor: Colors.lightBlue[500],
@@ -101,16 +101,10 @@ class EventCard extends StatelessWidget {
   // todo might have to change to Stateful widget as we are changing the color/opacity based on the expiration of the event.
   // styles for event name label
   TextStyle eventNameStyle = TextStyle(
-      fontSize: 18.0,
-      fontWeight: FontWeight.w700,
-      color: Colors.white
-  );
+      fontSize: 18.0, fontWeight: FontWeight.w700, color: Colors.white);
   // styles for event details
   TextStyle eventDetailsStyle = TextStyle(
-      fontSize: 16.0,
-      fontWeight: FontWeight.w500,
-      color: Colors.white
-  );
+      fontSize: 16.0, fontWeight: FontWeight.w500, color: Colors.white);
 
   final String eventName;
   final String eventCoordinator;
@@ -118,9 +112,12 @@ class EventCard extends StatelessWidget {
   final String startTime;
   final String endTime;
 
-  EventCard({this.eventName, this.eventCoordinator, this.eventDate, this.startTime, this.endTime});
-
-
+  EventCard(
+      {this.eventName,
+      this.eventCoordinator,
+      this.eventDate,
+      this.startTime,
+      this.endTime});
 
   @override
   Widget build(BuildContext context) {
@@ -129,10 +126,10 @@ class EventCard extends StatelessWidget {
       margin: EdgeInsets.only(bottom: 15.0),
       height: 100,
       decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.5), //todo dynamically change opacity based on event status
+          color: Colors.black.withOpacity(
+              0.5), //todo dynamically change opacity based on event status
           borderRadius: BorderRadius.all(Radius.circular(10.0)),
-          border: Border.all(color: Colors.grey[700])
-      ),
+          border: Border.all(color: Colors.grey[700])),
       child: Padding(
         padding: const EdgeInsets.all(10.0),
         child: Column(
@@ -141,14 +138,14 @@ class EventCard extends StatelessWidget {
           children: <Widget>[
             Text("$eventName", style: eventNameStyle),
             Text("$eventCoordinator", style: eventDetailsStyle),
-            Text("$eventDate | $startTime to $endTime", style: eventDetailsStyle)
+            Text("$eventDate | $startTime to $endTime",
+                style: eventDetailsStyle)
           ],
         ),
       ),
     );
   }
 }
-
 
 class ButtonDrawer extends StatelessWidget {
   @override
@@ -213,7 +210,7 @@ class DrawerButton extends StatelessWidget {
           if (buttonType == 'report') {
             // routing to reports screen
             print('report');
-          } else if (buttonType == 'profile'){
+          } else if (buttonType == 'profile') {
             // routing to profile screen
             print('profile');
           } else {

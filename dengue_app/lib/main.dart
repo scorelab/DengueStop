@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'views/home.dart';
 import 'views/signup.dart';
 import 'views/login.dart';
+import 'views/report_incident.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -21,6 +22,7 @@ void main() {
       'login': (context) => Login(),
       'signup': (context) => Signup(),
       'home': (context) => Home(),
+      'report_incident': (context) => ReportIncident(),
     },
   ));
 }
