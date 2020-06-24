@@ -19,6 +19,19 @@ SECRET_KEY = "thisisasecretkeythatmustbechangedlater"
 db.init_app(app)
 ma.init_app(app)
 
+def authenticate_token(token):
+    try:
+        # removing bearer value
+        tokenValue = token.split(" ")[1]
+        payload = jwt.decode(tokenValue, SECRET_KEY)
+        return(payload)
+    except jwt.ExpiredSignatureError:
+        print('Signature expired. Please log in again.')
+        return False
+    except jwt.InvalidTokenError:
+        print('Invalid token. Please log in again.')
+        return False
+
 
 @app.route('/create_user', methods=['POST'])
 def create_user():
@@ -101,35 +114,39 @@ def get_user_salt():
 @app.route('/report_incident', methods=['POST'])
 # endpoint to add a new report
 def report_incident():
-    try:
-        user_id = request.json['reportedUserId']
-        province = request.json['province']
-        district = request.json['district']
-        city = request.json['city']
-        location_lat = request.json['locationLat']
-        location_long = request.json['locationLong']
-        patient_name = request.json['patientName']
-        patient_gender = request.json['patientGender']
-        patient_dob = request.json['patientDob']
-        description = request.json['description']
-        reported_user_id = request.json['reportedUserId']
-        patient_status_id = request.json['patientStatusId']
-        is_verified = request.json['isVerified']
-        verified_by = request.json['verifiedBy']
-        org_id = request.json['orgId']
-        new_incident = Incident(province, district, city, location_lat, location_long, patient_name, patient_gender,
-                                patient_dob, description, reported_user_id, patient_status_id, is_verified, verified_by, org_id)
-        db.session.add(new_incident)
-        db.session.commit()
-        return incident_schema.jsonify(new_incident)
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        try:
+            user_id = request.json['reportedUserId']
+            if (auth_res['userId'] == user_id):
+                province = request.json['province']
+                district = request.json['district']
+                city = request.json['city']
+                location_lat = request.json['locationLat']
+                location_long = request.json['locationLong']
+                patient_name = request.json['patientName']
+                patient_gender = request.json['patientGender']
+                patient_dob = request.json['patientDob']
+                description = request.json['description']
+                reported_user_id = request.json['reportedUserId']
+                patient_status_id = request.json['patientStatusId']
+                is_verified = request.json['isVerified']
+                verified_by = request.json['verifiedBy']
+                org_id = request.json['orgId']
+                new_incident = Incident(province, district, city, location_lat, location_long, patient_name, patient_gender,
+                                        patient_dob, description, reported_user_id, patient_status_id, is_verified, verified_by, org_id)
+                db.session.add(new_incident)
+                db.session.commit()
+                return incident_schema.jsonify(new_incident)
 
-    except IOError:
-        print("I/O error")
-    except ValueError:
-        print("Value Error")
-    except:
-        print("Unexpected error")
-        raise
+        except IOError:
+            print("I/O error")
+        except ValueError:
+            print("Value Error")
+        except:
+            print("Unexpected error")
+            raise
 
     return make_response('Request Forbidden', 403)
 
