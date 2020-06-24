@@ -2,6 +2,7 @@
 # Environments
 /backend/venv/
 /backend/__pycache__
+/backend/.pytest_cache
 /backend/.vscode
 /backend/models/__pycache__
 /backend/services/__pycache__
