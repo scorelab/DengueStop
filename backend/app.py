@@ -1,9 +1,16 @@
-from models.user import User, user_schema, users_schema
+# importing models for flask-migrate to realize models and create tables according to models
+from models.admin import Admin, admin_schema, admins_schema
+from models.alert import Alert, alert_schema, alerts_schema
+from models.event_status import EventStatus, event_status_schema, event_statuses_schema
+from models.event import Event, event_schema, events_schema
 from models.incident import Incident, incident_schema, incidents_schema
+from models.org_unit import OrgUnit, org_unit_schema, org_units_schema
+from models.patient_status import PatientStatus, patient_status_schema, patient_statuses_schema
+from models.user import User, user_schema, users_schema
 from models.province import Province, province_schema, provinces_schema
 from models.district import District, district_schema, districts_schema
-from models.org_unit import OrgUnit, org_unit_schema, org_units_schema
 from flask import Flask, request, jsonify, make_response
+from flask_migrate import Migrate
 from database import db
 from database import ma
 import jwt
@@ -21,6 +28,19 @@ SECRET_KEY = "thisisasecretkeythatmustbechangedlater"
 # init extensions
 db.init_app(app)
 ma.init_app(app)
+migrate = Migrate(app, db)
+
+# @app.route('/pre_populate_database', methods=['POST'])
+# ########## IMPORTANT!!! ##########
+# # ONLY TO BE RUN ONCE TO POPULATE THE DATABASE AFTER INITIAL CREATION
+# # ONCE THE POPULATION IS DONE. MAKE SURE TO COMMENT OR REMOVE THIS ENDPOINT
+# # BEFORE RUNNING THIS ENDPOINT MAKE SURE TO PROPERLY ADD DATA NEEDED FOR PREPOPULAITON
+# def pre_populate_database():
+#     Province.prePopulateProvince()
+#     District.prePopulateDistrict()
+#     PatientStatus.prePopulatePatientStatus()
+#     EventStatus.prePopulateEventStatus()
+#     OrgUnit.prePopulateOrgUnit()
 
 def authenticate_token(token):
     try:

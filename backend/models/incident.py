@@ -27,8 +27,8 @@ class Incident(db.Model):
     # reported time will automatically assign at the time of creation
     reported_time = db.Column(db.DateTime, nullable=False, default=datetime.now)
     reported_user_id = db.Column(db.Integer, nullable=False)
-    # patient status is is set to 0 which corresponds to that the patient is pending treatment by default
-    patient_status_id = db.Column(db.Integer, nullable=False, default=0)
+    # patient status is is set to 1 which corresponds to that the patient is pending treatment by default
+    patient_status_id = db.Column(db.Integer, nullable=False, default=1)
     # by default incident is not verified and is set to False until verified by the admin
     is_verified = db.Column(db.Integer, nullable=False, default=0)
     verified_by = db.Column(db.Integer, nullable=True)
