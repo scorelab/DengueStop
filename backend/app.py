@@ -17,33 +17,30 @@ db.init_app(app)
 ma.init_app(app)
 
 
-@app.route('/', methods=['GET'])
-def hello_world():
-    return jsonify({'name': 'hello'})
+@app.route('/create_user', methods=['POST'])
+def create_user():
+    try:
+        telephone = request.json['telephone']
+        first_name = request.json['firstName']
+        last_name = request.json['lastName']
+        nic_number = request.json['nicNumber']
+        email = request.json['email']
+        password = request.json['password']
+        salt = request.json['salt']
+        new_user = User(telephone, first_name, last_name,
+                        nic_number, email, password, salt)
+        db.session.add(new_user)
+        db.session.commit()
+        return user_schema.jsonify(new_user)
 
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise
 
-@app.route('/register_user', methods=['POST'])
-def register_user():
-    telephone = request.json['telephone']
-    first_name = request.json['first_name']
-    last_name = request.json['last_name']
-    nic_number = request.json['nic_number']
-    email = request.json['email']
-    password = request.json['password']
-
-    new_user = User(telephone, first_name, last_name,
-                    nic_number, email, password)
-    db.session.add(new_user)
-    db.session.commit()
-
-    return user_schema.jsonify(new_user)
-
-
-@app.route('/get_users', methods=['GET'])
-def get_users():
-    all_users = User.query.all()
-    result = users_schema.dump(all_users)
-    return jsonify(result)
 
 
 # running server
