@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:dengue_app/services/user_service.dart';
 
 class Home extends StatelessWidget {
   @override
@@ -65,13 +66,7 @@ class _EventsState extends State<EventList> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           SizedBox(height: 10.0),
-          Center(
-            child: Text('Events',
-                style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 25.0,
-                    color: Colors.white)),
-          ),
+          TopToolBar(),
           SizedBox(height: 10.0),
           Expanded(
             child: Container(
@@ -91,6 +86,90 @@ class _EventsState extends State<EventList> {
                   }),
             ),
           )
+        ],
+      ),
+    );
+  }
+}
+
+class TopToolBar extends StatelessWidget {
+  final userService = UserService();
+
+  logoutUser(context) async {
+    bool result = await userService.logoutUser();
+    if (result == true) {
+      Navigator.pop(context);
+    }
+  }
+
+  showLogoutConfirmation(BuildContext context) {
+    Widget yesButton = FlatButton(
+      child: Text("Yes", style: TextStyle(color: Colors.red)),
+      onPressed: () {
+        // logout the user
+        logoutUser(context);
+        // dismiss the popup
+        Navigator.of(context).pop();
+      },
+    );
+
+    Widget noButton = FlatButton(
+      child: Text("No"),
+      onPressed: () {
+        // dismiss the popup
+        Navigator.of(context).pop();
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Logging Out..."),
+      content: Text("Do you want to logout from Dengue Stop?"),
+      actions: [
+        noButton,
+        yesButton,
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Material(
+            color: Colors.transparent,
+            child: IconButton(
+              icon: Icon(Icons.sort, size: 30),
+              onPressed: () {},
+            ),
+          ),
+          Text('Events',
+              style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 25.0,
+                  color: Colors.white)),
+          Material(
+            color: Colors.transparent,
+            child: IconButton(
+                icon: Icon(
+                  Icons.exit_to_app,
+                  size: 30,
+                ),
+                onPressed: () {
+                  // logout confirmation
+                  showLogoutConfirmation(context);
+                }),
+          ),
         ],
       ),
     );
@@ -213,6 +292,8 @@ class DrawerButton extends StatelessWidget {
           } else if (buttonType == 'profile') {
             // routing to profile screen
             Navigator.pushNamed(context, 'profile');
+          } else {
+            // todo handle the error
           }
         },
       ),
