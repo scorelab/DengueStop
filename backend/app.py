@@ -1,4 +1,5 @@
 from models.user import User, user_schema, users_schema
+from models.incident import Incident, incident_schema, incidents_schema
 from flask import Flask, request, jsonify, make_response
 from database import db
 from database import ma
@@ -95,6 +96,43 @@ def get_user_salt():
     except:
         print("Unexpected error")
         raise
+
+
+@app.route('/report_incident', methods=['POST'])
+# endpoint to add a new report
+def report_incident():
+    try:
+        user_id = request.json['reportedUserId']
+        province = request.json['province']
+        district = request.json['district']
+        city = request.json['city']
+        location_lat = request.json['locationLat']
+        location_long = request.json['locationLong']
+        patient_name = request.json['patientName']
+        patient_gender = request.json['patientGender']
+        patient_dob = request.json['patientDob']
+        description = request.json['description']
+        reported_user_id = request.json['reportedUserId']
+        patient_status_id = request.json['patientStatusId']
+        is_verified = request.json['isVerified']
+        verified_by = request.json['verifiedBy']
+        org_id = request.json['orgId']
+        new_incident = Incident(province, district, city, location_lat, location_long, patient_name, patient_gender,
+                                patient_dob, description, reported_user_id, patient_status_id, is_verified, verified_by, org_id)
+        db.session.add(new_incident)
+        db.session.commit()
+        return incident_schema.jsonify(new_incident)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise
+
+    return make_response('Request Forbidden', 403)
+
 
 # running server
 if __name__ == '__main__':
