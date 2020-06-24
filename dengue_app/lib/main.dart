@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:dengue_app/views/login.dart';
-import 'package:dengue_app/views/home.dart';
-import 'package:dengue_app/views/signup.dart';
+import 'views/home.dart';
+import 'views/signup.dart';
+import 'views/login.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -17,7 +17,7 @@ void main() {
       // defines the routing for the different components
       // todo add other routing components
       '/': (context) =>
-          Signup(), // ONLY FOR TESTING PURPOSES! change back to login()
+          Login(), // ONLY FOR TESTING PURPOSES! change back to login()
       'login': (context) => Login(),
       'signup': (context) => Signup(),
       'home': (context) => Home(),
