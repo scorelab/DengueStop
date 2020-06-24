@@ -28,24 +28,6 @@ class UserService {
     }
   }
 
-  Future<bool> updateUser(User updatedUser) async {
-    var url = 'update_user';
-    // getting current userId
-    User currentUser = await getUserData();
-    updatedUser.id = currentUser.id;
-    updatedUser.telephone = currentUser.telephone;
-    String jsonUpdatedUser = jsonEncode(updatedUser.toJson());
-    var response = await apiProvider.post(url, jsonUpdatedUser);
-    if (response['code'] == 200) {
-      // update details in the local storage
-      saveUserData(updatedUser);
-      return true;
-    } else {
-      print(response);
-      return false;
-    }
-  }
-
   Future<String> getUserSalt(String username) async {
     var usernameObj = {"username": username};
     var jsonUsername = jsonEncode(usernameObj);

@@ -4,7 +4,6 @@ import 'views/signup.dart';
 import 'views/login.dart';
 import 'views/report_incident.dart';
 import 'views/reports.dart';
-import 'views/profile.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -26,7 +25,6 @@ void main() {
       'home': (context) => Home(),
       'report_incident': (context) => ReportIncident(),
       'reports': (context) => Reports(),
-      'profile': (context) => Profile(),
     },
   ));
 }
