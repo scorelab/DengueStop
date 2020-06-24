@@ -7,4 +7,7 @@ echo 'Activating Environment...'
 . venv/Scripts/activate
 
 # running app.py 
-python app.py
+export FLASK_APP=app.py
+export FLASK_ENV=development
+
+flask run

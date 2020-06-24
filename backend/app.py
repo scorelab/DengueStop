@@ -1,7 +1,7 @@
 from models.user import User, user_schema, users_schema
 from flask import Flask, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from flask_marshmallow import Marshmallow
+from database import db
+from database import ma
 
 import os
 
@@ -12,10 +12,9 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 # to supress the warning on the terminal, specify this line
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:test1234@localhost/dengue_stop'
-# init DB
-db = SQLAlchemy(app)
-# init marshmallow
-ma = Marshmallow(app)
+# init extensions
+db.init_app(app)
+ma.init_app(app)
 
 
 @app.route('/', methods=['GET'])
