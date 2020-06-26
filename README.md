@@ -20,10 +20,11 @@ Clone the repository
 
    ```
    flutter doctor
-   ```  
+   ```
+
    If all are ok, jump-in to the next step.
 
-3. Go to the `dengue_app` folder 
+3. Go to the `dengue_app` folder
 
    ```
    cd dengue_app/
@@ -52,7 +53,7 @@ Clone the repository
    cd backend/
    ```
 
-3. If you're running the backend for the first time, run the `init.sh` script to install the required dependencies from the `requirements.txt` file. If not, skip to the 3rd step.
+3. If you're running the backend for the first time, run the `init.sh` script to install the required dependencies from the `requirements.txt` file. If not, skip to the 4th step.
 
    ```
    sh init.sh
@@ -65,7 +66,17 @@ Clone the repository
 
 ## React Admin Panel
 
-To be completed
+1. Go to `admin_panel` folder
+
+   ```
+   cd admin_panel/
+   ```
+
+2. If you're running the admin_panel for the first time, run the `yarn install` to install the required dependencies. If not, skip to the 3rd step.
+
+3. Run the application with `yarn start` command. This will run admin panel at `http://localhost:3000` by default.
+
+4. To test the application. Run the tests with `yarn test` command.
 
 # License
 
