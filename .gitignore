@@ -8,3 +8,4 @@
 /backend/services/__pycache__
 /backend/tests/__pycache__
 /backend/tests/.pytest_cache 
+/admin_panel/node_modules
