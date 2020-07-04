@@ -17,7 +17,6 @@ SECRET_KEY = "thisisasecretkeythatmustbechangedlater"
 # init extensions
 db.init_app(app)
 ma.init_app(app)
-<<<<<<< HEAD
 
 
 @app.route('/create_user', methods=['POST'])
@@ -43,9 +42,6 @@ def create_user():
     except:
         print("Unexpected error")
         raise
-=======
->>>>>>> Move sqlalchemy and marshmallow initialization to database.py to avoid cyclic dependency
-
 
 @app.route('/login_user', methods=['POST'])
 def login_user():
