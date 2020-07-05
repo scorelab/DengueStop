@@ -1,3 +1,4 @@
 {
     "python.pythonPath": "backend\\venv\\Scripts\\python.exe"
+    "git.ignoreLimitWarning": true
 }

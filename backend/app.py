@@ -80,7 +80,6 @@ def create_user():
         print("Unexpected error")
         raise
 
-
 @app.route('/login_user', methods=['POST'])
 def login_user():
     try:
