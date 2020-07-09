@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import "./home.css";
 import IncidentsReported from "./incidentsReported";
+import IncidentSummary from "./incidentSummary";
 import {
     MDBContainer,
     MDBRow,
@@ -31,6 +32,9 @@ class Home extends Component {
                                     <MDBCardTitle className="card-title">
                                         <b>Incident Summary</b>
                                     </MDBCardTitle>
+                                    <MDBRow className="mt-1">
+                                        <IncidentSummary></IncidentSummary>
+                                    </MDBRow>
                                 </MDBCardBody>
                             </MDBCard>
                         </MDBRow>
