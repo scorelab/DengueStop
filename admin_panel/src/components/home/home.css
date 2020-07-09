@@ -1,0 +1,73 @@
+.home-container {
+    background-color: rgb(231, 231, 231);
+    height: 90vh;
+}
+
+.main-card {
+    border: 1px;
+    max-width: 100%;
+    overflow: auto;
+    /* box-shadow: none; */
+
+    align-items: stretch;
+}
+
+.card-title {
+    text-align: center;
+}
+
+.map-container {
+    height: 150px;
+    width: 100%;
+}
+
+.incident-card {
+    padding: 5px;
+    border-style: solid;
+    border-width: 1.5px;
+    border-color: rgb(197, 197, 197);
+    border-radius: 0.25rem;
+    height: 7rem;
+    justify-content: space-around;
+}
+
+.incident-reporter-text {
+    font-size: 0.85rem;
+    color: black;
+    font-weight: bold;
+}
+
+.timestamp-text {
+    font-size: 0.8rem;
+    color: #808080;
+    font-weight: 600;
+}
+
+.view-report-text {
+    font-size: 0.85rem;
+    color: #0d63ae !important;
+    font-weight: bold;
+}
+
+.incident-array-container {
+    max-height: 80vh;
+    overflow: auto;
+}
+
+.verify-report-text {
+    font-size: 0.85rem;
+    color: #00841f !important;
+    font-weight: bold;
+}
+
+.decline-report-text {
+    font-size: 0.85rem;
+    color: #b20404 !important;
+    font-weight: bold;
+}
+
+.incident-description-text {
+    font-size: 0.95rem;
+    color: black;
+    font-weight: 500;
+}
