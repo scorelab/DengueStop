@@ -9,6 +9,7 @@ from models.patient_status import PatientStatus, patient_status_schema, patient_
 from models.user import User, user_schema, users_schema
 from models.province import Province, province_schema, provinces_schema
 from models.district import District, district_schema, districts_schema
+from sqlalchemy.sql import func
 from flask import Flask, request, jsonify, make_response
 from flask_migrate import Migrate
 from flask_cors import CORS
@@ -335,6 +336,24 @@ def decline_incident(incident_id, verified_admin_id):
         print("Unexpected error")
         raise
 
+
+@ app.route('/get_total_incident_summary', methods=['GET'])
+def get_total_incident_summary():
+    try:
+        # groups VERIFIED incidents by province and counts them and returns their numbers
+        # we only consider patient who are currently suffering with disease recovered patients are disregarded
+        incident_by_province_count = db.session.query(Incident.province, func.count(Incident.province)).filter(Incident.patient_status_id > 1, Incident.patient_status_id < 5).group_by(Incident.province).all()
+        if(incident_by_province_count != {}):
+            return jsonify(incident_by_province_count)
+        return make_response('Count Not Found', 404)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise
 
 # running server
 if __name__ == '__main__':
