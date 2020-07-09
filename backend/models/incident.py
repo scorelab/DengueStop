@@ -2,6 +2,9 @@ from datetime import datetime
 from database import db
 from database import ma
 from sqlalchemy import ForeignKeyConstraint
+from models.user import User, user_limited_schema
+from models.admin import Admin, admin_limited_schema
+from models.patient_status import PatientStatus, patient_status_schema
 
 
 class Incident(db.Model):
@@ -61,3 +64,14 @@ class IncidentSchema(ma.Schema):
 # init schema
 incident_schema = IncidentSchema()
 incidents_schema = IncidentSchema(many=True)
+
+class IncidentWithUserSchema(ma.Schema):
+    incident = ma.Nested(incident_schema)
+    user = ma.Nested(user_limited_schema)
+    status = ma.Nested(patient_status_schema)
+    admin = ma.Nested(admin_limited_schema)
+
+
+
+incident_with_user_schema = IncidentWithUserSchema()
+incidents_with_user_schema = IncidentWithUserSchema(many=True)
