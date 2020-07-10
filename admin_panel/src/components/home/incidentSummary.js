@@ -17,13 +17,7 @@ const IncidentsSummary = (props) => {
         const summaryArray = summaries.map((data, index) => {
             if (data) {
                 return (
-                    <React.Fragment>
-                        <SummaryRow
-                            key={index}
-                            name={data[0]}
-                            count={data[1]}
-                        />
-                    </React.Fragment>
+                    <SummaryRow key={index} name={data[0]} count={data[1]} />
                 );
             } else {
                 return <p>No incidents reported</p>;

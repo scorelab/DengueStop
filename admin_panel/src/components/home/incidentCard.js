@@ -62,14 +62,32 @@ const IncidentCard = (props) => {
                 </MDBRow>
                 <MDBRow className="mt-1">
                     {" "}
-                    <MDBCol size="4" className="text-left view-report-text">
-                        <a onClick={() => setViewModal(true)}>View More</a>
+                    <MDBCol size="4" className="text-left">
+                        <a
+                            href="#!"
+                            className="view-report-text"
+                            onClick={() => setViewModal(true)}
+                        >
+                            View More
+                        </a>
                     </MDBCol>
-                    <MDBCol size="4" className="text-center verify-report-text">
-                        <a onClick={() => setVerifyModal(true)}>Verify</a>
+                    <MDBCol size="4" className="text-center">
+                        <a
+                            href="#!"
+                            className="verify-report-text"
+                            onClick={() => setVerifyModal(true)}
+                        >
+                            Verify
+                        </a>
                     </MDBCol>
-                    <MDBCol size="4" className="text-right decline-report-text">
-                        <a onClick={() => setDeclineModal(true)}>Decline</a>
+                    <MDBCol size="4" className="text-right">
+                        <a
+                            href="#!"
+                            className="decline-report-text"
+                            onClick={() => setDeclineModal(true)}
+                        >
+                            Decline
+                        </a>
                     </MDBCol>
                 </MDBRow>
             </MDBCard>

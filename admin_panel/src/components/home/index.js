@@ -27,7 +27,7 @@ class Home extends Component {
                         </MDBCard>
                     </MDBCol>
                     <MDBCol xs="12" md="6" xl="3">
-                        <React.Fragment className="">
+                        <React.Fragment>
                             <MDBRow>
                                 <MDBCard className="w-100 main-card">
                                     <MDBCardBody>
