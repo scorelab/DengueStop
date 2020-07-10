@@ -1,6 +1,6 @@
 .home-container {
     background-color: rgb(231, 231, 231);
-    height: 90vh;
+    height: 94vh;
 }
 
 .main-card {
@@ -51,6 +51,11 @@
 
 .incident-array-container {
     max-height: 80vh;
+    overflow: auto;
+}
+
+.summary-array-container {
+    height: 30vh;
     overflow: auto;
 }
 
