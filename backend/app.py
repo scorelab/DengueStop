@@ -172,7 +172,6 @@ def report_incident():
 
     return make_response('Request Forbidden', 403)
 
-
 @ app.route('/get_incidents_by_user/<int:user_id>', methods=['GET'])
 def get_incidents_by_user(user_id):
     # checking for authentication
@@ -186,7 +185,6 @@ def get_incidents_by_user(user_id):
         return jsonify(result)
     else:
         return make_response('Request Forbidden', 403)
-
 
 @ app.route('/get_provinces', methods=['GET'])
 def get_provinces():
@@ -215,7 +213,7 @@ def get_districts():
     else:
         return make_response('Request Forbidden', 403)
 
-
+      
 @ app.route('/get_patient_status_list', methods=['GET'])
 def get_patient_status_list():
     # checking for authentication
