@@ -1,6 +1,16 @@
-from models.user import User, user_schema, users_schema
+# importing models for flask-migrate to realize models and create tables according to models
+from models.admin import Admin, admin_schema, admins_schema
+from models.alert import Alert, alert_schema, alerts_schema
+from models.event_status import EventStatus, event_status_schema, event_statuses_schema
+from models.event import Event, event_schema, events_schema
 from models.incident import Incident, incident_schema, incidents_schema
+from models.org_unit import OrgUnit, org_unit_schema, org_units_schema
+from models.patient_status import PatientStatus, patient_status_schema, patient_statuses_schema
+from models.user import User, user_schema, users_schema
+from models.province import Province, province_schema, provinces_schema
+from models.district import District, district_schema, districts_schema
 from flask import Flask, request, jsonify, make_response
+from flask_migrate import Migrate
 from database import db
 from database import ma
 import jwt
@@ -18,6 +28,32 @@ SECRET_KEY = "thisisasecretkeythatmustbechangedlater"
 # init extensions
 db.init_app(app)
 ma.init_app(app)
+migrate = Migrate(app, db)
+
+# @app.route('/pre_populate_database', methods=['POST'])
+# ########## IMPORTANT!!! ##########
+# # ONLY TO BE RUN ONCE TO POPULATE THE DATABASE AFTER INITIAL CREATION
+# # ONCE THE POPULATION IS DONE. MAKE SURE TO COMMENT OR REMOVE THIS ENDPOINT
+# # BEFORE RUNNING THIS ENDPOINT MAKE SURE TO PROPERLY ADD DATA NEEDED FOR PREPOPULAITON
+# def pre_populate_database():
+#     Province.prePopulateProvince()
+#     District.prePopulateDistrict()
+#     PatientStatus.prePopulatePatientStatus()
+#     EventStatus.prePopulateEventStatus()
+#     OrgUnit.prePopulateOrgUnit()
+
+def authenticate_token(token):
+    try:
+        # removing bearer value
+        tokenValue = token.split(" ")[1]
+        payload = jwt.decode(tokenValue, SECRET_KEY)
+        return(payload)
+    except jwt.ExpiredSignatureError:
+        print('Signature expired. Please log in again.')
+        return False
+    except jwt.InvalidTokenError:
+        print('Invalid token. Please log in again.')
+        return False
 
 
 @app.route('/create_user', methods=['POST'])
@@ -100,39 +136,84 @@ def get_user_salt():
 @app.route('/report_incident', methods=['POST'])
 # endpoint to add a new report
 def report_incident():
-    try:
-        user_id = request.json['reportedUserId']
-        province = request.json['province']
-        district = request.json['district']
-        city = request.json['city']
-        location_lat = request.json['locationLat']
-        location_long = request.json['locationLong']
-        patient_name = request.json['patientName']
-        patient_gender = request.json['patientGender']
-        patient_dob = request.json['patientDob']
-        description = request.json['description']
-        reported_user_id = request.json['reportedUserId']
-        patient_status_id = request.json['patientStatusId']
-        is_verified = request.json['isVerified']
-        verified_by = request.json['verifiedBy']
-        org_id = request.json['orgId']
-        new_incident = Incident(province, district, city, location_lat, location_long, patient_name, patient_gender,
-                                patient_dob, description, reported_user_id, patient_status_id, is_verified, verified_by, org_id)
-        db.session.add(new_incident)
-        db.session.commit()
-        return incident_schema.jsonify(new_incident)
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        try:
+            user_id = request.json['reportedUserId']
+            if (auth_res['userId'] == user_id):
+                province = request.json['province']
+                district = request.json['district']
+                city = request.json['city']
+                location_lat = request.json['locationLat']
+                location_long = request.json['locationLong']
+                patient_name = request.json['patientName']
+                patient_gender = request.json['patientGender']
+                patient_dob = request.json['patientDob']
+                description = request.json['description']
+                reported_user_id = request.json['reportedUserId']
+                patient_status_id = request.json['patientStatusId']
+                is_verified = request.json['isVerified']
+                verified_by = request.json['verifiedBy']
+                org_id = request.json['orgId']
+                new_incident = Incident(province, district, city, location_lat, location_long, patient_name, patient_gender,
+                                        patient_dob, description, reported_user_id, patient_status_id, is_verified, verified_by, org_id)
+                db.session.add(new_incident)
+                db.session.commit()
+                return incident_schema.jsonify(new_incident)
 
-    except IOError:
-        print("I/O error")
-    except ValueError:
-        print("Value Error")
-    except:
-        print("Unexpected error")
-        raise
+        except IOError:
+            print("I/O error")
+        except ValueError:
+            print("Value Error")
+        except:
+            print("Unexpected error")
+            raise
 
     return make_response('Request Forbidden', 403)
 
 
+@ app.route('/get_provinces', methods=['GET'])
+def get_provinces():
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        # returns all the provinces in the db
+        provinces = Province.query.all()
+        db.session.commit()
+        result = provinces_schema.dump(provinces)
+        return jsonify(result)
+    else:
+        return make_response('Request Forbidden', 403)
+        
+
+@ app.route('/get_districts', methods=['GET'])
+def get_districts():
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        # returns all the procinces in the db
+        districts = District.query.all()
+        db.session.commit()
+        result = districts_schema.dump(districts)
+        return jsonify(result)
+    else:
+        return make_response('Request Forbidden', 403)
+
+
+@ app.route('/get_org_unit/<province>/<district>', methods=['GET'])
+def get_incident_org_unit(province, district):
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        # returns all the procinces in the db
+        orgUnit = OrgUnit.query.filter_by(
+            province=province, district=district).first()
+        db.session.commit()
+        result = org_unit_schema.dump(orgUnit)
+        return jsonify(result)
+    else:
+        return make_response('Request Forbidden', 403)
 # running server
 if __name__ == '__main__':
     app.run(debug=True)
