@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import IncidentService from "../../services/incidentService";
-import IncidentCard from "./incidentCard";
 import { MDBRow, MDBCol } from "mdbreact";
 
 const IncidentsSummary = (props) => {

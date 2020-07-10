@@ -2,7 +2,7 @@
 from models.admin import Admin, admin_schema, admins_schema
 from models.alert import Alert, alert_schema, alerts_schema
 from models.event_status import EventStatus, event_status_schema, event_statuses_schema
-from models.event import Event, event_schema, events_schema
+from models.event import Event, event_schema, events_schema, event_with_full_schema, events_with_full_schema
 from models.incident import Incident, incident_schema, incidents_schema, incident_with_user_schema, incidents_with_user_schema
 from models.org_unit import OrgUnit, org_unit_schema, org_units_schema
 from models.patient_status import PatientStatus, patient_status_schema, patient_statuses_schema
@@ -345,6 +345,26 @@ def get_total_incident_summary():
         incident_by_province_count = db.session.query(Incident.province, func.count(Incident.province)).filter(Incident.patient_status_id > 1, Incident.patient_status_id < 5).group_by(Incident.province).all()
         if(incident_by_province_count != {}):
             return jsonify(incident_by_province_count)
+        return make_response('Count Not Found', 404)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise
+
+
+@ app.route('/get_events_by_org/<org_id>', methods=['GET'])
+def get_events_by_org(org_id):
+    try:
+        # get all events of the organization
+        events = db.session.query(Event, Admin, EventStatus).filter_by(org_id=org_id).join(Admin).join(EventStatus).order_by(Event.start_time.desc()).all()
+        if(events != {}):
+            print(events)
+            result = events_with_full_schema.dump([{'event': x[0], 'admin': x[1], 'status': x[2]} for x in events])
+            return jsonify(result)
         return make_response('Count Not Found', 404)
 
     except IOError:
