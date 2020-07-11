@@ -172,6 +172,19 @@ def report_incident():
 
     return make_response('Request Forbidden', 403)
 
+@ app.route('/get_incidents_by_user/<int:user_id>', methods=['GET'])
+def get_incidents_by_user(user_id):
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False and (auth_res['userId'] == user_id)):
+        # returns all the incidents that was reported by the user of the user_id
+        incidents = Incident.query.filter_by(
+            reported_user_id=user_id).order_by(Incident.reported_time.desc()).all()
+        db.session.commit()
+        result = incidents_schema.dump(incidents)
+        return jsonify(result)
+    else:
+        return make_response('Request Forbidden', 403)
 
 @ app.route('/get_provinces', methods=['GET'])
 def get_provinces():
@@ -200,6 +213,20 @@ def get_districts():
     else:
         return make_response('Request Forbidden', 403)
 
+      
+@ app.route('/get_patient_status_list', methods=['GET'])
+def get_patient_status_list():
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        # returns all the procinces in the db
+        patientStatus = PatientStatus.query.all()
+        db.session.commit()
+        result = patient_statuses_schema.dump(patientStatus)
+        return jsonify(result)
+    else:
+        return make_response('Request Forbidden', 403)
+        
 
 @ app.route('/get_org_unit/<province>/<district>', methods=['GET'])
 def get_incident_org_unit(province, district):

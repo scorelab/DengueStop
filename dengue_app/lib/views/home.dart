@@ -100,10 +100,10 @@ class _EventsState extends State<EventList> {
 class EventCard extends StatelessWidget {
   // todo might have to change to Stateful widget as we are changing the color/opacity based on the expiration of the event.
   // styles for event name label
-  TextStyle eventNameStyle = TextStyle(
+  final TextStyle eventNameStyle = TextStyle(
       fontSize: 18.0, fontWeight: FontWeight.w700, color: Colors.white);
   // styles for event details
-  TextStyle eventDetailsStyle = TextStyle(
+  final TextStyle eventDetailsStyle = TextStyle(
       fontSize: 16.0, fontWeight: FontWeight.w500, color: Colors.white);
 
   final String eventName;
@@ -209,7 +209,7 @@ class DrawerButton extends StatelessWidget {
           // on press will trigger different name routes based on the type of button
           if (buttonType == 'report') {
             // routing to reports screen
-            print('report');
+            Navigator.pushNamed(context, 'reports');
           } else if (buttonType == 'profile') {
             // routing to profile screen
             print('profile');

@@ -1,5 +1,6 @@
 import 'package:dengue_app/models/province.dart';
 import 'package:dengue_app/models/district.dart';
+import 'package:dengue_app/models/status.dart';
 import 'package:dengue_app/models/org_unit.dart';
 import 'package:dengue_app/networking/ApiProvider.dart';
 
@@ -38,6 +39,23 @@ class DataService {
       }
     }
     return districtList;
+  }
+
+  Future<List<Status>> getPatientStatusList() async {
+    var url = 'get_patient_status_list';
+    List<Status> statusList = List<Status>();
+    List<dynamic> responseData = new List<dynamic>();
+    var responseJson = await apiProvider.get(url);
+    if (responseJson['code'] == 200) {
+      responseData = responseJson['data'];
+      if (responseData.length > 0) {
+        for (int i = 0; i < responseData.length; i++) {
+          Map<String, dynamic> map = responseData[i];
+          statusList.add(Status.fromJson(map));
+        }
+      }
+    }
+    return statusList;
   }
 
   Future<OrgUnit> getIncidentOrgUnit(String province, String district) async {
