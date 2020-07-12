@@ -3,7 +3,7 @@ from models.admin import Admin, admin_schema, admins_schema
 from models.alert import Alert, alert_schema, alerts_schema
 from models.event_status import EventStatus, event_status_schema, event_statuses_schema
 from models.event import Event, event_schema, events_schema
-from models.incident import Incident, incident_schema, incidents_schema
+from models.incident import Incident, incident_schema, incidents_schema, incident_with_user_schema, incidents_with_user_schema
 from models.org_unit import OrgUnit, org_unit_schema, org_units_schema
 from models.patient_status import PatientStatus, patient_status_schema, patient_statuses_schema
 from models.user import User, user_schema, users_schema
@@ -11,6 +11,7 @@ from models.province import Province, province_schema, provinces_schema
 from models.district import District, district_schema, districts_schema
 from flask import Flask, request, jsonify, make_response
 from flask_migrate import Migrate
+from flask_cors import CORS
 from database import db
 from database import ma
 import jwt
@@ -19,6 +20,7 @@ import os
 
 # init app
 app = Flask(__name__)
+CORS(app)
 basedir = os.path.abspath(os.path.dirname(__file__))
 # database
 # to supress the warning on the terminal, specify this line
@@ -271,6 +273,65 @@ def get_incident_org_unit(province, district):
         return jsonify(result)
     else:
         return make_response('Request Forbidden', 403)
+
+
+@ app.route('/get_pending_incidents_by_org/<org_id>', methods=['GET'])
+def get_pending_incidents_by_org(org_id):
+    # returns all the incidents related to the org
+    incidents = db.session.query(Incident, User, PatientStatus).filter_by(org_id=org_id).filter_by(is_verified=0).join(User).join(PatientStatus).order_by(Incident.reported_time.desc()).all()
+    db.session.commit()
+    # converting the query response to the expected schema
+    result = incidents_with_user_schema.dump([{'incident': x[0], 'user': x[1], 'status': x[2]} for x in incidents])
+    return jsonify(result)
+
+
+@ app.route('/verify_incident/<incident_id>/<verified_admin_id>', methods=['GET'])
+def verify_incident(incident_id, verified_admin_id):
+    try:
+        updateIncident = Incident.query.filter_by(id=incident_id).first()
+        if(updateIncident != {}):
+            # now the incident is verified
+            updateIncident.is_verified = 1
+            # updating the verified admin ID
+            updateIncident.verified_by = verified_admin_id
+            # change patient status to status 2 - pending treatment
+            updateIncident.patient_status_id = 2
+            db.session.commit()
+            return make_response('Incident Verified', 200)
+        return make_response('Incident Not Found', 404)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise
+
+@ app.route('/decline_incident/<incident_id>/<verified_admin_id>', methods=['GET'])
+def decline_incident(incident_id, verified_admin_id):
+    try:
+        updateIncident = Incident.query.filter_by(id=incident_id).first()
+        if(updateIncident != {}):
+            # now the incident is declined
+            updateIncident.is_verified = 2
+            # updating the verified admin ID
+            updateIncident.verified_by = verified_admin_id
+            # change patient status to status 7 - declined
+            updateIncident.patient_status_id = 7
+            db.session.commit()
+            return make_response('Incident Declined', 200)
+        return make_response('Incident Not Found', 404)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise
+
+
 # running server
 if __name__ == '__main__':
     app.run(debug=True)

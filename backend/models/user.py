@@ -30,7 +30,15 @@ class UserSchema(ma.Schema):
         fields = ('id', 'telephone', 'first_name', 'last_name',
                   'nic_number', 'email', 'password', 'salt')
 
+class UserLimitedSchema(ma.Schema):
+    # user limited schema
+    # returns everything except password and salt of a user
+    class Meta:
+        fields = ('id', 'telephone', 'first_name', 'last_name',
+                  'nic_number', 'email')
 
 # init schema
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
+user_limited_schema = UserLimitedSchema()
+users_limited_schema = UserLimitedSchema(many=True)

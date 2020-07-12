@@ -32,7 +32,14 @@ class AdminSchema(ma.Schema):
         fields = ('id', 'email', 'name', 'contact',
                   'password', 'salt', 'org_id')
 
+class AdminLimitedSchema(ma.Schema):
+    # admin limited schema
+    # returns everything except password and salt of a admin
+    class Meta:
+        fields = ('id', 'email', 'name', 'contact')
 
 # init schema
 admin_schema = AdminSchema()
 admins_schema = AdminSchema(many=True)
+admin_limited_schema = AdminLimitedSchema()
+admins_limited_schema = AdminLimitedSchema(many=True)
