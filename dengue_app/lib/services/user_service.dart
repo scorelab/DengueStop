@@ -117,4 +117,12 @@ class UserService {
     }
     return false;
   }
+
+  Future<bool> logoutUser() async {
+    final SharedPreferences prefs = await _prefs;
+    // clear jwt from flutter secure storage
+    await storage.deleteAll();
+    await prefs.clear();
+    return true;
+  }
 }
