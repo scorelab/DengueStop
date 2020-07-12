@@ -1,6 +1,6 @@
 .home-container {
     background-color: rgb(231, 231, 231);
-    height: 90vh;
+    height: 94vh;
 }
 
 .main-card {
@@ -10,6 +10,49 @@
     /* box-shadow: none; */
 
     align-items: stretch;
+}
+
+.event-card {
+    padding: 5px;
+    border-style: solid;
+    border-width: 1.5px;
+    border-color: rgb(197, 197, 197);
+    border-radius: 0.25rem;
+    height: 8rem;
+    justify-content: space-around;
+}
+
+.event-name-text {
+    font-size: 0.85rem;
+    color: black;
+    font-weight: bold;
+}
+
+.view-event-text {
+    font-size: 0.85rem;
+    color: #0d63ae !important;
+    font-weight: bold;
+}
+
+.event-coordinator-text {
+    font-size: 0.95rem;
+    color: black;
+    font-weight: 500;
+}
+
+.venue-map-container {
+    height: 250px;
+    width: 100%;
+}
+
+.summary-array-container {
+    height: 30vh;
+    overflow: auto;
+}
+
+.event-array-container {
+    height: 43vh;
+    overflow: auto;
 }
 
 .card-title {
