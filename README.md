@@ -18,29 +18,30 @@ Clone the repository
 
 2. Run `flutter doctor`
 
-   ```
-   flutter doctor
-   ```  
-   If all are ok, jump-in to the next step.
+    ```
+    flutter doctor
+    ```
 
-3. Go to the `dengue_app` folder 
+    If all are ok, jump-in to the next step.
 
-   ```
-   cd dengue_app/
-   ```
+3. Go to the `dengue_app` folder
+
+    ```
+    cd dengue_app/
+    ```
 
 4. Install all the dependent flutter packages.  
    Run `flutter pub get` in the terminal, or click **Packages get** in IntelliJ or Android Studio.
 
-   ```
-   flutter pub get
-   ```
+    ```
+    flutter pub get
+    ```
 
 5. Run the application.
 
-   ```
-   flutter run
-   ```
+    ```
+    flutter run
+    ```
 
 ## Flask Backend
 
@@ -48,24 +49,34 @@ Clone the repository
 
 2. Go to `backend` folder
 
-   ```
-   cd backend/
-   ```
+    ```
+    cd backend/
+    ```
 
 3. If you're running the backend for the first time, run the `init.sh` script to install the required dependencies from the `requirements.txt` file. If not, skip to the 3rd step.
 
-   ```
-   sh init.sh
-   ```
+    ```
+    sh init.sh
+    ```
 
 4. Start the flask server by running the `start.sh` script. This will run the `app.py` file. Flask server will run at `http://127.0.0.1:5000` by default.
-   ```
-   sh start.sh
-   ```
+    ```
+    sh start.sh
+    ```
 
 ## React Admin Panel
 
-To be completed
+1. Go to `admin_panel` folder
+
+    ```
+    cd admin_panel/
+    ```
+
+2. If you're running the admin_panel for the first time, run the `yarn install` to install the required dependencies. If not, skip to the 3rd step.
+
+3. Run the application with `yarn start` command. This will run admin panel at `http://localhost:3000` by default.
+
+4. To test the application. Run the tests with `yarn test` command.
 
 # License
 
