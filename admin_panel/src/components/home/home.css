@@ -17,6 +17,11 @@
     overflow: auto;
 }
 
+.event-array-container {
+    height: 43vh;
+    overflow: auto;
+}
+
 .card-title {
     text-align: center;
 }

@@ -1,6 +1,8 @@
 from database import db
 from database import ma
 from sqlalchemy import ForeignKeyConstraint
+from models.admin import Admin, admin_limited_schema
+from models.event_status import EventStatus, event_status_schema
 
 class Event(db.Model):
     # class corresponding to the event table in the database
@@ -49,3 +51,14 @@ class EventSchema(ma.Schema):
 # init schema
 event_schema = EventSchema()
 events_schema = EventSchema(many=True)
+
+
+class EventFullInfoSchema(ma.Schema):
+    event = ma.Nested(event_schema)
+    admin = ma.Nested(admin_limited_schema)
+    status = ma.Nested(event_status_schema)
+
+
+
+event_with_full_schema = EventFullInfoSchema()
+events_with_full_schema = EventFullInfoSchema(many=True)
