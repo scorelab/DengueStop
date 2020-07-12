@@ -212,7 +212,7 @@ class DrawerButton extends StatelessWidget {
             Navigator.pushNamed(context, 'reports');
           } else if (buttonType == 'profile') {
             // routing to profile screen
-            print('profile');
+            Navigator.pushNamed(context, 'profile');
           } else {
             // todo handle the error
           }
