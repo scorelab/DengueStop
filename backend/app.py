@@ -80,7 +80,6 @@ def create_user():
         print("Unexpected error")
         raise
 
-
 @app.route('/login_user', methods=['POST'])
 def login_user():
     try:
@@ -133,6 +132,36 @@ def get_user_salt():
         print("Unexpected error")
         raise
 
+@app.route('/update_user', methods=['POST'])
+def update_user():
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        try:
+            user_id = request.json['id']
+            if (auth_res['userId'] == user_id):
+                first_name = request.json['firstName']
+                last_name = request.json['lastName']
+                nic_number = request.json['nicNumber']
+                email = request.json['email']
+                updated_user = User.query.filter_by(id=user_id).first()
+                updated_user.first_name = first_name
+                updated_user.last_name = last_name
+                updated_user.nic_number = nic_number
+                updated_user.email = email
+                db.session.merge(updated_user)
+                db.session.commit()
+                return user_schema.jsonify(updated_user)
+
+        except IOError:
+            print("I/O error")
+        except ValueError:
+            print("Value Error")
+        except:
+            print("Unexpected error")
+            raise
+
+    return make_response('Request Forbidden', 403)
 
 @app.route('/update_user', methods=['POST'])
 def update_user():
@@ -205,7 +234,6 @@ def report_incident():
 
     return make_response('Request Forbidden', 403)
 
-
 @ app.route('/get_incidents_by_user/<int:user_id>', methods=['GET'])
 def get_incidents_by_user(user_id):
     # checking for authentication
@@ -219,7 +247,6 @@ def get_incidents_by_user(user_id):
         return jsonify(result)
     else:
         return make_response('Request Forbidden', 403)
-
 
 @ app.route('/get_provinces', methods=['GET'])
 def get_provinces():
@@ -248,7 +275,7 @@ def get_districts():
     else:
         return make_response('Request Forbidden', 403)
 
-
+      
 @ app.route('/get_patient_status_list', methods=['GET'])
 def get_patient_status_list():
     # checking for authentication

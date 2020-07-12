@@ -5,8 +5,8 @@ import 'package:dengue_app/models/user.dart';
 import 'package:flutter/services.dart';
 
 // global styling for form labels
-TextStyle formLabelStyle =
-TextStyle(fontSize: 18.0, fontWeight: FontWeight.w500);
+TextStyle formLabelStyle = TextStyle(fontSize: 18.0, fontWeight: FontWeight.w500);
+
 
 class Profile extends StatelessWidget {
   @override
@@ -53,7 +53,6 @@ class ProfileForm extends StatefulWidget {
 }
 
 class _ProfileFormState extends State<ProfileForm> {
-
 
   @override
   Widget build(BuildContext context) {
@@ -151,6 +150,7 @@ class _ProfileFormFieldState extends State<ProfileFormField> {
 
   submitUserDetails() {
     if(_profileFormKey.currentState.validate()) {
+
       // submitting updated details
       showEditConfirmation(context);
     }
@@ -218,7 +218,6 @@ class _ProfileFormFieldState extends State<ProfileFormField> {
       },
     );
 
-
     // set up the AlertDialog
     AlertDialog alert = AlertDialog(
       title: Text(titleText),
@@ -236,8 +235,6 @@ class _ProfileFormFieldState extends State<ProfileFormField> {
     );
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -250,15 +247,33 @@ class _ProfileFormFieldState extends State<ProfileFormField> {
           mainAxisSize: MainAxisSize.max,
           children: <Widget>[
             SizedBox(height: 20.0),
-            TelephoneField(textFieldLabel: 'Telephone Number', textData: telephoneNumberController),
+            TelephoneField(
+                textFieldLabel: 'Telephone Number',
+                textData: telephoneNumberController),
             SizedBox(height: 10.0),
-            CustomProfileTextField(textData: firstNameController, focusNodeName: firstNameFocusNode, textFieldLabel: 'First Name', validatorFunction: validateFirstName),
+            CustomProfileTextField(
+                textData: firstNameController,
+                focusNodeName: firstNameFocusNode,
+                textFieldLabel: 'First Name',
+                validatorFunction: validateFirstName),
             SizedBox(height: 10.0),
-            CustomProfileTextField(textData: lastNameController, focusNodeName: lastNameFocusNode, textFieldLabel: 'Last Name', validatorFunction: validateLastName),
+            CustomProfileTextField(
+                textData: lastNameController,
+                focusNodeName: lastNameFocusNode,
+                textFieldLabel: 'Last Name',
+                validatorFunction: validateLastName),
             SizedBox(height: 10.0),
-            CustomProfileTextField(textData: nicNumberController, focusNodeName: nicNumberFocusNode, textFieldLabel: 'NIC Number', validatorFunction: validateNicNumber),
+            CustomProfileTextField(
+                textData: nicNumberController,
+                focusNodeName: nicNumberFocusNode,
+                textFieldLabel: 'NIC Number',
+                validatorFunction: validateNicNumber),
             SizedBox(height: 10.0),
-            CustomProfileTextField(textData: emailController, focusNodeName: emailFocusNode, textFieldLabel: 'Email', validatorFunction: validateEmail),
+            CustomProfileTextField(
+                textData: emailController,
+                focusNodeName: emailFocusNode,
+                textFieldLabel: 'Email',
+                validatorFunction: validateEmail),
             // contains the form action buttons
             ProfileFormButtons(submitFunction: submitUserDetails),
           ],
@@ -274,7 +289,13 @@ class CustomProfileTextField extends StatefulWidget {
   final FocusNode focusNodeName;
   final String textFieldLabel;
   final validatorFunction;
-  CustomProfileTextField({Key key, @required this.textData, @required this.focusNodeName, @required this.textFieldLabel, @required this.validatorFunction}) : super(key: key);
+  CustomProfileTextField(
+      {Key key,
+      @required this.textData,
+      @required this.focusNodeName,
+      @required this.textFieldLabel,
+      @required this.validatorFunction})
+      : super(key: key);
 
   @override
   _CustomProfileTextFieldState createState() => _CustomProfileTextFieldState();
@@ -353,7 +374,6 @@ class _CustomProfileTextFieldState extends State<CustomProfileTextField> {
   }
 }
 
-
 class TelephoneField extends StatelessWidget {
   final textFieldLabel;
   final TextEditingController textData;
@@ -391,7 +411,6 @@ class ProfileFormButtons extends StatelessWidget {
   final submitFunction;
   ProfileFormButtons({this.submitFunction});
 
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -428,8 +447,6 @@ class FormButton extends StatelessWidget {
               fontSize: 18.0,
               fontWeight: FontWeight.w600,
               // change font color of the button based on the button type
-              color:
-              (buttonType == 'change') ? Colors.indigo[900] : Colors.red[900],
             ),
           ),
         ),
@@ -451,4 +468,3 @@ class FormButton extends StatelessWidget {
     );
   }
 }
-
