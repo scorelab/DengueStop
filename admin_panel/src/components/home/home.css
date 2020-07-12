@@ -1,6 +1,6 @@
 .home-container {
     background-color: rgb(231, 231, 231);
-    height: 90vh;
+    height: 94vh;
 }
 
 .main-card {
@@ -10,6 +10,11 @@
     /* box-shadow: none; */
 
     align-items: stretch;
+}
+
+.summary-array-container {
+    height: 30vh;
+    overflow: auto;
 }
 
 .card-title {
