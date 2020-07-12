@@ -2,7 +2,7 @@ import FetchApi from "../utils/apiProviderService";
 
 class IncidentService {
     getIncidentsByOrgId(orgId) {
-        var apiUrl = "get_incidents_by_org/" + orgId.toString();
+        var apiUrl = "get_pending_incidents_by_org/" + orgId.toString();
         return FetchApi("GET", apiUrl)
             .then((res) => {
                 if (res.status === 200) {

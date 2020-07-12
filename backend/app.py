@@ -11,6 +11,7 @@ from models.province import Province, province_schema, provinces_schema
 from models.district import District, district_schema, districts_schema
 from flask import Flask, request, jsonify, make_response
 from flask_migrate import Migrate
+from flask_cors import CORS
 from database import db
 from database import ma
 import jwt
@@ -19,6 +20,7 @@ import os
 
 # init app
 app = Flask(__name__)
+CORS(app)
 basedir = os.path.abspath(os.path.dirname(__file__))
 # database
 # to supress the warning on the terminal, specify this line
@@ -273,14 +275,13 @@ def get_incident_org_unit(province, district):
         return make_response('Request Forbidden', 403)
 
 
-@ app.route('/get_incidents_by_org/<org_id>', methods=['GET'])
-def get_incidents_by_org(org_id):
+@ app.route('/get_pending_incidents_by_org/<org_id>', methods=['GET'])
+def get_pending_incidents_by_org(org_id):
     # returns all the incidents related to the org
-    incidents = db.session.query(Incident, User, PatientStatus, Admin).filter_by(org_id=org_id).join(User).join(PatientStatus).join(Admin).all()
-    print(incidents[0])
+    incidents = db.session.query(Incident, User, PatientStatus).filter_by(org_id=org_id).filter_by(is_verified=0).join(User).join(PatientStatus).order_by(Incident.reported_time.desc()).all()
     db.session.commit()
     # converting the query response to the expected schema
-    result = incidents_with_user_schema.dump([{'incident': x[0], 'user': x[1], 'status': x[2], 'admin': x[3]} for x in incidents])
+    result = incidents_with_user_schema.dump([{'incident': x[0], 'user': x[1], 'status': x[2]} for x in incidents])
     return jsonify(result)
 
 
