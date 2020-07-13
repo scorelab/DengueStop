@@ -28,6 +28,7 @@
 }
 
 .heat-map {
+    border-radius: 0.25rem;
     height: 50rem;
     width: 100%;
 }

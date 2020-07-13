@@ -378,12 +378,12 @@ def get_incident_markers_by_province(province):
         # we only consider patient who are currently suffering with disease recovered patients are disregarded
         if(province == "all"):
             # get all markers of the verified incidents
-            markers = Incident.query.filter(Incident.patient_status_id > 1, Incident.patient_status_id < 5).with_entities(Incident.location_lat, Incident.location_long).all()
+            markers = Incident.query.filter(Incident.patient_status_id > 1, Incident.patient_status_id < 5).with_entities(Incident.location_lat, Incident.location_long, Incident.district, Incident.patient_status_id).all()
             if(markers != {}):
                 return jsonify(markers)
             return make_response('Markers Not Found', 404)
         else:
-            markers = Incident.query.filter_by(province=province).filter(Incident.patient_status_id > 1, Incident.patient_status_id < 5).with_entities(Incident.location_lat, Incident.location_long).all()
+            markers = Incident.query.filter_by(province=province).filter(Incident.patient_status_id > 1, Incident.patient_status_id < 5).with_entities(Incident.location_lat, Incident.location_long, Incident.district, Incident.patient_status_id).all()
             if(markers != {}):
                 return jsonify(markers)
             return make_response('Markers Not Found', 404)
