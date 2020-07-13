@@ -370,7 +370,31 @@ def get_events_by_org(org_id):
     except:
         print("Unexpected error")
         raise
-    
+
+
+@ app.route('/get_incident_markers_by_province/<province>', methods=['GET'])
+def get_incident_markers_by_province(province):
+    try:
+        # we only consider patient who are currently suffering with disease recovered patients are disregarded
+        if(province == "all"):
+            # get all markers of the verified incidents
+            markers = Incident.query.filter(Incident.patient_status_id > 1, Incident.patient_status_id < 5).with_entities(Incident.location_lat, Incident.location_long).all()
+            if(markers != {}):
+                return jsonify(markers)
+            return make_response('Markers Not Found', 404)
+        else:
+            markers = Incident.query.filter_by(province=province).filter(Incident.patient_status_id > 1, Incident.patient_status_id < 5).with_entities(Incident.location_lat, Incident.location_long).all()
+            if(markers != {}):
+                return jsonify(markers)
+            return make_response('Markers Not Found', 404)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise 
     
 # running server
 if __name__ == '__main__':
