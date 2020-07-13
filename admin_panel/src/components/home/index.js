@@ -3,6 +3,7 @@ import "./home.css";
 import IncidentsReported from "./incidentsReported";
 import IncidentSummary from "./incidentSummary";
 import UpcomingEvents from "./upcomingEvents";
+import HeatMap from "./heatMap";
 import {
     MDBContainer,
     MDBRow,
@@ -23,6 +24,9 @@ class Home extends Component {
                                 <MDBCardTitle className="card-title">
                                     <b>Dengue Heat Map</b>
                                 </MDBCardTitle>
+                                <div className="mt-1 heat-map-container">
+                                    <HeatMap></HeatMap>
+                                </div>
                             </MDBCardBody>
                         </MDBCard>
                     </MDBCol>
