@@ -360,7 +360,6 @@ def get_events_by_org(org_id):
         events = db.session.query(Event, Admin, EventStatus).filter_by(org_id=org_id).join(Admin).join(EventStatus).order_by(Event.start_time.desc()).all()
         db.session.commit()
         if(events != {}):
-            print(events)
             result = events_with_full_schema.dump([{'event': x[0], 'admin': x[1], 'status': x[2]} for x in events])
             return jsonify(result)
         return make_response('Count Not Found', 404)
