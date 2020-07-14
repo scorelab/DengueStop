@@ -22,6 +22,17 @@
     justify-content: space-around;
 }
 
+.heat-map-container {
+    width: 100%;
+    height: 95%;
+}
+
+.heat-map {
+    border-radius: 0.25re;
+    height: 47rem;
+    width: 100%;
+}
+
 .event-name-text {
     font-size: 0.85rem;
     color: black;

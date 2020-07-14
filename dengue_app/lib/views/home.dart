@@ -66,13 +66,6 @@ class _EventsState extends State<EventList> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           SizedBox(height: 10.0),
-          Center(
-            child: Text('Events',
-                style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 25.0,
-                    color: Colors.white)),
-          ),
           TopToolBar(),
           SizedBox(height: 10.0),
           Expanded(

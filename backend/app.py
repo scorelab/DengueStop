@@ -339,6 +339,7 @@ def get_total_incident_summary():
         # groups VERIFIED incidents by province and counts them and returns their numbers
         # we only consider patient who are currently suffering with disease recovered patients are disregarded
         incident_by_province_count = db.session.query(Incident.province, func.count(Incident.province)).filter(Incident.patient_status_id > 1, Incident.patient_status_id < 5).group_by(Incident.province).all()
+        db.session.commit()
         if(incident_by_province_count != {}):
             return jsonify(incident_by_province_count)
         return make_response('Count Not Found', 404)
@@ -357,8 +358,8 @@ def get_events_by_org(org_id):
     try:
         # get all events of the organization
         events = db.session.query(Event, Admin, EventStatus).filter_by(org_id=org_id).join(Admin).join(EventStatus).order_by(Event.start_time.desc()).all()
+        db.session.commit()
         if(events != {}):
-            print(events)
             result = events_with_full_schema.dump([{'event': x[0], 'admin': x[1], 'status': x[2]} for x in events])
             return jsonify(result)
         return make_response('Count Not Found', 404)
@@ -370,8 +371,53 @@ def get_events_by_org(org_id):
     except:
         print("Unexpected error")
         raise
-    
-    
+
+
+@ app.route('/get_incident_markers_by_province/<province>', methods=['GET'])
+def get_incident_markers_by_province(province):
+    try:
+        # we only consider patient who are currently suffering with disease recovered patients are disregarded
+        if(province == "all"):
+            # get all markers of the verified incidents
+            markers = Incident.query.filter(Incident.patient_status_id > 1, Incident.patient_status_id < 5).with_entities(Incident.location_lat, Incident.location_long, Incident.district, Incident.patient_status_id).all()
+            db.session.commit()
+            if(markers != {}):
+                return jsonify(markers)
+            return make_response('Markers Not Found', 404)
+        else:
+            markers = Incident.query.filter_by(province=province).filter(Incident.patient_status_id > 1, Incident.patient_status_id < 5).with_entities(Incident.location_lat, Incident.location_long, Incident.district, Incident.patient_status_id).all()
+            db.session.commit()
+            if(markers != {}):
+                return jsonify(markers)
+            return make_response('Markers Not Found', 404)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise 
+
+
+@ app.route('/get_province_names', methods=['GET'])
+def get_province_names():
+    try:
+        # returns all the provinces in the db
+        provinces = Province.query.with_entities(Province.name).order_by(Province.name.asc()).all()
+        db.session.commit()
+        if(provinces != {}):
+            return jsonify(provinces)
+        return make_response('Provinces Not Found', 404)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise 
+
 # running server
 if __name__ == '__main__':
     app.run(debug=True)

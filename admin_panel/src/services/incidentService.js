@@ -68,6 +68,21 @@ class IncidentService {
                 return null;
             });
     }
+
+    getIncidentMarkers(province) {
+        var apiUrl = "get_incident_markers_by_province/" + province.toString();
+        return FetchApi("GET", apiUrl)
+            .then((res) => {
+                if (res.status === 200) {
+                    return res.data;
+                }
+                return null;
+            })
+            .catch((err) => {
+                console.log("error : ", err);
+                return null;
+            });
+    }
 }
 
 export default IncidentService;
