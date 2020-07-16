@@ -1,50 +1,42 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import "./home.css";
 import IncidentsReported from "./incidentsReported";
 import IncidentSummary from "./incidentSummary";
 import UpcomingEvents from "./upcomingEvents";
 import HeatMap from "./heatMap";
-import {
-    MDBContainer,
-    MDBRow,
-    MDBCol,
-    MDBCard,
-    MDBCardBody,
-    MDBCardTitle,
-} from "mdbreact";
+import { MDBContainer, MDBRow, MDBCol, MDBCard } from "mdbreact";
 
 const Home = () => {
+    const [lastMapRefresh, setLastMapRefresh] = useState(Date());
+    const [lastSummaryRefresh, setLastSummaryRefresh] = useState(Date());
+    const [lastEventRefresh, setLastEventRefresh] = useState(Date());
+    const [lastIncidentRefresh, setLastIncidentRefresh] = useState(Date());
     return (
         <MDBContainer className="pt-3 pb-3 home-container" fluid>
             <MDBRow className="h-100">
                 <MDBCol xs="12" md="12" xl="6">
                     <MDBCard className="h-100 main-card">
-                        <HeatMap></HeatMap>
+                        <HeatMap
+                            lastRefresh={lastMapRefresh}
+                            setLastRefresh={setLastMapRefresh}
+                        ></HeatMap>
                     </MDBCard>
                 </MDBCol>
                 <MDBCol xs="12" md="6" xl="3">
                     <MDBRow>
                         <MDBCard className="w-100 main-card">
-                            <MDBCardBody>
-                                <MDBCardTitle className="card-title">
-                                    <b>Incident Summary</b>
-                                </MDBCardTitle>
-                                <div className="mt-1 summary-array-container">
-                                    <IncidentSummary></IncidentSummary>
-                                </div>
-                            </MDBCardBody>
+                            <IncidentSummary
+                                lastRefresh={lastSummaryRefresh}
+                                setLastRefresh={setLastSummaryRefresh}
+                            ></IncidentSummary>
                         </MDBCard>
                     </MDBRow>
                     <MDBRow className="pt-3">
                         <MDBCard className="w-100 main-card">
-                            <MDBCardBody>
-                                <MDBCardTitle className="card-title">
-                                    <b>Upcoming Events</b>
-                                </MDBCardTitle>
-                                <div className="mt-1 event-array-container">
-                                    <UpcomingEvents></UpcomingEvents>
-                                </div>
-                            </MDBCardBody>
+                            <UpcomingEvents
+                                lastRefresh={lastEventRefresh}
+                                setLastRefresh={setLastEventRefresh}
+                            ></UpcomingEvents>
                         </MDBCard>
                     </MDBRow>
                 </MDBCol>
@@ -55,14 +47,10 @@ const Home = () => {
                     className="d-flex align-content-stretch flex-wrap"
                 >
                     <MDBCard className="main-card">
-                        <MDBCardBody>
-                            <MDBCardTitle className="card-title">
-                                <b>Pending Reports</b>
-                            </MDBCardTitle>
-                            <div className="mt-1 incident-array-container">
-                                <IncidentsReported></IncidentsReported>
-                            </div>
-                        </MDBCardBody>
+                        <IncidentsReported
+                            lastRefresh={lastIncidentRefresh}
+                            setLastRefresh={setLastIncidentRefresh}
+                        ></IncidentsReported>
                     </MDBCard>
                 </MDBCol>
             </MDBRow>
