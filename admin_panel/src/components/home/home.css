@@ -12,6 +12,17 @@
     align-items: stretch;
 }
 
+.refresh-button {
+    color: transparent;
+    background-color: white !important;
+    height: 2rem;
+    width: 2rem;
+    padding: 0px !important;
+    margin: 0px !important;
+    margin-right: 1rem;
+    float: right;
+}
+
 .event-card {
     padding: 5px;
     border-style: solid;
@@ -28,8 +39,8 @@
 }
 
 .heat-map {
-    border-radius: 0.25re;
-    height: 47rem;
+    border-radius: 0.3rem;
+    height: 80vh;
     width: 100%;
 }
 
@@ -51,18 +62,30 @@
     font-weight: 500;
 }
 
+.last-refresh-text {
+    margin: 0;
+    font-size: 0.95rem;
+    color: black;
+    font-weight: 500;
+}
+
 .venue-map-container {
     height: 250px;
     width: 100%;
 }
 
+.thin-footer {
+    padding: 0 !important;
+    height: 30px;
+}
+
 .summary-array-container {
-    height: 30vh;
+    height: 25vh;
     overflow: auto;
 }
 
 .event-array-container {
-    height: 43vh;
+    height: 45vh;
     overflow: auto;
 }
 
@@ -104,7 +127,7 @@
 }
 
 .incident-array-container {
-    max-height: 80vh;
+    height: 83vh;
     overflow: auto;
 }
 

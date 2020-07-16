@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Map, TileLayer, CircleMarker, Marker, Popup } from "react-leaflet";
+import { Map, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "./home.css";
 import {
     MDBRow,
     MDBCol,
     MDBCardBody,
-    MDBCardTitle,
     MDBDropdown,
+    MDBCardFooter,
     MDBDropdownMenu,
     MDBDropdownItem,
     MDBDropdownToggle,
@@ -22,7 +22,8 @@ const HeatMap = (props) => {
     const commonService = new CommonService();
     const [markers, setMarkers] = useState([]);
     const [provinces, setProvinces] = useState([]);
-    const [lastRefresh, setLastRefresh] = useState(Date());
+    const setLastRefresh = props.setLastRefresh;
+    const lastRefresh = props.lastRefresh;
     const [selectedProvince, setSelectedProvince] = useState("all");
     // this defines the center of the map at initial load
     const mapCenter = [7.9, 80.747452];
@@ -37,45 +38,66 @@ const HeatMap = (props) => {
     }, []);
 
     useEffect(() => {
-        incidentService.getIncidentMarkers(selectedProvince).then((res) => {
+        getMapData(selectedProvince);
+    }, [selectedProvince]);
+
+    const getMapData = (province) => {
+        incidentService.getIncidentMarkers(province).then((res) => {
             setMarkers(res);
             setLastRefresh(Date());
         });
-    }, [selectedProvince]);
+    };
 
     return (
-        <MDBCardBody>
-            <MDBRow>
-                <MDBCol size="6">
-                    <h4>
-                        <b>Dengue Heat Map</b>
-                    </h4>
-                </MDBCol>
-                <MDBCol size="6" className="px-1 text-right">
-                    <ProvinceList
-                        provinces={provinces}
-                        setSelectedProvince={setSelectedProvince}
-                        selectedProvince={selectedProvince}
-                    />
-                </MDBCol>
-            </MDBRow>
-            <div className="mt-1 heat-map-container">
+        <React.Fragment>
+            <MDBCardBody>
                 <MDBRow>
-                    <MDBCol>
-                        <Map className="heat-map" center={mapCenter} zoom={8}>
-                            <TileLayer
-                                attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                            />
-                            <MarkersList markers={markers} />
-                        </Map>
-                        <p className="event-coordinator-text text-right">
-                            Last refresh <Moment fromNow>{lastRefresh}</Moment>
-                        </p>
+                    <MDBCol size="6">
+                        <h4>
+                            <b>Dengue Heat Map</b>
+                        </h4>
+                    </MDBCol>
+                    <MDBCol size="6" className="px-1">
+                        <ProvinceList
+                            provinces={provinces}
+                            setSelectedProvince={setSelectedProvince}
+                            selectedProvince={selectedProvince}
+                        />
                     </MDBCol>
                 </MDBRow>
-            </div>
-        </MDBCardBody>
+                <div className="mt-1 heat-map-container">
+                    <MDBRow>
+                        <MDBCol>
+                            <Map
+                                className="heat-map"
+                                center={mapCenter}
+                                zoom={8}
+                            >
+                                <TileLayer
+                                    attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                />
+                                <MarkersList markers={markers} />
+                            </Map>
+                        </MDBCol>
+                    </MDBRow>
+                </div>
+            </MDBCardBody>
+            <MDBCardFooter className="thin-footer">
+                <span>
+                    <a
+                        href="#!"
+                        onClick={() => getMapData(selectedProvince)}
+                        className="px-1 last-refresh-text float-left font-weight-bold"
+                    >
+                        Update
+                    </a>
+                    <p className="px-1 last-refresh-text float-right">
+                        Updated <Moment fromNow>{lastRefresh}</Moment>
+                    </p>
+                </span>
+            </MDBCardFooter>
+        </React.Fragment>
     );
 };
 
@@ -104,13 +126,13 @@ const ProvinceList = (props) => {
     });
 
     return (
-        <MDBDropdown className="px-1 text-right">
+        <MDBDropdown className="px-1 float-right" dropleft>
             <MDBDropdownToggle className="black-text text-uppercase" nav caret>
                 {selectedProvince}
                 {"  "}
                 <MDBIcon icon="filter" className="black-text" />
             </MDBDropdownToggle>
-            <MDBDropdownMenu className="dropdown-default ">
+            <MDBDropdownMenu className="dropdown-default">
                 <MDBDropdownItem onClick={() => changeProvince("all")}>
                     All
                 </MDBDropdownItem>
