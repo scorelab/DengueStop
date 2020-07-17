@@ -42,13 +42,13 @@ class Navbar extends Component {
                         navbar
                     >
                         <MDBNavbarNav left>
-                            <MDBNavItem active>
+                            <MDBNavItem>
                                 <MDBNavLink to="/">Home</MDBNavLink>
                             </MDBNavItem>
                             <MDBNavItem>
                                 <MDBNavLink to="metric">Metrics</MDBNavLink>
                             </MDBNavItem>
-                            <MDBNavItem>
+                            <MDBNavItem active>
                                 <MDBNavLink to="patient">Patients</MDBNavLink>
                             </MDBNavItem>
                             <MDBNavItem>

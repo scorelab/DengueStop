@@ -1,9 +1,36 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
+import "./patient.css";
+import { MDBContainer, MDBRow } from "mdbreact";
+import PatientList from "./patientList";
+import PatientSearch from "./patientSearch";
+import IncidentService from "../../services/incidentService";
 
-class Patient extends Component {
-    render() {
-        return <h1>Patient</h1>;
-    }
-}
+const Patient = () => {
+    const [incidentArray, setIncidentArray] = useState([]);
+    const incidentService = new IncidentService();
+
+    const getIncidents = (patientName, province, status, dateRange) => {
+        incidentService
+            .queryIncidents(patientName, province, status, dateRange)
+            .then((res) => {
+                setIncidentArray(res);
+            });
+    };
+
+    useEffect(() => {
+        getIncidents("", "all", "all", "all");
+    }, []);
+
+    return (
+        <MDBContainer className="py-3 patient-container" fluid>
+            <MDBRow>
+                <PatientSearch></PatientSearch>
+            </MDBRow>
+            <MDBRow>
+                <PatientList incidentArray={incidentArray}></PatientList>
+            </MDBRow>
+        </MDBContainer>
+    );
+};
 
 export default Patient;

@@ -10,12 +10,14 @@
     "leaflet": "^1.6.0",
     "mdbreact": "^4.27.0",
     "react": "^16.13.1",
+    "react-data-table-component": "^6.9.7",
     "react-dom": "^16.13.1",
     "react-leaflet": "^2.7.0",
     "react-moment": "^0.9.7",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.1",
-    "react-truncate": "^2.4.0"
+    "react-truncate": "^2.4.0",
+    "styled-components": "^5.1.1"
   },
   "scripts": {
     "start": "react-scripts start",
