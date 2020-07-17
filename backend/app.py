@@ -16,7 +16,7 @@ from sqlalchemy.sql import func
 from database import db
 from database import ma
 import jwt
-import datetime
+from datetime import datetime, timedelta
 import os
 
 # init app
@@ -409,6 +409,168 @@ def get_province_names():
         if(provinces != {}):
             return jsonify(provinces)
         return make_response('Provinces Not Found', 404)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise 
+
+@ app.route('/query_incidents', methods=['POST'])
+def query_incidents():
+    org_id = request.json['orgId']
+    patient_name = request.json['patientName']
+    print(patient_name)
+    province = request.json['province']
+    status = request.json['status']
+    date_range = request.json['dateRange']
+    duration = datetime.utcnow()
+    if(date_range == "weekly"):
+        # setting the duration upto last week
+        duration = duration - timedelta(weeks=1)
+    elif(date_range == "monthly"):
+        # setting the duration upto last month
+        duration = duration - timedelta(months=1)
+    elif(date_range == "yearly"):
+        # setting the duration upto last year
+        duration = duration - timedelta(months=1)
+    
+    try:
+        # returns all the incident of an organization based on the parameters provided
+        if(date_range == "all"):
+            # remove date range from the query
+            if(status == "all"):
+                # remove patient status from the query
+                if(province == "all"):
+                # remove province from the query
+                    if(patient_name == ""):
+                        # remove patient name from the query
+                        incidents = Incident.query.filter(
+                            Incident.org_id == org_id 
+                            ).order_by(Incident.reported_time.asc()).all()
+                    else:
+                        incidents = Incident.query.filter(
+                            Incident.patient_name.ilike("%"+patient_name+"%"),
+                            Incident.org_id == org_id 
+                            ).order_by(Incident.reported_time.asc()).all()
+                else:
+                    if(patient_name == ""):
+                        # remove patient name from the query
+                        incidents = Incident.query.filter(
+                            Incident.org_id == org_id, 
+                            Incident.province == province, 
+                            ).order_by(Incident.reported_time.asc()).all()
+                    else:
+                        incidents = Incident.query.filter(
+                            Incident.patient_name.ilike("%"+patient_name+"%"),
+                            Incident.org_id == org_id, 
+                            Incident.province == province, 
+                            ).order_by(Incident.reported_time.asc()).all()
+            else:
+                if(province == "all"):
+                # remove province from the query
+                    if(patient_name == ""):
+                        # remove patient name from the query
+                        incidents = Incident.query.filter(
+                            Incident.org_id == org_id,
+                            Incident.patient_status_id == status,
+                            ).order_by(Incident.reported_time.asc()).all()
+                    else:
+                        incidents = Incident.query.filter(
+                            Incident.patient_name.ilike("%"+patient_name+"%"),
+                            Incident.org_id == org_id,
+                            Incident.patient_status_id == status, 
+                            ).order_by(Incident.reported_time.asc()).all()
+                else:
+                    if(patient_name == ""):
+                        # remove patient name from the query
+                        incidents = Incident.query.filter(
+                            Incident.org_id == org_id, 
+                            Incident.province == province,
+                            Incident.patient_status_id == status, 
+                            ).order_by(Incident.reported_time.asc()).all()
+                    else:
+                        incidents = Incident.query.filter(
+                            Incident.patient_name.ilike("%"+patient_name+"%"),
+                            Incident.org_id == org_id, 
+                            Incident.province == province, 
+                            Incident.patient_status_id == status,
+                            ).order_by(Incident.reported_time.asc()).all()
+        else:
+            if(status == "all"):
+                # remove patient status from the query
+                if(province == "all"):
+                # remove province from the query
+                    if(patient_name == ""):
+                        # remove patient name from the query
+                        incidents = Incident.query.filter(
+                            Incident.org_id == org_id,
+                            Incident.reported_time >= duration 
+                            ).order_by(Incident.reported_time.asc()).all()
+                    else:
+                        incidents = Incident.query.filter(
+                            Incident.patient_name.ilike("%"+patient_name+"%"),
+                            Incident.org_id == org_id,
+                            Incident.reported_time >= duration 
+                            ).order_by(Incident.reported_time.asc()).all()
+                else:
+                    if(patient_name == ""):
+                        # remove patient name from the query
+                        incidents = Incident.query.filter(
+                            Incident.org_id == org_id, 
+                            Incident.province == province, 
+                            Incident.reported_time >= duration
+                            ).order_by(Incident.reported_time.asc()).all()
+                    else:
+                        incidents = Incident.query.filter(
+                            Incident.patient_name.ilike("%"+patient_name+"%"),
+                            Incident.org_id == org_id, 
+                            Incident.province == province, 
+                            Incident.reported_time >= duration
+                            ).order_by(Incident.reported_time.asc()).all()
+            else:
+                # remove patient status from the query
+                if(province == "all"):
+                # remove province from the query
+                    if(patient_name == ""):
+                        # remove patient name from the query
+                        incidents = Incident.query.filter(
+                            Incident.org_id == org_id,
+                            Incident.patient_status_id == status,
+                            Incident.reported_time >= duration
+                            ).order_by(Incident.reported_time.asc()).all()
+                    else:
+                        incidents = Incident.query.filter(
+                            Incident.patient_name.ilike("%"+patient_name+"%"),
+                            Incident.org_id == org_id,
+                            Incident.patient_status_id == status, 
+                            Incident.reported_time >= duration
+                            ).order_by(Incident.reported_time.asc()).all()
+                else:
+                    if(patient_name == ""):
+                        # remove patient name from the query
+                        incidents = Incident.query.filter(
+                            Incident.org_id == org_id, 
+                            Incident.province == province,
+                            Incident.patient_status_id == status,
+                            Incident.reported_time >= duration 
+                            ).order_by(Incident.reported_time.asc()).all()
+                    else:
+                        incidents = Incident.query.filter(
+                            Incident.patient_name.ilike("%"+patient_name+"%"),
+                            Incident.org_id == org_id, 
+                            Incident.province == province, 
+                            Incident.patient_status_id == status,
+                            Incident.reported_time >= duration
+                            ).order_by(Incident.reported_time.asc()).all()
+
+        db.session.commit()
+        if(incidents != {}):
+            result = incidents_schema.dump(incidents)
+            return jsonify(result)
+        return make_response('Incidents Not Found', 404)
 
     except IOError:
         print("I/O error")
