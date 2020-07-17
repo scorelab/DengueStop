@@ -446,57 +446,57 @@ def query_incidents():
                 # remove province from the query
                     if(patient_name == ""):
                         # remove patient name from the query
-                        incidents = Incident.query.filter(
+                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
                             Incident.org_id == org_id 
-                            ).order_by(Incident.reported_time.asc()).all()
+                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.asc()).all()
                     else:
-                        incidents = Incident.query.filter(
+                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
                             Incident.patient_name.ilike("%"+patient_name+"%"),
                             Incident.org_id == org_id 
-                            ).order_by(Incident.reported_time.asc()).all()
+                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.asc()).all()
                 else:
                     if(patient_name == ""):
                         # remove patient name from the query
-                        incidents = Incident.query.filter(
+                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
                             Incident.org_id == org_id, 
                             Incident.province == province, 
-                            ).order_by(Incident.reported_time.asc()).all()
+                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.asc()).all()
                     else:
-                        incidents = Incident.query.filter(
+                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
                             Incident.patient_name.ilike("%"+patient_name+"%"),
                             Incident.org_id == org_id, 
                             Incident.province == province, 
-                            ).order_by(Incident.reported_time.asc()).all()
+                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.asc()).all()
             else:
                 if(province == "all"):
                 # remove province from the query
                     if(patient_name == ""):
                         # remove patient name from the query
-                        incidents = Incident.query.filter(
+                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
                             Incident.org_id == org_id,
                             Incident.patient_status_id == status,
-                            ).order_by(Incident.reported_time.asc()).all()
+                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.asc()).all()
                     else:
-                        incidents = Incident.query.filter(
+                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
                             Incident.patient_name.ilike("%"+patient_name+"%"),
                             Incident.org_id == org_id,
                             Incident.patient_status_id == status, 
-                            ).order_by(Incident.reported_time.asc()).all()
+                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.asc()).all()
                 else:
                     if(patient_name == ""):
                         # remove patient name from the query
-                        incidents = Incident.query.filter(
+                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
                             Incident.org_id == org_id, 
                             Incident.province == province,
                             Incident.patient_status_id == status, 
-                            ).order_by(Incident.reported_time.asc()).all()
+                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.asc()).all()
                     else:
-                        incidents = Incident.query.filter(
+                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
                             Incident.patient_name.ilike("%"+patient_name+"%"),
                             Incident.org_id == org_id, 
                             Incident.province == province, 
                             Incident.patient_status_id == status,
-                            ).order_by(Incident.reported_time.asc()).all()
+                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.asc()).all()
         else:
             if(status == "all"):
                 # remove patient status from the query
@@ -504,70 +504,70 @@ def query_incidents():
                 # remove province from the query
                     if(patient_name == ""):
                         # remove patient name from the query
-                        incidents = Incident.query.filter(
+                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
                             Incident.org_id == org_id,
                             Incident.reported_time >= duration 
-                            ).order_by(Incident.reported_time.asc()).all()
+                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.asc()).all()
                     else:
-                        incidents = Incident.query.filter(
+                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
                             Incident.patient_name.ilike("%"+patient_name+"%"),
                             Incident.org_id == org_id,
                             Incident.reported_time >= duration 
-                            ).order_by(Incident.reported_time.asc()).all()
+                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.asc()).all()
                 else:
                     if(patient_name == ""):
                         # remove patient name from the query
-                        incidents = Incident.query.filter(
+                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
                             Incident.org_id == org_id, 
                             Incident.province == province, 
                             Incident.reported_time >= duration
-                            ).order_by(Incident.reported_time.asc()).all()
+                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.asc()).all()
                     else:
-                        incidents = Incident.query.filter(
+                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
                             Incident.patient_name.ilike("%"+patient_name+"%"),
                             Incident.org_id == org_id, 
                             Incident.province == province, 
                             Incident.reported_time >= duration
-                            ).order_by(Incident.reported_time.asc()).all()
+                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.asc()).all()
             else:
                 # remove patient status from the query
                 if(province == "all"):
                 # remove province from the query
                     if(patient_name == ""):
                         # remove patient name from the query
-                        incidents = Incident.query.filter(
+                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
                             Incident.org_id == org_id,
                             Incident.patient_status_id == status,
                             Incident.reported_time >= duration
-                            ).order_by(Incident.reported_time.asc()).all()
+                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.asc()).all()
                     else:
-                        incidents = Incident.query.filter(
+                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
                             Incident.patient_name.ilike("%"+patient_name+"%"),
                             Incident.org_id == org_id,
                             Incident.patient_status_id == status, 
                             Incident.reported_time >= duration
-                            ).order_by(Incident.reported_time.asc()).all()
+                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.asc()).all()
                 else:
                     if(patient_name == ""):
                         # remove patient name from the query
-                        incidents = Incident.query.filter(
+                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
                             Incident.org_id == org_id, 
                             Incident.province == province,
                             Incident.patient_status_id == status,
                             Incident.reported_time >= duration 
-                            ).order_by(Incident.reported_time.asc()).all()
+                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.asc()).all()
                     else:
-                        incidents = Incident.query.filter(
+                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
                             Incident.patient_name.ilike("%"+patient_name+"%"),
                             Incident.org_id == org_id, 
                             Incident.province == province, 
                             Incident.patient_status_id == status,
                             Incident.reported_time >= duration
-                            ).order_by(Incident.reported_time.asc()).all()
+                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.asc()).all()
 
         db.session.commit()
         if(incidents != {}):
-            result = incidents_schema.dump(incidents)
+            result = incidents_with_user_schema.dump([{'incident': x[0], 'user': x[1], 'status': x[2], 'admin': x[3]} for x in incidents])
             return jsonify(result)
         return make_response('Incidents Not Found', 404)
 

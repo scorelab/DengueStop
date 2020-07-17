@@ -1,7 +1,8 @@
 import React from "react";
+import { MDBCard, MDBRow, MDBCol, MDBBtn } from "mdbreact";
 
 const PatientSearch = () => {
-    return <div>Patient Search goes here</div>;
+    return <MDBCard className="patient-search-container p-4"></MDBCard>;
 };
 
 export default PatientSearch;

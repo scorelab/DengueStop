@@ -1,5 +1,5 @@
 import React from "react";
-import { MDBDataTable, MDBCard } from "mdbreact";
+import { MDBCard } from "mdbreact";
 import DataTable, { createTheme } from "react-data-table-component";
 import Moment from "react-moment";
 
@@ -8,75 +8,71 @@ const PatientList = (props) => {
     const columns = [
         {
             name: "Reported Time",
-            selector: "reported_time",
+            selector: "incident.reported_time",
             cell: (row) => (
                 <Moment format="DD/MM/YYYY @ hh:mm a">
-                    {row.reported_time}
+                    {row.incident.reported_time}
                 </Moment>
             ),
             sortable: true,
         },
         {
             name: "Patient Name",
-            selector: "patient_name",
+            selector: "incident.patient_name",
             sortable: true,
         },
         {
             name: "Gender",
-            selector: "patient_gender",
+            selector: "incident.patient_gender",
             cell: (row) => (
-                <div>{row.patient_gender == "m" ? "Male" : "Female"}</div>
+                <div>
+                    {row.incident.patient_gender === "m" ? "Male" : "Female"}
+                </div>
             ),
             sortable: true,
         },
         {
             name: "Date of Birth",
+            selector: "incident.patient_dob",
             cell: (row) => (
-                <Moment format="DD/MM/YYYY">{row.patient_dob}</Moment>
+                <Moment format="DD/MM/YYYY">{row.incident.patient_dob}</Moment>
             ),
             sortable: true,
         },
         {
             name: "Province",
-            selector: "province",
+            selector: "incident.province",
             sortable: true,
         },
         {
             name: "District",
-            selector: "district",
+            selector: "incident.district",
             sortable: true,
         },
         {
             name: "Patient Status",
-            selector: "patient_status_id",
+            selector: "status.status",
             sortable: true,
         },
         {
-            name: "Incident Status",
-            selector: "is_verified",
+            name: "Incident Verified",
+            selector: "incident.is_verified",
+            cell: (row) => (
+                <div>{row.incident.is_verified === "0" ? "No" : "Yes"}</div>
+            ),
             sortable: true,
         },
     ];
-    const data = {
-        columns: columns,
-        rows: incidentArray,
-    };
 
     return (
         <MDBCard className="patient-table-container">
-            {/* <MDBDataTable
-                hover
-                autoWidth
-                responsive
-                noBottomColumns
-                searching={false}
-                displayEntries={false}
-                data={data}
-            /> */}
             <DataTable
                 columns={columns}
                 data={incidentArray}
                 theme="solarized"
+                responsive={true}
+                expandableRows
+                expandableRowsComponent={<h1> hello </h1>}
                 pagination
             />
         </MDBCard>
