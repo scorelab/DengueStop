@@ -13,14 +13,12 @@ const Patient = () => {
         incidentService
             .queryIncidents(patientName, province, status, dateRange)
             .then((res) => {
-                console.log(res);
-
                 setIncidentArray(res);
             });
     };
 
     useEffect(() => {
-        getIncidents("bAR", "all", "all", "all");
+        getIncidents("", "all", "all", "all");
     }, []);
 
     return (
@@ -29,7 +27,7 @@ const Patient = () => {
                 <PatientSearch></PatientSearch>
             </MDBRow>
             <MDBRow>
-                <PatientList></PatientList>
+                <PatientList incidentArray={incidentArray}></PatientList>
             </MDBRow>
         </MDBContainer>
     );
