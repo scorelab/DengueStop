@@ -422,7 +422,6 @@ def get_province_names():
 def query_incidents():
     org_id = request.json['orgId']
     patient_name = request.json['patientName']
-    print(patient_name)
     province = request.json['province']
     status = request.json['status']
     date_range = request.json['dateRange']

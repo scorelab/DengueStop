@@ -12,7 +12,7 @@ const IncidentsReported = (props) => {
     const getIncidentData = () => {
         const incidentService = new IncidentService();
         // to do get incident id from the user data
-        incidentService.getIncidentsByOrgId(1).then((res) => {
+        incidentService.getPendingIncidentsByOrgId(1).then((res) => {
             setIncidents(res);
             setLastRefresh(Date());
         });

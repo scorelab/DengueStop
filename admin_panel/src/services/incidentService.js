@@ -1,7 +1,7 @@
 import FetchApi from "../utils/apiProviderService";
 
 class IncidentService {
-    getIncidentsByOrgId(orgId) {
+    getPendingIncidentsByOrgId(orgId) {
         var apiUrl = "get_pending_incidents_by_org/" + orgId.toString();
         return FetchApi("GET", apiUrl)
             .then((res) => {
@@ -74,6 +74,32 @@ class IncidentService {
         return FetchApi("GET", apiUrl)
             .then((res) => {
                 if (res.status === 200) {
+                    return res.data;
+                }
+                return null;
+            })
+            .catch((err) => {
+                console.log("error : ", err);
+                return null;
+            });
+    }
+
+    queryIncidents(patientName, province, status, dateRange) {
+        var apiUrl = "query_incidents";
+        // get org id from user service
+        var orgId = 1;
+        var data = {
+            orgId: orgId,
+            patientName: patientName,
+            province: province,
+            status: status,
+            dateRange: dateRange,
+        };
+        return FetchApi("POST", apiUrl, data)
+            .then((res) => {
+                if (res.status === 200) {
+                    console.log(res.data);
+
                     return res.data;
                 }
                 return null;
