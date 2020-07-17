@@ -98,8 +98,6 @@ class IncidentService {
         return FetchApi("POST", apiUrl, data)
             .then((res) => {
                 if (res.status === 200) {
-                    console.log(res.data);
-
                     return res.data;
                 }
                 return null;

@@ -31,7 +31,7 @@ const HeatMap = (props) => {
         var tempArr = [];
         commonService.getProvinceNames().then((res) => {
             res.forEach((data) => {
-                tempArr.push(data);
+                tempArr.push(data.name);
             });
             setProvinces(tempArr);
         });
@@ -111,14 +111,10 @@ const ProvinceList = (props) => {
     }
 
     const provinceDropdownList = provinces.map((data, key) => {
-        const province = data[0];
-        if (province) {
+        if (data) {
             return (
-                <MDBDropdownItem
-                    key={key}
-                    onClick={() => changeProvince(province)}
-                >
-                    {province}
+                <MDBDropdownItem key={key} onClick={() => changeProvince(data)}>
+                    {data}
                 </MDBDropdownItem>
             );
         }

@@ -24,7 +24,7 @@ const Patient = () => {
     return (
         <MDBContainer className="py-3 patient-container" fluid>
             <MDBRow>
-                <PatientSearch></PatientSearch>
+                <PatientSearch getIncidents={getIncidents}></PatientSearch>
             </MDBRow>
             <MDBRow>
                 <PatientList incidentArray={incidentArray}></PatientList>
