@@ -15,16 +15,15 @@ import {
     MDBDropdownMenu,
     MDBDropdownItem,
 } from "mdbreact";
-import DataTable, { createTheme } from "react-data-table-component";
+import DataTable from "react-data-table-component";
 import Moment from "react-moment";
+import IncidentService from "../../services/incidentService";
 
 const PatientList = (props) => {
-    console.log("Patient List Re Render");
     const setIncidentArray = props.setIncidentArray;
     const incidentArray = props.incidentArray;
     const statusArray = props.statusArray;
-
-    // useEffect(() => {}, [incidentArray]);
+    const lastRefresh = props.lastRefresh;
 
     const columns = [
         {
@@ -84,7 +83,13 @@ const PatientList = (props) => {
             name: "Incident Verified",
             selector: "incident.is_verified",
             cell: (row) => (
-                <div>{row.incident.is_verified === 0 ? "No" : "Yes"}</div>
+                <div>
+                    {row.incident.is_verified === 0
+                        ? "No"
+                        : row.incident.is_verified === 1
+                        ? "Yes"
+                        : "Declined"}
+                </div>
             ),
             sortable: true,
         },
@@ -108,6 +113,9 @@ const PatientList = (props) => {
                 }
                 pagination
             />
+            <p className="px-3 text-right">
+                Updated <Moment fromNow>{lastRefresh}</Moment>
+            </p>
         </MDBCard>
     );
 };
@@ -118,8 +126,19 @@ const ExpandedComponent = (props) => {
     const setIncidentArray = props.setIncidentArray;
     const [locationModal, setLocationModal] = useState(false);
     const [patientStatusModal, setPatientStatusModal] = useState(false);
+    const [verifyModal, setVerifyModal] = useState(false);
+    const [declineModal, setDeclineModal] = useState(false);
     const data = props.data;
-    console.log(props);
+
+    const showChangePatientStatusButton = (data) => {
+        if (
+            data.incident.is_verified !== 1 ||
+            data.incident.patient_status_id >= 5
+        ) {
+            return false;
+        }
+        return true;
+    };
 
     return (
         <div className="p-5 border-bottom">
@@ -219,7 +238,7 @@ const ExpandedComponent = (props) => {
                         </MDBRow>
                     ) : null}
                     {/* only show if incident is verified */}
-                    {data.incident.is_verified === 1 ? (
+                    {showChangePatientStatusButton(data) ? (
                         <MDBRow className="p-2">
                             <MDBBtn
                                 color="elegant"
@@ -231,15 +250,23 @@ const ExpandedComponent = (props) => {
                         </MDBRow>
                     ) : null}
                     {/* only show if incident is not verified */}
-                    {data.incident.is_verified !== 1 ? (
+                    {data.incident.is_verified === 0 ? (
                         <React.Fragment>
                             <MDBRow className="p-2">
-                                <MDBBtn color="primary" block>
+                                <MDBBtn
+                                    color="primary"
+                                    block
+                                    onClick={() => setVerifyModal(true)}
+                                >
                                     Approve Incident
                                 </MDBBtn>
                             </MDBRow>
                             <MDBRow className="p-2">
-                                <MDBBtn color="danger" block>
+                                <MDBBtn
+                                    color="danger"
+                                    block
+                                    onClick={() => setDeclineModal(true)}
+                                >
                                     Decline Incident
                                 </MDBBtn>
                             </MDBRow>
@@ -263,6 +290,20 @@ const ExpandedComponent = (props) => {
                 setPatientStatusModal={setPatientStatusModal}
                 setIncidentArray={setIncidentArray}
             ></PatientStatusModal>
+            <VerifyReportModal
+                isOpen={verifyModal}
+                setIncidentArray={setIncidentArray}
+                incidentArray={incidentArray}
+                setVerifyModal={setVerifyModal}
+                data={data}
+            />
+            <DeclineReportModal
+                isOpen={declineModal}
+                setIncidentArray={setIncidentArray}
+                incidentArray={incidentArray}
+                setDeclineModal={setDeclineModal}
+                data={data}
+            />
         </div>
     );
 };
@@ -350,29 +391,27 @@ const PatientStatusModal = (props) => {
     });
 
     const changePatientStatus = () => {
+        const incidentService = new IncidentService();
         setPatientStatusModal(false);
         let incidents = [...props.incidentArray];
-        let updateIncident = data;
-        let index = incidents.findIndex(
-            (x) => x.incident.id === updateIncident.incident.id
-        );
-        console.log(incidents);
-        incidents.splice(index, 1);
-        console.log(incidents);
-        updateIncident.incident.patient_status_id = selectedStatus;
-        incidents[index] = updateIncident;
-        console.log(incidents);
-        console.log(index);
 
-        // const updatedIncidentArray = incidents.map((incidentRow, index) => {
-        //     if (incidentRow.incident.id === data.incident.id) {
-        //         incidentRow.incident.patient_status_id = selectedStatus;
-        //         return incidentRow;
-        //     }
-        //     return incidentRow;
-        // });
+        const updatedIncidentArray = incidents.map((incidentRow, index) => {
+            if (incidentRow.incident.id === data.incident.id) {
+                incidentRow.incident.patient_status_id = selectedStatus;
+                incidentRow.status.id = selectedStatus;
+                incidentRow.status.status = selectedStatusName;
+                return incidentRow;
+            }
+            return incidentRow;
+        });
         // updating the state
-        setIncidentArray(incidents);
+        incidentService
+            .updatePatientStatus(data.incident.id, selectedStatus)
+            .then((res) => {
+                if (res) {
+                    setIncidentArray(updatedIncidentArray);
+                }
+            });
     };
 
     return (
@@ -431,6 +470,148 @@ const PatientStatusModal = (props) => {
                 </MDBBtn>
             </MDBModalFooter>
         </MDBModal>
+    );
+};
+
+const VerifyReportModal = (props) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const setIncidentArray = props.setIncidentArray;
+    const currentIncident = props.data;
+    const setVerifyModal = props.setVerifyModal;
+
+    useEffect(() => {
+        setIsOpen(props.isOpen);
+    });
+
+    async function verifyIncident(incidentId) {
+        //get admin Id from user context data
+        setVerifyModal(false);
+        // getting a copy of incidents array
+        const adminId = 1;
+        let incidents = [...props.incidentArray];
+
+        const updatedIncidentArray = incidents.map((incidentRow, index) => {
+            if (incidentRow.incident.id === incidentId) {
+                incidentRow.incident.patient_status_id = 2;
+                incidentRow.incident.is_verified = 1;
+                return incidentRow;
+            }
+            return incidentRow;
+        });
+        const incidentService = new IncidentService();
+        const res = await incidentService.verifyIncident(incidentId, adminId);
+        if (res) {
+            // setting the new state when the request is successful
+            setIncidentArray(updatedIncidentArray);
+        } else {
+            //show error
+        }
+    }
+
+    return (
+        <React.Fragment>
+            {/* verify incident modal */}
+            <MDBModal
+                isOpen={isOpen}
+                toggle={() => setVerifyModal(false)}
+                className="modal-notify modal-primary text-white"
+                size="sm"
+            >
+                <MDBModalHeader>Verify Incident?</MDBModalHeader>
+                <MDBModalBody>
+                    Please make sure to contact reporter and verify the incident
+                    before confirmation. Do you want to verify?
+                </MDBModalBody>
+                <MDBModalFooter>
+                    <MDBBtn
+                        color="primary"
+                        onClick={() =>
+                            verifyIncident(currentIncident.incident.id)
+                        }
+                    >
+                        Yes
+                    </MDBBtn>
+                    <MDBBtn
+                        color="secondary"
+                        onClick={() => setVerifyModal(false)}
+                    >
+                        No
+                    </MDBBtn>
+                </MDBModalFooter>
+            </MDBModal>
+        </React.Fragment>
+    );
+};
+
+const DeclineReportModal = (props) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const setIncidentArray = props.setIncidentArray;
+    const currentIncident = props.data;
+    const setDeclineModal = props.setDeclineModal;
+
+    useEffect(() => {
+        setIsOpen(props.isOpen);
+    });
+
+    async function declineIncident(incidentId) {
+        //get admin Id from user context data
+        setDeclineModal(false);
+        // getting a copy of incidents array
+        const adminId = 1;
+        let incidents = [...props.incidentArray];
+
+        const updatedIncidentArray = incidents.map((incidentRow, index) => {
+            if (incidentRow.incident.id === incidentId) {
+                incidentRow.incident.patient_status_id = 7;
+                incidentRow.incident.is_verified = 2;
+                incidentRow.status.id = 7;
+                incidentRow.status.status = "Declined";
+                return incidentRow;
+            }
+            return incidentRow;
+        });
+        const incidentService = new IncidentService();
+        const res = await incidentService.declineIncident(incidentId, adminId);
+        if (res) {
+            // setting the new state when the request is successful
+            setIncidentArray(updatedIncidentArray);
+        } else {
+            //show error
+        }
+    }
+
+    return (
+        <React.Fragment>
+            {/* verify incident modal */}
+            <MDBModal
+                isOpen={isOpen}
+                toggle={() => setDeclineModal(false)}
+                className="modal-notify modal-danger text-white"
+                size="sm"
+            >
+                <MDBModalHeader>Decline Incident?</MDBModalHeader>
+                <MDBModalBody>
+                    Are you sure you want to decline this incident? This action
+                    is irreversible.
+                </MDBModalBody>
+                <MDBModalFooter>
+                    <MDBBtn
+                        color="danger"
+                        onClick={() =>
+                            declineIncident(currentIncident.incident.id)
+                        }
+                    >
+                        Yes
+                    </MDBBtn>
+                    <MDBBtn
+                        color="secondary"
+                        onClick={() => setDeclineModal(false)}
+                    >
+                        No
+                    </MDBBtn>
+                </MDBModalFooter>
+            </MDBModal>
+        </React.Fragment>
     );
 };
 

@@ -107,6 +107,25 @@ class IncidentService {
                 return null;
             });
     }
+
+    updatePatientStatus(incidentId, newStatus) {
+        var apiUrl =
+            "update_patient_status/" +
+            incidentId.toString() +
+            "/" +
+            newStatus.toString();
+        return FetchApi("GET", apiUrl)
+            .then((res) => {
+                if (res.status === 200) {
+                    return true;
+                }
+                return false;
+            })
+            .catch((err) => {
+                console.log("error : ", err);
+                return false;
+            });
+    }
 }
 
 export default IncidentService;

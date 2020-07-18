@@ -592,6 +592,25 @@ def get_patient_statuses():
         return jsonify(result)
     return make_response('Patient Status Not Found', 404)
 
+@ app.route('/update_patient_status/<incident_id>/<new_status>', methods=['GET'])
+def update_patient_status(incident_id, new_status):
+    # todo auth
+    # returns the incident related to the id provided
+    try:
+        updateIncident = Incident.query.filter_by(id=incident_id).first()
+        if(updateIncident != {}):
+            updateIncident.patient_status_id = new_status
+            db.session.commit()
+            return make_response('Patient Status Changed', 200)
+        return make_response('Incident Not Found', 404)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise
 
 # running server
 if __name__ == '__main__':
