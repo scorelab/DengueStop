@@ -585,7 +585,7 @@ def query_incidents():
 def get_patient_statuses():
     # todo auth
     # returns all the patient statuses in the db
-    patientStatus = PatientStatus.query.all()
+    patientStatus = PatientStatus.query.order_by(PatientStatus.id.asc()).all()
     db.session.commit()
     if(patientStatus != {}):
         result = patient_statuses_schema.dump(patientStatus)

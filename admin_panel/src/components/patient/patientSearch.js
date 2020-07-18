@@ -1,41 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { MDBCard, MDBRow, MDBCol, MDBBtn } from "mdbreact";
-import CommonService from "../../services/commonService";
 
 const PatientSearch = (props) => {
-    const commonService = new CommonService();
     const [patientName, setPatientName] = useState("");
     const [province, setProvince] = useState("all");
-    const [provinceArray, setProvinceArray] = useState([]);
-    const [statusArray, setStatusArray] = useState([]);
+    const provinceArray = props.provinceArray;
+    const statusArray = props.statusArray;
     const [status, setStatus] = useState("all");
     const [dateRange, setDateRange] = useState("all");
     const getIncidents = props.getIncidents;
-
-    useEffect(() => {
-        commonService.getProvinceNames().then((res) => {
-            makeProvinceArray(res);
-        });
-        commonService.getPatientStatuses().then((res) => {
-            setStatusArray(res);
-        });
-    }, []);
-
-    const makeProvinceArray = (data) => {
-        var tempArray = [];
-        data.forEach((province) => {
-            tempArray.push(province.name);
-        });
-        setProvinceArray(tempArray);
-    };
-
-    const makeStatusArray = (data) => {
-        var tempArray = [];
-        data.forEach((status) => {
-            tempArray.push(status);
-        });
-        setStatusArray(tempArray);
-    };
 
     const searchPatient = () => {
         // queries the incidents based on the params

@@ -19,3 +19,11 @@
     margin: 0 !important;
     font-weight: 700 !important;
 }
+
+.map-container {
+    height: 20rem;
+}
+
+.modal-custom-dark-header {
+    background-color: rgb(32, 32, 32);
+}
