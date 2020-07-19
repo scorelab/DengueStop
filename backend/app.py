@@ -645,7 +645,6 @@ def get_monthly_incident_count(org_id):
                 }
                 # updating the count
                 monthlyCountArray[monthIndex] = monthObj
-            print(monthlyCountArray)
             return jsonify(monthlyCountArray)
         return make_response('Monthly Incident Count Not Found', 404)
 

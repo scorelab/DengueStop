@@ -31,7 +31,7 @@ class Navbar extends Component {
     render() {
         return (
             <Router>
-                <MDBNavbar color="indigo" dark expand="md">
+                <MDBNavbar color="unique-color" dark expand="md">
                     <MDBNavbarBrand>
                         <strong className="white-text">Dengue Stop</strong>
                     </MDBNavbarBrand>

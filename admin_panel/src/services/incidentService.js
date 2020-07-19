@@ -126,6 +126,21 @@ class IncidentService {
                 return false;
             });
     }
+
+    getMonthlyIncidentCount(orgId) {
+        var apiUrl = "get_monthly_incident_count/" + orgId.toString();
+        return FetchApi("GET", apiUrl)
+            .then((res) => {
+                if (res.status === 200) {
+                    return res.data;
+                }
+                return null;
+            })
+            .catch((err) => {
+                console.log("error : ", err);
+                return null;
+            });
+    }
 }
 
 export default IncidentService;
