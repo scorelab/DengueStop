@@ -46,7 +46,7 @@ const Home = () => {
                     xl="3"
                     className="d-flex align-content-stretch flex-wrap"
                 >
-                    <MDBCard className="main-card">
+                    <MDBCard className="w-100 main-card">
                         <IncidentsReported
                             lastRefresh={lastIncidentRefresh}
                             setLastRefresh={setLastIncidentRefresh}

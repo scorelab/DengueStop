@@ -1,0 +1,9 @@
+.metric-container {
+    background-color: rgb(231, 231, 231);
+    height: 94vh;
+}
+
+.annual-incidents-chart-container {
+    width: 100vw;
+    margin: 1rem;
+}
