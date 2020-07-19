@@ -98,8 +98,6 @@ class IncidentService {
         return FetchApi("POST", apiUrl, data)
             .then((res) => {
                 if (res.status === 200) {
-                    console.log(res.data);
-
                     return res.data;
                 }
                 return null;
@@ -107,6 +105,25 @@ class IncidentService {
             .catch((err) => {
                 console.log("error : ", err);
                 return null;
+            });
+    }
+
+    updatePatientStatus(incidentId, newStatus) {
+        var apiUrl =
+            "update_patient_status/" +
+            incidentId.toString() +
+            "/" +
+            newStatus.toString();
+        return FetchApi("GET", apiUrl)
+            .then((res) => {
+                if (res.status === 200) {
+                    return true;
+                }
+                return false;
+            })
+            .catch((err) => {
+                console.log("error : ", err);
+                return false;
             });
     }
 }
