@@ -17,6 +17,7 @@ from database import db
 from database import ma
 import jwt
 from datetime import datetime
+import calendar
 from dateutil.relativedelta import relativedelta
 import os
 
@@ -603,6 +604,50 @@ def update_patient_status(incident_id, new_status):
             db.session.commit()
             return make_response('Patient Status Changed', 200)
         return make_response('Incident Not Found', 404)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise
+
+
+@ app.route('/get_monthly_incident_count/<org_id>', methods=['GET'])
+def get_monthly_incident_count(org_id):
+    # todo auth
+    # returns the count of VERIFIED monthly incidents reported of the organization
+    # this is used in metrics for visualization
+    try:
+        # initializing an array of 12 months with count 0
+        monthlyCountArray = []
+        for i in range(12):
+            monthObj = {
+                # using calendar API to generate month names
+                "name": calendar.month_name[i+1],
+                "count": 0
+
+            }
+            monthlyCountArray.append(monthObj)
+
+        monthlyCount = db.session.query(Incident.reported_time, func.count(Incident.reported_time)).filter(Incident.org_id==org_id, Incident.is_verified==1).group_by(func.year(Incident.reported_time), func.month(Incident.reported_time)).all()
+        db.session.commit()
+        if(monthlyCount != {}):
+            for x in monthlyCount:
+                # reducing 1 from the actual month to fit into monthlyCountArray index
+                monthIndex = x[0].month - 1
+                monthObj = {
+                # using calendar API to generate month names
+                "name": calendar.month_name[monthIndex+1],
+                "count": x[1]
+
+                }
+                # updating the count
+                monthlyCountArray[monthIndex] = monthObj
+            print(monthlyCountArray)
+            return jsonify(monthlyCountArray)
+        return make_response('Monthly Incident Count Not Found', 404)
 
     except IOError:
         print("I/O error")
