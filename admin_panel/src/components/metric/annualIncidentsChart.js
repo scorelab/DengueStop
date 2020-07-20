@@ -13,8 +13,8 @@ import { MDBCard } from "mdbreact";
 const AnnualIncidentsChart = (props) => {
     const annualIncidentCount = props.annualIncidentCount;
     return (
-        <MDBCard className="annual-incidents-chart-container px-5">
-            <p className="text-center py-1 font-weight-bold">
+        <MDBCard className="annual-incidents-chart-container py-2 px-5">
+            <p className="text-center font-weight-bold">
                 Dengue Incidents Reported Over the year
             </p>
             <ResponsiveContainer width="100%" height={250}>

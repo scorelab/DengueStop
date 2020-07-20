@@ -8,3 +8,7 @@
     width: 100vw;
     margin: 1rem;
 }
+
+.age-category-chart-container {
+    height: auto;
+}

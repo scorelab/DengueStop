@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import "./metric.css";
-import { MDBContainer, MDBRow } from "mdbreact";
+import { MDBContainer, MDBRow, MDBCol } from "mdbreact";
 import IncidentService from "../../services/incidentService";
 import AnnualIncidentsChart from "./annualIncidentsChart";
-
+import AgeCategoryChart from "./ageCategoryChart";
 const Metric = (props) => {
     const incidentService = new IncidentService();
     const [annualIncidentCount, setAnnualIncidentCount] = useState([]);
@@ -23,8 +23,12 @@ const Metric = (props) => {
                     annualIncidentCount={annualIncidentCount}
                 />
             </MDBRow>
-
-            <MDBRow></MDBRow>
+            <MDBRow>
+                <MDBCol size="3">
+                    <AgeCategoryChart />
+                </MDBCol>
+                <MDBCol size="3"></MDBCol>
+            </MDBRow>
         </MDBContainer>
     );
 };
