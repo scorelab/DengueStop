@@ -747,6 +747,82 @@ def get_incident_age_group_count(org_id, date_range):
         raise
 
 
+@ app.route('/get_incident_status_count/<org_id>/<date_range>', methods=['GET'])
+def get_incident_status_count(org_id, date_range):
+    # todo auth
+    # returns the count of VERIFIED incidents count according to the status of reported of the organization
+    # this is used in metrics for visualization
+    try:
+        # this is for date range filtering
+        duration = datetime.utcnow()
+        if(date_range == "weekly"):
+            # setting the duration upto last week
+            duration = duration - relativedelta(weeks=1)
+        elif(date_range == "monthly"):
+            # setting the duration upto last month
+            duration = duration - relativedelta(months=1)
+        elif(date_range == "yearly"):
+            # setting the duration upto last year
+            duration = duration - relativedelta(years=1)
+        # initializing array to count the incidents belong to a certain status
+        statusCountArray = []
+        pendingTreatmentCount = 0
+        underTreatmentCount = 0
+        recoveringCount = 0
+        recoveredCount = 0
+        deathCount = 0
+        statusCount = {}
+        if(date_range == "all"):
+            statusCount = db.session.query(Incident.patient_status_id, func.count(Incident.patient_status_id)).filter(Incident.org_id==org_id, Incident.is_verified==1).group_by(Incident.patient_status_id).all()
+        else:
+            statusCount = db.session.query(Incident.patient_status_id, func.count(Incident.patient_status_id)).filter(Incident.org_id==org_id, Incident.is_verified==1, Incident.reported_time >= duration).group_by(Incident.patient_status_id).all()
+        db.session.commit()
+        if(statusCount != {}): 
+            for x in statusCount:
+                status_id = x[0]
+                if(status_id == 2):
+                    pendingTreatmentCount = x[1]
+                elif(status_id == 3):
+                    underTreatmentCount = x[1]
+                elif(status_id == 4):
+                    recoveringCount = x[1]
+                elif(status_id == 5):
+                    recoveredCount = x[1]
+                elif(status_id ==6):
+                    deathCount = x[1]
+
+            statusCountArray.append({
+                "name": "Pending Treatment",
+                "count": pendingTreatmentCount
+            })
+            statusCountArray.append({
+                "name": "Under Treatment",
+                "count": underTreatmentCount
+            })
+            statusCountArray.append({
+                "name": "Recovering",
+                "count": recoveringCount
+            })
+            statusCountArray.append({
+                "name": "Recovered",
+                "count": recoveredCount
+            })
+            statusCountArray.append({
+                "name": "Death",
+                "count": deathCount
+            })
+ 
+            return jsonify(statusCountArray)
+        return make_response('Status Incident Count Not Found', 404)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise
+
 # running server
 if __name__ == '__main__':
     app.run(debug=True)
