@@ -656,6 +656,81 @@ def get_monthly_incident_count(org_id):
         print("Unexpected error")
         raise
 
+
+@ app.route('/get_incident_age_group_count/<org_id>', methods=['GET'])
+def get_incident_age_group_count(org_id):
+    # todo auth
+    # returns the count of VERIFIED incidents age group count reported of the organization
+    # this is used in metrics for visualization
+    # age groups are as follow
+    # 0-2 years = babies
+    # 3-18 years = children
+    # 19-35 years = young adults
+    # 36-50 years = adults
+    # 51 and above = elders
+    try:
+        # initializing an array of age groups with count 0
+        ageCountArray = []
+        currentYear = datetime.now().year
+        babyCount = 0
+        childrenCount = 0
+        youngAdultCount = 0
+        adultCount = 0
+        seniorCount = 0
+        ageCount = db.session.query(Incident.patient_dob, func.count(Incident.patient_dob)).filter(Incident.org_id==org_id, Incident.is_verified==1).group_by(func.year(Incident.patient_dob)).all()
+        db.session.commit()
+        if(ageCount != {}):
+            for x in ageCount:
+                # getting the current age of the patient
+                currentAge = currentYear - x[0].year 
+                if(currentAge > 0 and currentAge <=2):
+                    babyCount += x[1]
+                elif(currentAge > 2 and currentAge <=18):
+                    childrenCount += x[1]
+                elif(currentAge > 19 and currentAge <=35):
+                    youngAdultCount += x[1]
+                elif(currentAge > 36 and currentAge <=50):
+                    adultCount += x[1]
+                else:
+                    seniorCount += x[1]
+
+            ageCountArray.append({
+                "name": "Babies",
+                "range": "0-2",
+                "count": babyCount
+            })
+            ageCountArray.append({
+                "name": "Children",
+                "range": "3-18",
+                "count": childrenCount
+            })
+            ageCountArray.append({
+                "name": "Young Adults",
+                "range": "19-35",
+                "count": youngAdultCount
+            })
+            ageCountArray.append({
+                "name": "Adults",
+                "range": "36-50",
+                "count": adultCount
+            })
+            ageCountArray.append({
+                "name": "Seniors",
+                "range": "51-above",
+                "count": seniorCount
+            })
+            return jsonify(ageCountArray)
+        return make_response('Age Incident Count Not Found', 404)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise
+
+
 # running server
 if __name__ == '__main__':
     app.run(debug=True)
