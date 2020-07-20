@@ -177,9 +177,9 @@ class _LoginFormState extends State<LoginForm> {
             children: <Widget>[
               Text(
                 'Welcome to Dengue-Stop',
-                style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.w700),
+                style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.w700),
               ),
-              SizedBox(height: 30.0),
+              SizedBox(height: 20.0),
               Text('Telephone Number', style: formLabelStyle),
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 15.0),
@@ -197,7 +197,7 @@ class _LoginFormState extends State<LoginForm> {
                   controller: telephoneController,
                 ),
               ),
-              SizedBox(height: 30.0),
+              SizedBox(height: 20.0),
               Text('Password', style: formLabelStyle),
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 15.0),
@@ -216,10 +216,10 @@ class _LoginFormState extends State<LoginForm> {
                   controller: passwordController,
                 ),
               ),
-              SizedBox(height: 30.0),
+              SizedBox(height: 20.0),
               SizedBox(
                 width: double.infinity,
-                height: 70,
+                height: 50,
                 child: Padding(
                   padding:
                       EdgeInsets.symmetric(vertical: 5.0, horizontal: 15.0),
