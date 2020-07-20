@@ -4,15 +4,20 @@ import { MDBContainer, MDBRow, MDBCol } from "mdbreact";
 import IncidentService from "../../services/incidentService";
 import AnnualIncidentsChart from "./annualIncidentsChart";
 import AgeCategoryChart from "./ageCategoryChart";
+import StatusCategoryChart from "./statusCategoryChart";
 
 const Metric = (props) => {
     const incidentService = new IncidentService();
     const [annualIncidentCount, setAnnualIncidentCount] = useState([]);
     const [ageGroupIncidentCount, setAgeGroupIncidentCount] = useState([]);
+    const [statusIncidentCount, setStatusIncidentCount] = useState([]);
     const [
         ageGroupIncidentCountFilter,
         setAgeGroupIncidentCountFilter,
     ] = useState("all");
+    const [statusIncidentCountFilter, setStatusIncidentCountFilter] = useState(
+        "all"
+    );
 
     useEffect(() => {
         // todo get orgId from user data
@@ -43,15 +48,19 @@ const Metric = (props) => {
                 <MDBCol size="3">
                     <AgeCategoryChart
                         ageGroupIncidentCount={ageGroupIncidentCount}
-                        ageGroupIncidentCountFilter={
-                            ageGroupIncidentCountFilter
-                        }
                         setAgeGroupIncidentCountFilter={
                             setAgeGroupIncidentCountFilter
                         }
                     />
                 </MDBCol>
-                <MDBCol size="3"></MDBCol>
+                <MDBCol size="3">
+                    <StatusCategoryChart
+                        statusIncidentCount={statusIncidentCount}
+                        setStatusIncidentCountFilter={
+                            setStatusIncidentCountFilter
+                        }
+                    />
+                </MDBCol>
             </MDBRow>
         </MDBContainer>
     );
