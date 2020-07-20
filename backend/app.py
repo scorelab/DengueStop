@@ -621,6 +621,8 @@ def get_monthly_incident_count(org_id):
     # this is used in metrics for visualization
     try:
         # initializing an array of 12 months with count 0
+        duration = datetime.utcnow()
+        duration = duration - relativedelta(years=1)
         monthlyCountArray = []
         for i in range(12):
             monthObj = {
@@ -631,7 +633,7 @@ def get_monthly_incident_count(org_id):
             }
             monthlyCountArray.append(monthObj)
 
-        monthlyCount = db.session.query(Incident.reported_time, func.count(Incident.reported_time)).filter(Incident.org_id==org_id, Incident.is_verified==1).group_by(func.year(Incident.reported_time), func.month(Incident.reported_time)).all()
+        monthlyCount = db.session.query(Incident.reported_time, func.count(Incident.reported_time)).filter(Incident.org_id==org_id, Incident.is_verified==1, Incident.reported_time >= duration).group_by(func.year(Incident.reported_time), func.month(Incident.reported_time)).all()
         db.session.commit()
         if(monthlyCount != {}):
             for x in monthlyCount:
@@ -657,8 +659,8 @@ def get_monthly_incident_count(org_id):
         raise
 
 
-@ app.route('/get_incident_age_group_count/<org_id>', methods=['GET'])
-def get_incident_age_group_count(org_id):
+@ app.route('/get_incident_age_group_count/<org_id>/<date_range>', methods=['GET'])
+def get_incident_age_group_count(org_id, date_range):
     # todo auth
     # returns the count of VERIFIED incidents age group count reported of the organization
     # this is used in metrics for visualization
@@ -670,6 +672,16 @@ def get_incident_age_group_count(org_id):
     # 51 and above = elders
     try:
         # initializing an array of age groups with count 0
+        duration = datetime.utcnow()
+        if(date_range == "weekly"):
+            # setting the duration upto last week
+            duration = duration - relativedelta(weeks=1)
+        elif(date_range == "monthly"):
+            # setting the duration upto last month
+            duration = duration - relativedelta(months=1)
+        elif(date_range == "yearly"):
+            # setting the duration upto last year
+            duration = duration - relativedelta(years=1)
         ageCountArray = []
         currentYear = datetime.now().year
         babyCount = 0
@@ -677,7 +689,11 @@ def get_incident_age_group_count(org_id):
         youngAdultCount = 0
         adultCount = 0
         seniorCount = 0
-        ageCount = db.session.query(Incident.patient_dob, func.count(Incident.patient_dob)).filter(Incident.org_id==org_id, Incident.is_verified==1).group_by(func.year(Incident.patient_dob)).all()
+        ageCount = {}
+        if(date_range == "all"):
+            ageCount = db.session.query(Incident.patient_dob, func.count(Incident.patient_dob)).filter(Incident.org_id==org_id, Incident.is_verified==1).group_by(func.year(Incident.patient_dob)).all()
+        else:
+            ageCount = db.session.query(Incident.patient_dob, func.count(Incident.patient_dob)).filter(Incident.org_id==org_id, Incident.is_verified==1, Incident.reported_time >= duration).group_by(func.year(Incident.patient_dob)).all()
         db.session.commit()
         if(ageCount != {}):
             for x in ageCount:
@@ -696,27 +712,27 @@ def get_incident_age_group_count(org_id):
 
             ageCountArray.append({
                 "name": "Babies",
-                "range": "0-2",
+                "range": "0 - 2 years",
                 "count": babyCount
             })
             ageCountArray.append({
                 "name": "Children",
-                "range": "3-18",
+                "range": "3 - 18 years",
                 "count": childrenCount
             })
             ageCountArray.append({
                 "name": "Young Adults",
-                "range": "19-35",
+                "range": "19 - 35 years",
                 "count": youngAdultCount
             })
             ageCountArray.append({
                 "name": "Adults",
-                "range": "36-50",
+                "range": "36 - 50 years",
                 "count": adultCount
             })
             ageCountArray.append({
                 "name": "Seniors",
-                "range": "51-above",
+                "range": "51 years and above",
                 "count": seniorCount
             })
             return jsonify(ageCountArray)

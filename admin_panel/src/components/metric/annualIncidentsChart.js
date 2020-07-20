@@ -12,6 +12,7 @@ import { MDBCard } from "mdbreact";
 
 const AnnualIncidentsChart = (props) => {
     const annualIncidentCount = props.annualIncidentCount;
+
     return (
         <MDBCard className="annual-incidents-chart-container py-2 px-5">
             <p className="text-center font-weight-bold">

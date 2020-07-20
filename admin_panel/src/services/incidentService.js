@@ -141,6 +141,25 @@ class IncidentService {
                 return null;
             });
     }
+
+    getIncidentAgeGroupCount(orgId, dateRange) {
+        var apiUrl =
+            "get_incident_age_group_count/" +
+            orgId.toString() +
+            "/" +
+            dateRange.toString();
+        return FetchApi("GET", apiUrl)
+            .then((res) => {
+                if (res.status === 200) {
+                    return res.data;
+                }
+                return null;
+            })
+            .catch((err) => {
+                console.log("error : ", err);
+                return null;
+            });
+    }
 }
 
 export default IncidentService;
