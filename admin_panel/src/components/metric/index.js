@@ -37,6 +37,16 @@ const Metric = (props) => {
             });
     }, [ageGroupIncidentCountFilter]);
 
+    useEffect(() => {
+        // todo get orgId from user data
+        const orgId = 1;
+        incidentService
+            .getIncidentStatusCount(orgId, statusIncidentCountFilter)
+            .then((res) => {
+                setStatusIncidentCount(res);
+            });
+    }, [statusIncidentCountFilter]);
+
     return (
         <MDBContainer className="metric-container" fluid>
             <MDBRow>

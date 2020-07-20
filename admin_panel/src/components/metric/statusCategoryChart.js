@@ -22,7 +22,7 @@ import {
 const StatusCategoryChart = (props) => {
     const statusIncidentCount = props.statusIncidentCount;
     const setStatusIncidentCountFilter = props.setStatusIncidentCountFilter;
-    const COLORS = ["#003f5c", "#58508d", "#bc5090", "#ff6361", "#ffa600"];
+    const COLORS = ["#E67F0D", "#40BCD8", "#1C77C3", "#157145", "#BD1E1E"];
     const RADIAN = Math.PI / 180;
     const renderCustomizedLabel = ({
         cx,
@@ -108,8 +108,9 @@ const StatusCategoryChart = (props) => {
                         data={statusIncidentCount}
                         isAnimationActive={false}
                         dataKey="count"
-                        nameKey="range"
+                        nameKey="name"
                         label={renderCustomizedLabel}
+                        innerRadius={80}
                         cx="50%"
                         cy="50%"
                         fill="#8884d8"
