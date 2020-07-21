@@ -5,6 +5,7 @@ import IncidentService from "../../services/incidentService";
 import AnnualIncidentsChart from "./annualIncidentsChart";
 import AgeCategoryChart from "./ageCategoryChart";
 import StatusCategoryChart from "./statusCategoryChart";
+import CommunityStats from "./communityStats";
 
 const Metric = (props) => {
     const incidentService = new IncidentService();
@@ -55,22 +56,30 @@ const Metric = (props) => {
                 />
             </MDBRow>
             <MDBRow>
-                <MDBCol size="3">
+                <MDBCol sm="12" md="6" xl="3" className="pl-3 p-2 d-flex">
                     <AgeCategoryChart
                         ageGroupIncidentCount={ageGroupIncidentCount}
+                        ageGroupIncidentCountFilter={
+                            ageGroupIncidentCountFilter
+                        }
                         setAgeGroupIncidentCountFilter={
                             setAgeGroupIncidentCountFilter
                         }
                     />
                 </MDBCol>
-                <MDBCol size="3">
+                <MDBCol sm="12" md="6" xl="3" className="p-2 d-flex">
                     <StatusCategoryChart
                         statusIncidentCount={statusIncidentCount}
+                        statusIncidentCountFilter={statusIncidentCountFilter}
                         setStatusIncidentCountFilter={
                             setStatusIncidentCountFilter
                         }
                     />
                 </MDBCol>
+                <MDBCol sm="12" md="6" xl="3" className="d-flex flex-column">
+                    <CommunityStats />
+                </MDBCol>
+                <MDBCol sm="12" md="6" xl="3"></MDBCol>
             </MDBRow>
         </MDBContainer>
     );
