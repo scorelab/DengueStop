@@ -922,6 +922,57 @@ def get_user_base_breakdown():
         raise
 
 
+@ app.route('/get_province_vs_status_count/<date_range>', methods=['GET'])
+def get_province_vs_status_count(date_range):
+    # todo auth
+    # returns the count of different incident types in each province
+    # this is used in metrics for visualization
+    try:
+        # this is for date range filtering
+        duration = datetime.utcnow()
+        if(date_range == "weekly"):
+            # setting the duration upto last week
+            duration = duration - relativedelta(weeks=1)
+        elif(date_range == "monthly"):
+            # setting the duration upto last month
+            duration = duration - relativedelta(months=1)
+        elif(date_range == "yearly"):
+            # setting the duration upto last year
+            duration = duration - relativedelta(years=1)
+        # initializing array to count the incidents belong to a certain status
+        provinceStatusArray = []
+        incidentCount = {}
+        if(date_range == "all"):
+            incidentCount = db.session.query(Incident.province, PatientStatus.status, func.count(Incident.patient_status_id)).filter().join(PatientStatus).group_by(Incident.province, Incident.patient_status_id).all()
+        else:
+            incidentCount = db.session.query(Incident.is_verified, func.count(Incident.is_verified)).filter(Incident.reported_time >= duration).group_by(Incident.is_verified).all()
+        db.session.commit()
+        if(incidentCount != {}): 
+            print(incidentCount)
+            for x in incidentCount:
+                province = x[0]
+                status = x[1]
+                count = x[2]
+                tempObj = {
+                    "province": province,
+                    "status": status,
+                    "count": count
+                }
+
+                provinceStatusArray.append(tempObj)
+
+ 
+            return jsonify(provinceStatusArray)
+        return make_response('Incident Breakdown Not Found', 404)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise
+
 # running server
 if __name__ == '__main__':
     app.run(debug=True)
