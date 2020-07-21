@@ -823,6 +823,108 @@ def get_incident_status_count(org_id, date_range):
         print("Unexpected error")
         raise
 
+
+@ app.route('/get_incident_verification_breakdown/<org_id>/<date_range>', methods=['GET'])
+def get_incident_verification_breakdown(org_id, date_range):
+    # todo auth
+    # returns the count of incidents count according to their status in the organization
+    # this is used in metrics for visualization
+    try:
+        # this is for date range filtering
+        duration = datetime.utcnow()
+        if(date_range == "weekly"):
+            # setting the duration upto last week
+            duration = duration - relativedelta(weeks=1)
+        elif(date_range == "monthly"):
+            # setting the duration upto last month
+            duration = duration - relativedelta(months=1)
+        elif(date_range == "yearly"):
+            # setting the duration upto last year
+            duration = duration - relativedelta(years=1)
+        # initializing array to count the incidents belong to a certain status
+        incidentBreakdownArray = []
+        pendingIncidentCount = 0
+        verifiedIncidentCount = 0
+        declinedIncidentCount = 0
+        incidentCount = {}
+        if(date_range == "all"):
+            incidentCount = db.session.query(Incident.is_verified, func.count(Incident.is_verified)).filter(Incident.org_id==org_id).group_by(Incident.is_verified).all()
+        else:
+            incidentCount = db.session.query(Incident.is_verified, func.count(Incident.is_verified)).filter(Incident.org_id==org_id, Incident.reported_time >= duration).group_by(Incident.is_verified).all()
+        db.session.commit()
+        if(incidentCount != {}): 
+            print(incidentCount)
+            for x in incidentCount:
+                verification = x[0]
+                if(verification == 0):
+                    pendingIncidentCount = x[1]
+                elif(verification == 1):
+                    verifiedIncidentCount = x[1]
+                elif(verification == 2):
+                    declinedIncidentCount = x[1]
+
+            incidentBreakdownArray.append({
+                "name": "Pending",
+                "count": pendingIncidentCount
+            })
+            incidentBreakdownArray.append({
+                "name": "Verified",
+                "count": verifiedIncidentCount
+            })
+            incidentBreakdownArray.append({
+                "name": "Declined",
+                "count": declinedIncidentCount
+            })
+ 
+            return jsonify(incidentBreakdownArray)
+        return make_response('Incident Breakdown Not Found', 404)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise
+
+
+@ app.route('/get_user_base_breakdown', methods=['GET'])
+def get_user_base_breakdown():
+    # todo auth
+    # returns the total number of admin and users in the system
+    # this is used in metrics for visualization
+    try:
+        userBreakdownArray = []
+        adminCount = -1
+        userCount = -1
+        userCount = db.session.query(User).count()
+        adminCount = db.session.query(Admin).count()
+        db.session.commit()
+        if(userCount != -1 and adminCount != -1): 
+            print(userCount)
+            print(adminCount)
+
+            userBreakdownArray.append({
+                "name": "User",
+                "count": userCount
+            })
+            userBreakdownArray.append({
+                "name": "Admin",
+                "count": adminCount
+            })
+ 
+            return jsonify(userBreakdownArray)
+        return make_response('User Breakdown Not Found', 404)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise
+
+
 # running server
 if __name__ == '__main__':
     app.run(debug=True)
