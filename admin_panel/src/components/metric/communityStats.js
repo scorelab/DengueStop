@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
     MDBCard,
     MDBRow,
@@ -10,10 +10,74 @@ import {
     MDBDropdownMenu,
     MDBIcon,
 } from "mdbreact";
+import IncidentService from "../../services/incidentService";
+import UserService from "../../services/userService";
 
 const CommunityStats = (props) => {
-    const verificationBreakdown = props.verificationBreakdown;
-    const userBaseBreakdown = props.userBaseBreakdown;
+    const incidentService = new IncidentService();
+    const userService = new UserService();
+    const [
+        verificationBreakdownCount,
+        setVerificationBreakdownCount,
+    ] = useState([]);
+    const [userBaseBreakdownCount, setUserBaseBreakdownCount] = useState([]);
+
+    const [
+        verificationBreakdownCountFilter,
+        setVerificationBreakdownCountFilter,
+    ] = useState("all");
+
+    useEffect(() => {
+        // todo get orgId from user data
+        const orgId = 1;
+        incidentService
+            .getIncidentVerificationBreakdown(
+                orgId,
+                verificationBreakdownCountFilter
+            )
+            .then((res) => {
+                setVerificationBreakdownCount(res);
+            });
+    }, [verificationBreakdownCountFilter]);
+
+    useEffect(() => {
+        // todo get orgId from user data
+        const orgId = 1;
+        userService.getUserBaseBreakdown().then((res) => {
+            setUserBaseBreakdownCount(res);
+        });
+    }, []);
+
+    const extractCount = (type) => {
+        return verificationBreakdownCount.map((data, index) => {
+            if (data.name === type) {
+                return data.count;
+            }
+        });
+    };
+
+    const extractUserCount = (type) => {
+        return userBaseBreakdownCount.map((data, index) => {
+            if (data.name === type) {
+                return data.count;
+            }
+        });
+    };
+
+    const extractPercentage = (type) => {
+        // calculates percentage
+        var total = 0;
+        var value = 0;
+        verificationBreakdownCount.map((data, index) => {
+            if (data.name === type) {
+                value = data.count;
+            }
+            total += data.count;
+        });
+        const percentage = ((value / total) * 100).toFixed(2);
+        return percentage;
+    };
+
     return (
         <React.Fragment>
             <MDBRow className="flex-start p-2 flex-1">
@@ -39,9 +103,9 @@ const CommunityStats = (props) => {
                                         />
                                     </MDBDropdownToggle>
                                     <MDBDropdownMenu className="dropdown-default">
-                                        {/* <MDBDropdownItem
+                                        <MDBDropdownItem
                                             onClick={() => {
-                                                setAgeGroupIncidentCountFilter(
+                                                setVerificationBreakdownCountFilter(
                                                     "all"
                                                 );
                                             }}
@@ -50,7 +114,7 @@ const CommunityStats = (props) => {
                                         </MDBDropdownItem>
                                         <MDBDropdownItem
                                             onClick={() => {
-                                                setAgeGroupIncidentCountFilter(
+                                                setVerificationBreakdownCountFilter(
                                                     "weekly"
                                                 );
                                             }}
@@ -59,7 +123,7 @@ const CommunityStats = (props) => {
                                         </MDBDropdownItem>
                                         <MDBDropdownItem
                                             onClick={() => {
-                                                setAgeGroupIncidentCountFilter(
+                                                setVerificationBreakdownCountFilter(
                                                     "monthly"
                                                 );
                                             }}
@@ -68,13 +132,13 @@ const CommunityStats = (props) => {
                                         </MDBDropdownItem>
                                         <MDBDropdownItem
                                             onClick={() => {
-                                                setAgeGroupIncidentCountFilter(
+                                                setVerificationBreakdownCountFilter(
                                                     "yearly"
                                                 );
                                             }}
                                         >
                                             Last Year
-                                        </MDBDropdownItem> */}
+                                        </MDBDropdownItem>
                                     </MDBDropdownMenu>
                                 </MDBDropdown>
                             </MDBCol>
@@ -84,14 +148,14 @@ const CommunityStats = (props) => {
                                 <MDBRow>
                                     <MDBCol>
                                         <p className="text-center percent-text orange-text">
-                                            98%
+                                            {extractPercentage("Pending")}%
                                         </p>
                                     </MDBCol>
                                 </MDBRow>
                                 <MDBRow>
                                     <MDBCol>
                                         <p className="text-center count-text">
-                                            12
+                                            {extractCount("Pending")}
                                         </p>
                                     </MDBCol>
                                 </MDBRow>
@@ -107,14 +171,14 @@ const CommunityStats = (props) => {
                                 <MDBRow>
                                     <MDBCol>
                                         <p className="text-center percent-text green-text">
-                                            98%
+                                            {extractPercentage("Verified")}%
                                         </p>
                                     </MDBCol>
                                 </MDBRow>
                                 <MDBRow>
                                     <MDBCol>
                                         <p className="text-center count-text">
-                                            12
+                                            {extractCount("Verified")}
                                         </p>
                                     </MDBCol>
                                 </MDBRow>
@@ -130,14 +194,14 @@ const CommunityStats = (props) => {
                                 <MDBRow>
                                     <MDBCol>
                                         <p className="text-center percent-text red-text">
-                                            98%
+                                            {extractPercentage("Declined")}%
                                         </p>
                                     </MDBCol>
                                 </MDBRow>
                                 <MDBRow>
                                     <MDBCol>
                                         <p className="text-center count-text">
-                                            12
+                                            {extractCount("Declined")}
                                         </p>
                                     </MDBCol>
                                 </MDBRow>
@@ -169,7 +233,7 @@ const CommunityStats = (props) => {
                                 <MDBRow>
                                     <MDBCol>
                                         <p className="text-center user-count-text">
-                                            12
+                                            {extractUserCount("User")}
                                         </p>
                                     </MDBCol>
                                 </MDBRow>
@@ -185,7 +249,7 @@ const CommunityStats = (props) => {
                                 <MDBRow>
                                     <MDBCol>
                                         <p className="text-center user-count-text">
-                                            12
+                                            {extractUserCount("Admin")}
                                         </p>
                                     </MDBCol>
                                 </MDBRow>

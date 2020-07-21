@@ -6,12 +6,18 @@ import AnnualIncidentsChart from "./annualIncidentsChart";
 import AgeCategoryChart from "./ageCategoryChart";
 import StatusCategoryChart from "./statusCategoryChart";
 import CommunityStats from "./communityStats";
+import UserService from "../../services/userService";
 
 const Metric = (props) => {
     const incidentService = new IncidentService();
+    const userService = new UserService();
     const [annualIncidentCount, setAnnualIncidentCount] = useState([]);
     const [ageGroupIncidentCount, setAgeGroupIncidentCount] = useState([]);
     const [statusIncidentCount, setStatusIncidentCount] = useState([]);
+    const [
+        verificationBreakdownCount,
+        setVerificationBreakdownCount,
+    ] = useState([]);
     const [
         ageGroupIncidentCountFilter,
         setAgeGroupIncidentCountFilter,
@@ -19,6 +25,10 @@ const Metric = (props) => {
     const [statusIncidentCountFilter, setStatusIncidentCountFilter] = useState(
         "all"
     );
+    const [
+        verificationBreakdownCountFilter,
+        setVerificationBreakdownCountFilter,
+    ] = useState("all");
 
     useEffect(() => {
         // todo get orgId from user data
@@ -77,7 +87,15 @@ const Metric = (props) => {
                     />
                 </MDBCol>
                 <MDBCol sm="12" md="6" xl="3" className="d-flex flex-column">
-                    <CommunityStats />
+                    <CommunityStats
+                        verificationBreakdownCount={verificationBreakdownCount}
+                        verificationBreakdownCountFilter={
+                            verificationBreakdownCountFilter
+                        }
+                        setVerificationBreakdownCountFilter={
+                            setVerificationBreakdownCountFilter
+                        }
+                    />
                 </MDBCol>
                 <MDBCol sm="12" md="6" xl="3"></MDBCol>
             </MDBRow>
