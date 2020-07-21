@@ -19,11 +19,15 @@ import {
     Tooltip,
     Cell,
 } from "recharts";
+import IncidentService from "../../services/incidentService";
 
-const AgeCategoryChart = (props) => {
-    const ageGroupIncidentCount = props.ageGroupIncidentCount;
-    const ageGroupIncidentCountFilter = props.ageGroupIncidentCountFilter;
-    const setAgeGroupIncidentCountFilter = props.setAgeGroupIncidentCountFilter;
+const AgeCategoryChart = () => {
+    const incidentService = new IncidentService();
+    const [ageGroupIncidentCount, setAgeGroupIncidentCount] = useState([]);
+    const [
+        ageGroupIncidentCountFilter,
+        setAgeGroupIncidentCountFilter,
+    ] = useState("all");
     const COLORS = ["#003f5c", "#58508d", "#bc5090", "#ff6361", "#ffa600"];
     const RADIAN = Math.PI / 180;
     const renderCustomizedLabel = ({
@@ -62,6 +66,16 @@ const AgeCategoryChart = (props) => {
             return "Showing results from last 365 days";
         else return "";
     };
+
+    useEffect(() => {
+        // todo get orgId from user data
+        const orgId = 1;
+        incidentService
+            .getIncidentAgeGroupCount(orgId, ageGroupIncidentCountFilter)
+            .then((res) => {
+                setAgeGroupIncidentCount(res);
+            });
+    }, [ageGroupIncidentCountFilter]);
 
     return (
         <MDBCard className="age-category-chart-container w-100">

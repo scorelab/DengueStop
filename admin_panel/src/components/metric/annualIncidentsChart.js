@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
     LineChart,
     Line,
@@ -9,9 +9,19 @@ import {
     Tooltip,
 } from "recharts";
 import { MDBCard } from "mdbreact";
+import IncidentService from "../../services/incidentService";
 
-const AnnualIncidentsChart = (props) => {
-    const annualIncidentCount = props.annualIncidentCount;
+const AnnualIncidentsChart = () => {
+    const incidentService = new IncidentService();
+    const [annualIncidentCount, setAnnualIncidentCount] = useState([]);
+
+    useEffect(() => {
+        // todo get orgId from user data
+        const orgId = 1;
+        incidentService.getMonthlyIncidentCount(orgId).then((res) => {
+            setAnnualIncidentCount(res);
+        });
+    }, []);
 
     return (
         <MDBCard className="annual-incidents-chart-container py-2 px-5">

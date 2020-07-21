@@ -13,7 +13,7 @@ import {
 import IncidentService from "../../services/incidentService";
 import UserService from "../../services/userService";
 
-const CommunityStats = (props) => {
+const CommunityStats = () => {
     const incidentService = new IncidentService();
     const userService = new UserService();
     const [

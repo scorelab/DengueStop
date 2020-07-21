@@ -19,11 +19,14 @@ import {
     Tooltip,
     Cell,
 } from "recharts";
+import IncidentService from "../../services/incidentService";
 
 const StatusCategoryChart = (props) => {
-    const statusIncidentCount = props.statusIncidentCount;
-    const statusIncidentCountFilter = props.statusIncidentCountFilter;
-    const setStatusIncidentCountFilter = props.setStatusIncidentCountFilter;
+    const incidentService = new IncidentService();
+    const [statusIncidentCount, setStatusIncidentCount] = useState([]);
+    const [statusIncidentCountFilter, setStatusIncidentCountFilter] = useState(
+        "all"
+    );
     const COLORS = ["#E67F0D", "#40BCD8", "#1C77C3", "#157145", "#BD1E1E"];
     const RADIAN = Math.PI / 180;
     const renderCustomizedLabel = ({
@@ -61,6 +64,16 @@ const StatusCategoryChart = (props) => {
             return "Showing results from last 365 days";
         else return "";
     };
+
+    useEffect(() => {
+        // todo get orgId from user data
+        const orgId = 1;
+        incidentService
+            .getIncidentStatusCount(orgId, statusIncidentCountFilter)
+            .then((res) => {
+                setStatusIncidentCount(res);
+            });
+    }, [statusIncidentCountFilter]);
 
     return (
         <MDBCard className="age-category-chart-container w-100">

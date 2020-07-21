@@ -901,9 +901,6 @@ def get_user_base_breakdown():
         adminCount = db.session.query(Admin).count()
         db.session.commit()
         if(userCount != -1 and adminCount != -1): 
-            print(userCount)
-            print(adminCount)
-
             userBreakdownArray.append({
                 "name": "User",
                 "count": userCount
