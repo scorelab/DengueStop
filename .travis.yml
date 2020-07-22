@@ -1,31 +1,42 @@
 os: linux
 matrix:
-  include:
-    - language: dart
-      dart: stable
-      stage: Flutter Mobile Application Test
-      before_install:
-        - "cd dengue_app"
-      addons:
-        apt:
-          packages:
-            - lib32stdc++6
-      install:
-        - git clone https://github.com/flutter/flutter.git -b stable
-        - ./flutter/bin/flutter doctor
-      script:
-        - ./flutter/bin/flutter test
-      cache:
-        directories:
-          - $HOME/.pub-cache
+    include:
+        - language: dart
+          dart: stable
+          stage: Flutter Mobile Application Test
+          before_install:
+              - "cd dengue_app"
+          addons:
+              apt:
+                  packages:
+                      - lib32stdc++6
+          install:
+              - git clone https://github.com/flutter/flutter.git -b stable
+              - ./flutter/bin/flutter doctor
+          script:
+              - ./flutter/bin/flutter test
+          cache:
+              directories:
+                  - $HOME/.pub-cache
 
-    - language: python
-      python:
-        - "3.7"
-      stage: Flask API Test
-      before_install:
-        - "cd backend"
-      install:
-        - pip install -r requirements.txt
-      script:
-        - pytest
+        - language: python
+          python:
+              - "3.7"
+          stage: Flask API Test
+          before_install:
+              - "cd backend"
+          install:
+              - pip install -r requirements.txt
+          script:
+              - pytest
+
+        - language: node_js
+          node_js:
+              - "node"
+          stage: React Admin Panel Test
+          before_install:
+              - "cd admin_panel"
+          install:
+              - yarn install
+          script:
+              - yarn test
