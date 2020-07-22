@@ -5,6 +5,7 @@ import AnnualIncidentsChart from "./annualIncidentsChart";
 import AgeCategoryChart from "./ageCategoryChart";
 import StatusCategoryChart from "./statusCategoryChart";
 import CommunityStats from "./communityStats";
+import ProvinceStatusRadarChart from "./provinceStatusRadarChart";
 
 const Metric = (props) => {
     return (
@@ -13,16 +14,18 @@ const Metric = (props) => {
                 <AnnualIncidentsChart />
             </MDBRow>
             <MDBRow>
-                <MDBCol sm="12" md="6" xl="4" className="pl-3 p-2 d-flex">
+                <MDBCol sm="12" md="6" xl="3" className="pl-3 p-2 d-flex">
                     <AgeCategoryChart />
                 </MDBCol>
-                <MDBCol sm="12" md="6" xl="4" className="p-2 d-flex">
+                <MDBCol sm="12" md="6" xl="3" className="p-2 d-flex">
                     <StatusCategoryChart />
                 </MDBCol>
-                <MDBCol sm="12" md="12" xl="4" className="d-flex flex-column">
+                <MDBCol sm="12" md="6" xl="3" className="p-2 d-flex">
+                    <ProvinceStatusRadarChart />
+                </MDBCol>
+                <MDBCol sm="12" md="6" xl="3" className="d-flex flex-column">
                     <CommunityStats />
                 </MDBCol>
-                {/* <MDBCol sm="12" md="6" xl="3"></MDBCol> */}
             </MDBRow>
         </MDBContainer>
     );

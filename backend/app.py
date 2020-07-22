@@ -940,28 +940,50 @@ def get_province_vs_status_count(date_range):
             # setting the duration upto last year
             duration = duration - relativedelta(years=1)
         # initializing array to count the incidents belong to a certain status
-        provinceStatusArray = []
+        statusDict = {
+            "Pending Verification": 0,
+            "Pending Treatment": 0,
+            "Under Treatment": 0,
+            "Recovering": 0,
+            "Recovered": 0,
+            "Death": 0,
+            "Declined": 0,
+        }
+        cpDict = statusDict.copy()
+        cpDict["province"] = "Central"
+        epDict = statusDict.copy()
+        epDict["province"] = "Eastern"
+        ncDict = statusDict.copy()
+        ncDict["province"] = "North Central"
+        nwDict = statusDict.copy()
+        nwDict["province"] = "North Western"
+        npDict = statusDict.copy()
+        npDict["province"] = "Northern"
+        sgDict = statusDict.copy()
+        sgDict["province"] = "Sabaragamuwa"
+        spDict = statusDict.copy()
+        spDict["province"] = "Southern"
+        upDict = statusDict.copy()
+        upDict["province"] = "Uva"
+        wpDict = statusDict.copy()
+        wpDict["province"] = "Western"
+        provinceStatusArray = [cpDict, epDict, ncDict, nwDict, npDict, sgDict, spDict, upDict, wpDict]
         incidentCount = {}
         if(date_range == "all"):
             incidentCount = db.session.query(Incident.province, PatientStatus.status, func.count(Incident.patient_status_id)).filter().join(PatientStatus).group_by(Incident.province, Incident.patient_status_id).all()
         else:
-            incidentCount = db.session.query(Incident.is_verified, func.count(Incident.is_verified)).filter(Incident.reported_time >= duration).group_by(Incident.is_verified).all()
+            incidentCount = db.session.query(Incident.province, PatientStatus.status, func.count(Incident.patient_status_id)).filter(Incident.reported_time >= duration).join(PatientStatus).group_by(Incident.province, Incident.patient_status_id).all()
         db.session.commit()
         if(incidentCount != {}): 
-            print(incidentCount)
             for x in incidentCount:
                 province = x[0]
                 status = x[1]
                 count = x[2]
-                tempObj = {
-                    "province": province,
-                    "status": status,
-                    "count": count
-                }
 
-                provinceStatusArray.append(tempObj)
+                for item in provinceStatusArray:
+                    if(item["province"] == province):
+                        item[status] = count
 
- 
             return jsonify(provinceStatusArray)
         return make_response('Incident Breakdown Not Found', 404)
 
