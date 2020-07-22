@@ -17,6 +17,7 @@ from database import db
 from database import ma
 import jwt
 from datetime import datetime
+import calendar
 from dateutil.relativedelta import relativedelta
 import os
 
@@ -603,6 +604,388 @@ def update_patient_status(incident_id, new_status):
             db.session.commit()
             return make_response('Patient Status Changed', 200)
         return make_response('Incident Not Found', 404)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise
+
+
+@ app.route('/get_monthly_incident_count/<org_id>', methods=['GET'])
+def get_monthly_incident_count(org_id):
+    # todo auth
+    # returns the count of VERIFIED monthly incidents reported of the organization
+    # this is used in metrics for visualization
+    try:
+        # initializing an array of 12 months with count 0
+        duration = datetime.utcnow()
+        duration = duration - relativedelta(years=1)
+        monthlyCountArray = []
+        for i in range(12):
+            monthObj = {
+                # using calendar API to generate month names
+                "name": calendar.month_name[i+1],
+                "count": 0
+
+            }
+            monthlyCountArray.append(monthObj)
+
+        monthlyCount = db.session.query(Incident.reported_time, func.count(Incident.reported_time)).filter(Incident.org_id==org_id, Incident.is_verified==1, Incident.reported_time >= duration).group_by(func.year(Incident.reported_time), func.month(Incident.reported_time)).all()
+        db.session.commit()
+        if(monthlyCount != {}):
+            for x in monthlyCount:
+                # reducing 1 from the actual month to fit into monthlyCountArray index
+                monthIndex = x[0].month - 1
+                monthObj = {
+                # using calendar API to generate month names
+                "name": calendar.month_name[monthIndex+1],
+                "count": x[1]
+
+                }
+                # updating the count
+                monthlyCountArray[monthIndex] = monthObj
+            return jsonify(monthlyCountArray)
+        return make_response('Monthly Incident Count Not Found', 404)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise
+
+
+@ app.route('/get_incident_age_group_count/<org_id>/<date_range>', methods=['GET'])
+def get_incident_age_group_count(org_id, date_range):
+    # todo auth
+    # returns the count of VERIFIED incidents age group count reported of the organization
+    # this is used in metrics for visualization
+    # age groups are as follow
+    # 0-2 years = babies
+    # 3-18 years = children
+    # 19-35 years = young adults
+    # 36-50 years = adults
+    # 51 and above = elders
+    try:
+        # initializing an array of age groups with count 0
+        duration = datetime.utcnow()
+        if(date_range == "weekly"):
+            # setting the duration upto last week
+            duration = duration - relativedelta(weeks=1)
+        elif(date_range == "monthly"):
+            # setting the duration upto last month
+            duration = duration - relativedelta(months=1)
+        elif(date_range == "yearly"):
+            # setting the duration upto last year
+            duration = duration - relativedelta(years=1)
+        ageCountArray = []
+        currentYear = datetime.now().year
+        babyCount = 0
+        childrenCount = 0
+        youngAdultCount = 0
+        adultCount = 0
+        seniorCount = 0
+        ageCount = {}
+        if(date_range == "all"):
+            ageCount = db.session.query(Incident.patient_dob, func.count(Incident.patient_dob)).filter(Incident.org_id==org_id, Incident.is_verified==1).group_by(func.year(Incident.patient_dob)).all()
+        else:
+            ageCount = db.session.query(Incident.patient_dob, func.count(Incident.patient_dob)).filter(Incident.org_id==org_id, Incident.is_verified==1, Incident.reported_time >= duration).group_by(func.year(Incident.patient_dob)).all()
+        db.session.commit()
+        if(ageCount != {}):
+            for x in ageCount:
+                # getting the current age of the patient
+                currentAge = currentYear - x[0].year 
+                if(currentAge > 0 and currentAge <=2):
+                    babyCount += x[1]
+                elif(currentAge > 2 and currentAge <=18):
+                    childrenCount += x[1]
+                elif(currentAge > 19 and currentAge <=35):
+                    youngAdultCount += x[1]
+                elif(currentAge > 36 and currentAge <=50):
+                    adultCount += x[1]
+                else:
+                    seniorCount += x[1]
+
+            ageCountArray.append({
+                "name": "Babies",
+                "range": "0 - 2 years",
+                "count": babyCount
+            })
+            ageCountArray.append({
+                "name": "Children",
+                "range": "3 - 18 years",
+                "count": childrenCount
+            })
+            ageCountArray.append({
+                "name": "Young Adults",
+                "range": "19 - 35 years",
+                "count": youngAdultCount
+            })
+            ageCountArray.append({
+                "name": "Adults",
+                "range": "36 - 50 years",
+                "count": adultCount
+            })
+            ageCountArray.append({
+                "name": "Seniors",
+                "range": "51 years and above",
+                "count": seniorCount
+            })
+            return jsonify(ageCountArray)
+        return make_response('Age Incident Count Not Found', 404)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise
+
+
+@ app.route('/get_incident_status_count/<org_id>/<date_range>', methods=['GET'])
+def get_incident_status_count(org_id, date_range):
+    # todo auth
+    # returns the count of VERIFIED incidents count according to the status of reported of the organization
+    # this is used in metrics for visualization
+    try:
+        # this is for date range filtering
+        duration = datetime.utcnow()
+        if(date_range == "weekly"):
+            # setting the duration upto last week
+            duration = duration - relativedelta(weeks=1)
+        elif(date_range == "monthly"):
+            # setting the duration upto last month
+            duration = duration - relativedelta(months=1)
+        elif(date_range == "yearly"):
+            # setting the duration upto last year
+            duration = duration - relativedelta(years=1)
+        # initializing array to count the incidents belong to a certain status
+        statusCountArray = []
+        pendingTreatmentCount = 0
+        underTreatmentCount = 0
+        recoveringCount = 0
+        recoveredCount = 0
+        deathCount = 0
+        statusCount = {}
+        if(date_range == "all"):
+            statusCount = db.session.query(Incident.patient_status_id, func.count(Incident.patient_status_id)).filter(Incident.org_id==org_id, Incident.is_verified==1).group_by(Incident.patient_status_id).all()
+        else:
+            statusCount = db.session.query(Incident.patient_status_id, func.count(Incident.patient_status_id)).filter(Incident.org_id==org_id, Incident.is_verified==1, Incident.reported_time >= duration).group_by(Incident.patient_status_id).all()
+        db.session.commit()
+        if(statusCount != {}): 
+            for x in statusCount:
+                status_id = x[0]
+                if(status_id == 2):
+                    pendingTreatmentCount = x[1]
+                elif(status_id == 3):
+                    underTreatmentCount = x[1]
+                elif(status_id == 4):
+                    recoveringCount = x[1]
+                elif(status_id == 5):
+                    recoveredCount = x[1]
+                elif(status_id ==6):
+                    deathCount = x[1]
+
+            statusCountArray.append({
+                "name": "Pending Treatment",
+                "count": pendingTreatmentCount
+            })
+            statusCountArray.append({
+                "name": "Under Treatment",
+                "count": underTreatmentCount
+            })
+            statusCountArray.append({
+                "name": "Recovering",
+                "count": recoveringCount
+            })
+            statusCountArray.append({
+                "name": "Recovered",
+                "count": recoveredCount
+            })
+            statusCountArray.append({
+                "name": "Death",
+                "count": deathCount
+            })
+ 
+            return jsonify(statusCountArray)
+        return make_response('Status Incident Count Not Found', 404)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise
+
+
+@ app.route('/get_incident_verification_breakdown/<org_id>/<date_range>', methods=['GET'])
+def get_incident_verification_breakdown(org_id, date_range):
+    # todo auth
+    # returns the count of incidents count according to their status in the organization
+    # this is used in metrics for visualization
+    try:
+        # this is for date range filtering
+        duration = datetime.utcnow()
+        if(date_range == "weekly"):
+            # setting the duration upto last week
+            duration = duration - relativedelta(weeks=1)
+        elif(date_range == "monthly"):
+            # setting the duration upto last month
+            duration = duration - relativedelta(months=1)
+        elif(date_range == "yearly"):
+            # setting the duration upto last year
+            duration = duration - relativedelta(years=1)
+        # initializing array to count the incidents belong to a certain status
+        incidentBreakdownArray = []
+        pendingIncidentCount = 0
+        verifiedIncidentCount = 0
+        declinedIncidentCount = 0
+        incidentCount = {}
+        if(date_range == "all"):
+            incidentCount = db.session.query(Incident.is_verified, func.count(Incident.is_verified)).filter(Incident.org_id==org_id).group_by(Incident.is_verified).all()
+        else:
+            incidentCount = db.session.query(Incident.is_verified, func.count(Incident.is_verified)).filter(Incident.org_id==org_id, Incident.reported_time >= duration).group_by(Incident.is_verified).all()
+        db.session.commit()
+        if(incidentCount != {}): 
+            print(incidentCount)
+            for x in incidentCount:
+                verification = x[0]
+                if(verification == 0):
+                    pendingIncidentCount = x[1]
+                elif(verification == 1):
+                    verifiedIncidentCount = x[1]
+                elif(verification == 2):
+                    declinedIncidentCount = x[1]
+
+            incidentBreakdownArray.append({
+                "name": "Pending",
+                "count": pendingIncidentCount
+            })
+            incidentBreakdownArray.append({
+                "name": "Verified",
+                "count": verifiedIncidentCount
+            })
+            incidentBreakdownArray.append({
+                "name": "Declined",
+                "count": declinedIncidentCount
+            })
+ 
+            return jsonify(incidentBreakdownArray)
+        return make_response('Incident Breakdown Not Found', 404)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise
+
+
+@ app.route('/get_user_base_breakdown', methods=['GET'])
+def get_user_base_breakdown():
+    # todo auth
+    # returns the total number of admin and users in the system
+    # this is used in metrics for visualization
+    try:
+        userBreakdownArray = []
+        adminCount = -1
+        userCount = -1
+        userCount = db.session.query(User).count()
+        adminCount = db.session.query(Admin).count()
+        db.session.commit()
+        if(userCount != -1 and adminCount != -1): 
+            userBreakdownArray.append({
+                "name": "User",
+                "count": userCount
+            })
+            userBreakdownArray.append({
+                "name": "Admin",
+                "count": adminCount
+            })
+ 
+            return jsonify(userBreakdownArray)
+        return make_response('User Breakdown Not Found', 404)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise
+
+
+@ app.route('/get_province_vs_status_count/<date_range>', methods=['GET'])
+def get_province_vs_status_count(date_range):
+    # todo auth
+    # returns the count of different incident types in each province
+    # this is used in metrics for visualization
+    try:
+        # this is for date range filtering
+        duration = datetime.utcnow()
+        if(date_range == "weekly"):
+            # setting the duration upto last week
+            duration = duration - relativedelta(weeks=1)
+        elif(date_range == "monthly"):
+            # setting the duration upto last month
+            duration = duration - relativedelta(months=1)
+        elif(date_range == "yearly"):
+            # setting the duration upto last year
+            duration = duration - relativedelta(years=1)
+        # initializing array to count the incidents belong to a certain status
+        statusDict = {
+            "Pending Verification": 0,
+            "Pending Treatment": 0,
+            "Under Treatment": 0,
+            "Recovering": 0,
+            "Recovered": 0,
+            "Death": 0,
+            "Declined": 0,
+        }
+        cpDict = statusDict.copy()
+        cpDict["province"] = "Central"
+        epDict = statusDict.copy()
+        epDict["province"] = "Eastern"
+        ncDict = statusDict.copy()
+        ncDict["province"] = "North Central"
+        nwDict = statusDict.copy()
+        nwDict["province"] = "North Western"
+        npDict = statusDict.copy()
+        npDict["province"] = "Northern"
+        sgDict = statusDict.copy()
+        sgDict["province"] = "Sabaragamuwa"
+        spDict = statusDict.copy()
+        spDict["province"] = "Southern"
+        upDict = statusDict.copy()
+        upDict["province"] = "Uva"
+        wpDict = statusDict.copy()
+        wpDict["province"] = "Western"
+        provinceStatusArray = [cpDict, epDict, ncDict, nwDict, npDict, sgDict, spDict, upDict, wpDict]
+        incidentCount = {}
+        if(date_range == "all"):
+            incidentCount = db.session.query(Incident.province, PatientStatus.status, func.count(Incident.patient_status_id)).filter().join(PatientStatus).group_by(Incident.province, Incident.patient_status_id).all()
+        else:
+            incidentCount = db.session.query(Incident.province, PatientStatus.status, func.count(Incident.patient_status_id)).filter(Incident.reported_time >= duration).join(PatientStatus).group_by(Incident.province, Incident.patient_status_id).all()
+        db.session.commit()
+        if(incidentCount != {}): 
+            for x in incidentCount:
+                province = x[0]
+                status = x[1]
+                count = x[2]
+
+                for item in provinceStatusArray:
+                    if(item["province"] == province):
+                        item[status] = count
+
+            return jsonify(provinceStatusArray)
+        return make_response('Incident Breakdown Not Found', 404)
 
     except IOError:
         print("I/O error")

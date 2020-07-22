@@ -1,0 +1,39 @@
+.metric-container {
+    background-color: rgb(231, 231, 231);
+    height: 94vh;
+}
+
+.annual-incidents-chart-container {
+    background-color: #e4f3fd !important;
+    width: 100vw;
+    margin: 1rem;
+}
+
+.age-category-chart-container {
+    height: auto;
+}
+
+.thin-footer {
+    padding: 0 !important;
+    height: 30px;
+}
+
+.percent-text {
+    font-size: 2rem;
+    font-weight: 800;
+}
+
+.count-text {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.user-count-text {
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.name-text {
+    font-size: 1rem;
+    font-weight: 600;
+}

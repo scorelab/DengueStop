@@ -126,6 +126,93 @@ class IncidentService {
                 return false;
             });
     }
+
+    getMonthlyIncidentCount(orgId) {
+        var apiUrl = "get_monthly_incident_count/" + orgId.toString();
+        return FetchApi("GET", apiUrl)
+            .then((res) => {
+                if (res.status === 200) {
+                    return res.data;
+                }
+                return null;
+            })
+            .catch((err) => {
+                console.log("error : ", err);
+                return null;
+            });
+    }
+
+    getIncidentAgeGroupCount(orgId, dateRange) {
+        var apiUrl =
+            "get_incident_age_group_count/" +
+            orgId.toString() +
+            "/" +
+            dateRange.toString();
+        return FetchApi("GET", apiUrl)
+            .then((res) => {
+                if (res.status === 200) {
+                    return res.data;
+                }
+                return null;
+            })
+            .catch((err) => {
+                console.log("error : ", err);
+                return null;
+            });
+    }
+
+    getIncidentStatusCount(orgId, dateRange) {
+        var apiUrl =
+            "get_incident_status_count/" +
+            orgId.toString() +
+            "/" +
+            dateRange.toString();
+        return FetchApi("GET", apiUrl)
+            .then((res) => {
+                if (res.status === 200) {
+                    return res.data;
+                }
+                return null;
+            })
+            .catch((err) => {
+                console.log("error : ", err);
+                return null;
+            });
+    }
+
+    getIncidentVerificationBreakdown(orgId, dateRange) {
+        var apiUrl =
+            "get_incident_verification_breakdown/" +
+            orgId.toString() +
+            "/" +
+            dateRange.toString();
+        return FetchApi("GET", apiUrl)
+            .then((res) => {
+                if (res.status === 200) {
+                    return res.data;
+                }
+                return null;
+            })
+            .catch((err) => {
+                console.log("error : ", err);
+                return null;
+            });
+    }
+
+    getProvinceVsStatusCount(dateRange) {
+        var apiUrl = "get_province_vs_status_count/" + dateRange.toString();
+        return FetchApi("GET", apiUrl)
+            .then((res) => {
+                if (res.status === 200) {
+                    return res.data;
+                }
+                return null;
+            })
+            .catch((err) => {
+                console.log("error : ", err);
+                return null;
+            });
+    }
 }
 
 export default IncidentService;
