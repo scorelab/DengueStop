@@ -23,7 +23,12 @@ const Metric = (props) => {
                 <MDBCol sm="12" md="6" xl="3" className="p-2 d-flex">
                     <ProvinceStatusRadarChart />
                 </MDBCol>
-                <MDBCol sm="12" md="6" xl="3" className="d-flex flex-column">
+                <MDBCol
+                    sm="12"
+                    md="6"
+                    xl="3"
+                    className="pr-4 d-flex flex-column"
+                >
                     <CommunityStats />
                 </MDBCol>
             </MDBRow>

@@ -131,7 +131,6 @@ const StatusCategoryChart = (props) => {
                     <PieChart>
                         <Pie
                             data={statusIncidentCount}
-                            isAnimationActive={false}
                             dataKey="count"
                             nameKey="name"
                             label={renderCustomizedLabel}

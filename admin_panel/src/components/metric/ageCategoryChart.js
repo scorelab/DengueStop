@@ -139,7 +139,6 @@ const AgeCategoryChart = () => {
                     <PieChart>
                         <Pie
                             data={ageGroupIncidentCount}
-                            isAnimationActive={false}
                             dataKey="count"
                             nameKey="range"
                             label={renderCustomizedLabel}
