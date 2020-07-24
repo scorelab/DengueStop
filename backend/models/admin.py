@@ -24,6 +24,17 @@ class Admin(db.Model):
         self.password = password
         self.salt = salt
         self.org_id = org_id
+    
+    def prePopulateAdminUser():
+        # ONLY FOR TESTING PURPOSES
+        # adds a dummy admin with ID 1 to surpress foreign_key errors
+        objects = [
+            Admin('admin@dengue.com', 'Admin User', '0777123123', 'test1234', 'test1234', 1)
+        ]
+        # bulk insert operation
+        db.session.bulk_save_objects(objects)
+        db.session.commit()
+
 
 
 class AdminSchema(ma.Schema):

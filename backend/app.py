@@ -46,6 +46,7 @@ migrate = Migrate(app, db)
 #     PatientStatus.prePopulatePatientStatus()
 #     EventStatus.prePopulateEventStatus()
 #     OrgUnit.prePopulateOrgUnit()
+#     Admin.prePopulateAdminUser()
 
 def authenticate_token(token):
     try:
