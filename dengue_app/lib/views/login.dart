@@ -197,6 +197,7 @@ class _LoginFormState extends State<LoginForm> {
                   controller: telephoneController,
                 ),
               ),
+              //using mediaquery to make it responsive and remove the overflow issue
               SizedBox(height: MediaQuery.of(context).size.height/40),
               Text('Password', style: formLabelStyle),
               Padding(
