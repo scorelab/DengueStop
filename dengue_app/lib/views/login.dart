@@ -177,12 +177,12 @@ class _LoginFormState extends State<LoginForm> {
             children: <Widget>[
               Text(
                 'Welcome to Dengue-Stop',
-                style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.w700),
+                style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.w700),
               ),
-              SizedBox(height: 30.0),
+              SizedBox(height: MediaQuery.of(context).size.height/20),
               Text('Telephone Number', style: formLabelStyle),
               Padding(
-                padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 15.0),
+                padding: EdgeInsets.symmetric(horizontal: 15.0),
                 child: TextFormField(
                   // changing focus to the password text field on pressing enter
                   textInputAction: TextInputAction.next,
@@ -197,10 +197,11 @@ class _LoginFormState extends State<LoginForm> {
                   controller: telephoneController,
                 ),
               ),
-              SizedBox(height: 30.0),
+              //using mediaquery to make it responsive and remove the overflow issue
+              SizedBox(height: MediaQuery.of(context).size.height/40),
               Text('Password', style: formLabelStyle),
               Padding(
-                padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 15.0),
+                padding: EdgeInsets.symmetric(horizontal: 15.0),
                 child: TextFormField(
                   // unfocussing the password text field on pressing enter allowing the user to login
                   textInputAction: TextInputAction.done,
@@ -216,7 +217,7 @@ class _LoginFormState extends State<LoginForm> {
                   controller: passwordController,
                 ),
               ),
-              SizedBox(height: 30.0),
+              SizedBox(height: MediaQuery.of(context).size.height/20),
               SizedBox(
                 width: double.infinity,
                 height: 70,
@@ -241,7 +242,7 @@ class _LoginFormState extends State<LoginForm> {
                   ),
                 ),
               ),
-              SizedBox(height: 50.0),
+              SizedBox(height: MediaQuery.of(context).size.height/20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
