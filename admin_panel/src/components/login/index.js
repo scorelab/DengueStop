@@ -9,14 +9,33 @@ import {
     MDBBtn,
 } from "mdbreact";
 import "./login.css";
+import UserService from "../../services/userService";
 
 const Login = (props) => {
+    const userService = new UserService();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
     useEffect(() => {
         console.log(username);
     }, [username]);
+
+    const validEmailRegex = RegExp(
+        /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i
+    );
+
+    const submitCredentials = (event) => {
+        event.preventDefault();
+        event.target.className += " was-validated";
+        const emailValidate = validEmailRegex.test(username);
+        const passwordValidate = password !== "";
+
+        if (emailValidate && passwordValidate) {
+            userService.loginAdminUser(username, password);
+        } else {
+            alert("Provided Credentials Are in Invalid Format");
+        }
+    };
 
     return (
         <MDBContainer className="login-main-container" fluid>
@@ -37,49 +56,73 @@ const Login = (props) => {
                                             </h3>
                                         </MDBCol>
                                     </MDBRow>
-                                    <MDBRow>
-                                        <MDBCol>
-                                            <div className="form-group text-center mt-5 px-5">
-                                                <label>Username</label>
-                                                <input
-                                                    value={username}
-                                                    type="text"
-                                                    className="form-control form-control-lg"
-                                                    onChange={(event) =>
-                                                        setUsername(
-                                                            event.target.value
-                                                        )
-                                                    }
-                                                />
-                                            </div>
-                                        </MDBCol>
-                                    </MDBRow>
-                                    <MDBRow>
-                                        <MDBCol>
-                                            <div className="form-group text-center mt-4 px-5">
-                                                <label>Password</label>
-                                                <input
-                                                    value={password}
-                                                    type="password"
-                                                    className="form-control form-control-lg"
-                                                    onChange={(event) =>
-                                                        setPassword(
-                                                            event.target.value
-                                                        )
-                                                    }
-                                                />
-                                            </div>
-                                        </MDBCol>
-                                    </MDBRow>
-                                    <MDBRow>
-                                        <MDBCol>
-                                            <div className="mt-5 px-5">
-                                                <MDBBtn size="lg" block>
-                                                    Sign in
-                                                </MDBBtn>
-                                            </div>
-                                        </MDBCol>
-                                    </MDBRow>
+                                    <form
+                                        className="needs-validation"
+                                        onSubmit={(event) =>
+                                            submitCredentials(event)
+                                        }
+                                        noValidate
+                                    >
+                                        <MDBRow>
+                                            <MDBCol>
+                                                <div className="form-group text-center mt-5 px-5">
+                                                    <label>Username</label>
+                                                    <input
+                                                        required
+                                                        value={username}
+                                                        type="email"
+                                                        className="form-control form-control-lg"
+                                                        onChange={(event) =>
+                                                            setUsername(
+                                                                event.target
+                                                                    .value
+                                                            )
+                                                        }
+                                                    />
+                                                    <div className="invalid-feedback">
+                                                        Please provide a proper
+                                                        email format
+                                                    </div>
+                                                </div>
+                                            </MDBCol>
+                                        </MDBRow>
+                                        <MDBRow>
+                                            <MDBCol>
+                                                <div className="form-group text-center mt-4 px-5">
+                                                    <label>Password</label>
+                                                    <input
+                                                        required
+                                                        value={password}
+                                                        type="password"
+                                                        className="form-control form-control-lg"
+                                                        onChange={(event) =>
+                                                            setPassword(
+                                                                event.target
+                                                                    .value
+                                                            )
+                                                        }
+                                                    />
+                                                    <div className="invalid-feedback">
+                                                        Please provide a
+                                                        password
+                                                    </div>
+                                                </div>
+                                            </MDBCol>
+                                        </MDBRow>
+                                        <MDBRow>
+                                            <MDBCol>
+                                                <div className="mt-5 px-5">
+                                                    <MDBBtn
+                                                        size="lg"
+                                                        type="submit"
+                                                        block
+                                                    >
+                                                        Sign in
+                                                    </MDBBtn>
+                                                </div>
+                                            </MDBCol>
+                                        </MDBRow>
+                                    </form>
                                 </MDBCol>
                             </MDBRow>
                         </MDBCardBody>

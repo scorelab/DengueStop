@@ -15,6 +15,11 @@ class UserService {
                 return null;
             });
     }
+
+    loginAdminUser(username, password) {
+        console.log(username);
+        console.log(password);
+    }
 }
 
 export default UserService;
