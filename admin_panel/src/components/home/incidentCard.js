@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Map, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import Moment from "react-moment";
@@ -16,6 +16,7 @@ import {
 import Truncate from "react-truncate";
 import IncidentService from "../../services/incidentService";
 import L from "leaflet";
+import { SessionContext } from "../../services/sessionService";
 
 delete L.Icon.Default.prototype._getIconUrl;
 
@@ -117,6 +118,7 @@ const IncidentCard = (props) => {
 };
 
 const DeclineReportModal = (props) => {
+    const currentUser = useContext(SessionContext);
     const [isOpen, setIsOpen] = useState(false);
     const setIncidents = props.setIncidents;
     const index = props.index;
@@ -131,7 +133,7 @@ const DeclineReportModal = (props) => {
         //get admin Id from user context data
         setDeclineModal(false);
         // getting a copy of incidents array
-        const adminId = 1;
+        const adminId = currentUser.id;
         const incidents = [...props.incidents];
         // removing the declined element
         incidents.splice(index, 1);
@@ -181,6 +183,7 @@ const DeclineReportModal = (props) => {
 };
 
 const VerifyReportModal = (props) => {
+    const currentUser = useContext(SessionContext);
     const [isOpen, setIsOpen] = useState(false);
     const setIncidents = props.setIncidents;
     const index = props.index;
@@ -195,7 +198,7 @@ const VerifyReportModal = (props) => {
         //get admin Id from user context data
         setVerifyModal(false);
         // getting a copy of incidents array
-        const adminId = 1;
+        const adminId = currentUser.id;
         const incidents = [...props.incidents];
         // removing the verified element
         incidents.splice(index, 1);

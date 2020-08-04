@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import EventService from "../../services/eventService";
 import EventCard from "./eventCard";
 import Moment from "react-moment";
 import { MDBCardBody, MDBCardTitle, MDBCardFooter } from "mdbreact";
+import { SessionContext } from "../../services/sessionService";
 
 const UpcomingEvents = (props) => {
     const [events, setEvents] = useState([]);
     const setLastRefresh = props.setLastRefresh;
     const lastRefresh = props.lastRefresh;
+    const currentUser = useContext(SessionContext);
 
     useEffect(() => {
         getEventData();
@@ -15,8 +17,7 @@ const UpcomingEvents = (props) => {
 
     const getEventData = () => {
         const eventService = new EventService();
-        // should get org id from logged in user
-        eventService.getEventsByOrgId(1).then((res) => {
+        eventService.getEventsByOrgId(currentUser.org_id).then((res) => {
             setEvents(res);
             setLastRefresh(Date());
         });

@@ -1,21 +1,24 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import IncidentService from "../../services/incidentService";
 import IncidentCard from "./incidentCard";
 import Moment from "react-moment";
 import { MDBCardBody, MDBCardTitle, MDBCardFooter } from "mdbreact";
+import { SessionContext } from "../../services/sessionService";
 
 const IncidentsReported = (props) => {
     const [incidents, setIncidents] = useState([]);
     const setLastRefresh = props.setLastRefresh;
     const lastRefresh = props.lastRefresh;
+    const currentUser = useContext(SessionContext);
 
     const getIncidentData = () => {
         const incidentService = new IncidentService();
-        // to do get incident id from the user data
-        incidentService.getPendingIncidentsByOrgId(1).then((res) => {
-            setIncidents(res);
-            setLastRefresh(Date());
-        });
+        incidentService
+            .getPendingIncidentsByOrgId(currentUser.org_id)
+            .then((res) => {
+                setIncidents(res);
+                setLastRefresh(Date());
+            });
     };
 
     useEffect(() => {

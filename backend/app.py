@@ -18,6 +18,7 @@ from database import ma
 import jwt
 from datetime import datetime
 import calendar
+import bcrypt
 from dateutil.relativedelta import relativedelta
 import os
 
@@ -995,6 +996,68 @@ def get_province_vs_status_count(date_range):
     except:
         print("Unexpected error")
         raise
+
+
+@ app.route('/login_admin_user', methods=['POST'])
+def login_admin_user():
+    # login function for admin users
+    try:
+        email = request.json['user'].encode("utf-8")
+        password  = request.json['pass'].encode("utf-8")
+
+        loginAdmin = Admin.query.filter_by(email=email).first()
+        db.session.commit()
+        if(loginAdmin != {} and loginAdmin != None):
+            userPass = loginAdmin.password.encode("utf-8")
+            if bcrypt.checkpw(password, userPass):
+                loggedInUser = {
+                    "login_res": True,
+                    "id": loginAdmin.id,
+                    "email": loginAdmin.email,
+                    "name" : loginAdmin.name,
+                    "contact": loginAdmin.contact,
+                    "org_id": loginAdmin.org_id
+                }
+                secret_key = SECRET_KEY
+                token = jwt.encode({'user': loginAdmin.email, 'userId': loginAdmin.id, 'exp': datetime.utcnow(
+                ) + relativedelta(hours=1)}, secret_key)
+                return jsonify({'token': token.decode('UTF-8'),'login_res': True, 'userData': loggedInUser})
+            else:
+                return make_response({"login_res": False}, 200)
+        return make_response({"login_res": False}, 200)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise
+
+
+@ app.route('/create_admin_user', methods=['POST'])
+def create_admin_user():
+    # signup function for admin users
+    try:
+        email = request.json['email'].encode("utf-8")
+        name  = request.json['name'].encode("utf-8")
+        contact  = request.json['contact'].encode("utf-8")
+        password  = request.json['password'].encode("utf-8")
+        org_id  = request.json['orgId'].encode("utf-8")
+        hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
+        new_admin = Admin(email, name, contact, hashed_password, org_id)
+        db.session.add(new_admin)
+        db.session.commit()
+        return user_schema.jsonify(new_admin)
+
+    except IOError:
+        print("I/O error")
+    except ValueError:
+        print("Value Error")
+    except:
+        print("Unexpected error")
+        raise
+
 
 # running server
 if __name__ == '__main__':
