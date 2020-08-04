@@ -2,6 +2,8 @@ alembic==1.4.2
 appdirs==1.4.4
 atomicwrites==1.4.0
 attrs==19.3.0
+bcrypt==3.1.7
+cffi==1.14.0
 click==7.1.2
 colorama==0.4.3
 distlib==0.3.0
@@ -22,6 +24,8 @@ mysqlclient==1.4.6
 packaging==20.4
 pluggy==0.13.1
 py==1.8.2
+pycountry==19.8.18
+pycparser==2.20
 PyJWT==1.7.1
 pyparsing==2.4.7
 pytest==5.4.3

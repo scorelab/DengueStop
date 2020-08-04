@@ -9,10 +9,10 @@ import {
     MDBBtn,
 } from "mdbreact";
 import "./login.css";
-import UserService from "../../services/userService";
+import AuthService from "../../services/authService";
 
 const Login = (props) => {
-    const userService = new UserService();
+    const authService = new AuthService();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
@@ -31,7 +31,15 @@ const Login = (props) => {
         const passwordValidate = password !== "";
 
         if (emailValidate && passwordValidate) {
-            userService.loginAdminUser(username, password);
+            authService.loginAdminUser(username, password).then((res) => {
+                console.log(res);
+
+                if (res.login_res === true) {
+                    //login
+                } else {
+                    //show error message
+                }
+            });
         } else {
             alert("Provided Credentials Are in Invalid Format");
         }
