@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
     LineChart,
     Line,
@@ -10,14 +10,15 @@ import {
 } from "recharts";
 import { MDBCard, MDBCardBody } from "mdbreact";
 import IncidentService from "../../services/incidentService";
+import { SessionContext } from "../../services/sessionService";
 
 const AnnualIncidentsChart = () => {
+    const currentUser = useContext(SessionContext);
     const incidentService = new IncidentService();
     const [annualIncidentCount, setAnnualIncidentCount] = useState([]);
 
     useEffect(() => {
-        // todo get orgId from user data
-        const orgId = 1;
+        const orgId = currentUser.org_id;
         incidentService.getMonthlyIncidentCount(orgId).then((res) => {
             setAnnualIncidentCount(res);
         });

@@ -8,6 +8,7 @@
     "@testing-library/user-event": "^7.1.2",
     "axios": "^0.19.2",
     "core-js": "^3",
+    "history": "^5.0.0",
     "leaflet": "^1.6.0",
     "mdbreact": "^4.27.0",
     "react": "^16.13.1",

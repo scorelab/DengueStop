@@ -10,6 +10,7 @@ import {
 } from "mdbreact";
 import "./login.css";
 import AuthService from "../../services/authService";
+import { setSession } from "../../services/sessionService";
 
 const Login = (props) => {
     const authService = new AuthService();
@@ -32,10 +33,10 @@ const Login = (props) => {
 
         if (emailValidate && passwordValidate) {
             authService.loginAdminUser(username, password).then((res) => {
-                console.log(res);
-
-                if (res.login_res === true) {
-                    //login
+                if (res && res.login_res === true) {
+                    setSession(res);
+                    console.log(props);
+                    props.history.push("/dash/home");
                 } else {
                     //show error message
                 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import {
     MDBCard,
     MDBDropdown,
@@ -20,8 +20,10 @@ import {
     Cell,
 } from "recharts";
 import IncidentService from "../../services/incidentService";
+import { SessionContext } from "../../services/sessionService";
 
 const StatusCategoryChart = (props) => {
+    const currentUser = useContext(SessionContext);
     const incidentService = new IncidentService();
     const [statusIncidentCount, setStatusIncidentCount] = useState([]);
     const [statusIncidentCountFilter, setStatusIncidentCountFilter] = useState(
@@ -66,8 +68,7 @@ const StatusCategoryChart = (props) => {
     };
 
     useEffect(() => {
-        // todo get orgId from user data
-        const orgId = 1;
+        const orgId = currentUser.org_id;
         incidentService
             .getIncidentStatusCount(orgId, statusIncidentCountFilter)
             .then((res) => {

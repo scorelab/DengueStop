@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import {
     MDBCard,
     MDBRow,
@@ -11,11 +11,13 @@ import {
     MDBIcon,
 } from "mdbreact";
 import IncidentService from "../../services/incidentService";
-import UserService from "../../services/userService";
+import AuthService from "../../services/authService";
+import { SessionContext } from "../../services/sessionService";
 
 const CommunityStats = () => {
+    const currentUser = useContext(SessionContext);
     const incidentService = new IncidentService();
-    const userService = new UserService();
+    const userService = new AuthService();
     const [
         verificationBreakdownCount,
         setVerificationBreakdownCount,
@@ -28,8 +30,7 @@ const CommunityStats = () => {
     ] = useState("all");
 
     useEffect(() => {
-        // todo get orgId from user data
-        const orgId = 1;
+        const orgId = currentUser.org_id;
         incidentService
             .getIncidentVerificationBreakdown(
                 orgId,
@@ -41,8 +42,7 @@ const CommunityStats = () => {
     }, [verificationBreakdownCountFilter]);
 
     useEffect(() => {
-        // todo get orgId from user data
-        const orgId = 1;
+        const orgId = currentUser.org_id;
         userService.getUserBaseBreakdown().then((res) => {
             setUserBaseBreakdownCount(res);
         });
