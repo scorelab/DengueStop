@@ -282,720 +282,792 @@ def get_incident_org_unit(province, district):
 
 @ app.route('/get_pending_incidents_by_org/<org_id>', methods=['GET'])
 def get_pending_incidents_by_org(org_id):
-    # returns all the incidents related to the org
-    incidents = db.session.query(Incident, User, PatientStatus).filter_by(org_id=org_id).filter_by(is_verified=0).join(User).join(PatientStatus).order_by(Incident.reported_time.desc()).all()
-    db.session.commit()
-    # converting the query response to the expected schema
-    result = incidents_with_user_schema.dump([{'incident': x[0], 'user': x[1], 'status': x[2]} for x in incidents])
-    return jsonify(result)
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        # returns all the incidents related to the org
+        incidents = db.session.query(Incident, User, PatientStatus).filter_by(org_id=org_id).filter_by(is_verified=0).join(User).join(PatientStatus).order_by(Incident.reported_time.desc()).all()
+        db.session.commit()
+        # converting the query response to the expected schema
+        result = incidents_with_user_schema.dump([{'incident': x[0], 'user': x[1], 'status': x[2]} for x in incidents])
+        return jsonify(result)
+    else:
+        return make_response('Request Forbidden', 403)
 
 
 @ app.route('/verify_incident/<incident_id>/<verified_admin_id>', methods=['GET'])
 def verify_incident(incident_id, verified_admin_id):
-    try:
-        updateIncident = Incident.query.filter_by(id=incident_id).first()
-        if(updateIncident != {}):
-            # now the incident is verified
-            updateIncident.is_verified = 1
-            # updating the verified admin ID
-            updateIncident.verified_by = verified_admin_id
-            # change patient status to status 2 - pending treatment
-            updateIncident.patient_status_id = 2
-            db.session.commit()
-            return make_response('Incident Verified', 200)
-        return make_response('Incident Not Found', 404)
+     # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        try:
+            updateIncident = Incident.query.filter_by(id=incident_id).first()
+            if(updateIncident != {}):
+                # now the incident is verified
+                updateIncident.is_verified = 1
+                # updating the verified admin ID
+                updateIncident.verified_by = verified_admin_id
+                # change patient status to status 2 - pending treatment
+                updateIncident.patient_status_id = 2
+                db.session.commit()
+                return make_response('Incident Verified', 200)
+            return make_response('Incident Not Found', 404)
 
-    except IOError:
-        print("I/O error")
-    except ValueError:
-        print("Value Error")
-    except:
-        print("Unexpected error")
-        raise
+        except IOError:
+            print("I/O error")
+        except ValueError:
+            print("Value Error")
+        except:
+            print("Unexpected error")
+            raise
+    else:
+        return make_response('Request Forbidden', 403)
 
 @ app.route('/decline_incident/<incident_id>/<verified_admin_id>', methods=['GET'])
 def decline_incident(incident_id, verified_admin_id):
-    try:
-        updateIncident = Incident.query.filter_by(id=incident_id).first()
-        if(updateIncident != {}):
-            # now the incident is declined
-            updateIncident.is_verified = 2
-            # updating the verified admin ID
-            updateIncident.verified_by = verified_admin_id
-            # change patient status to status 7 - declined
-            updateIncident.patient_status_id = 7
-            db.session.commit()
-            return make_response('Incident Declined', 200)
-        return make_response('Incident Not Found', 404)
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        try:
+            updateIncident = Incident.query.filter_by(id=incident_id).first()
+            if(updateIncident != {}):
+                # now the incident is declined
+                updateIncident.is_verified = 2
+                # updating the verified admin ID
+                updateIncident.verified_by = verified_admin_id
+                # change patient status to status 7 - declined
+                updateIncident.patient_status_id = 7
+                db.session.commit()
+                return make_response('Incident Declined', 200)
+            return make_response('Incident Not Found', 404)
 
-    except IOError:
-        print("I/O error")
-    except ValueError:
-        print("Value Error")
-    except:
-        print("Unexpected error")
-        raise
+        except IOError:
+            print("I/O error")
+        except ValueError:
+            print("Value Error")
+        except:
+            print("Unexpected error")
+            raise
+    else:
+        return make_response('Request Forbidden', 403)
 
 
 @ app.route('/get_total_incident_summary', methods=['GET'])
 def get_total_incident_summary():
-    try:
-        # groups VERIFIED incidents by province and counts them and returns their numbers
-        # we only consider patient who are currently suffering with disease recovered patients are disregarded
-        incident_by_province_count = db.session.query(Incident.province, func.count(Incident.province)).filter(Incident.patient_status_id > 1, Incident.patient_status_id < 5).group_by(Incident.province).all()
-        db.session.commit()
-        if(incident_by_province_count != {}):
-            return jsonify(incident_by_province_count)
-        return make_response('Count Not Found', 404)
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        try:
+            # groups VERIFIED incidents by province and counts them and returns their numbers
+            # we only consider patient who are currently suffering with disease recovered patients are disregarded
+            incident_by_province_count = db.session.query(Incident.province, func.count(Incident.province)).filter(Incident.patient_status_id > 1, Incident.patient_status_id < 5).group_by(Incident.province).all()
+            db.session.commit()
+            if(incident_by_province_count != {}):
+                return jsonify(incident_by_province_count)
+            return make_response('Count Not Found', 404)
 
-    except IOError:
-        print("I/O error")
-    except ValueError:
-        print("Value Error")
-    except:
-        print("Unexpected error")
-        raise
+        except IOError:
+            print("I/O error")
+        except ValueError:
+            print("Value Error")
+        except:
+            print("Unexpected error")
+            raise
+    else:
+        return make_response('Request Forbidden', 403)
 
 
 @ app.route('/get_events_by_org/<org_id>', methods=['GET'])
 def get_events_by_org(org_id):
-    try:
-        # get all events of the organization
-        events = db.session.query(Event, Admin, EventStatus).filter_by(org_id=org_id).join(Admin).join(EventStatus).order_by(Event.start_time.desc()).all()
-        db.session.commit()
-        if(events != {}):
-            result = events_with_full_schema.dump([{'event': x[0], 'admin': x[1], 'status': x[2]} for x in events])
-            return jsonify(result)
-        return make_response('Count Not Found', 404)
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        try:
+            # get all events of the organization
+            events = db.session.query(Event, Admin, EventStatus).filter_by(org_id=org_id).join(Admin).join(EventStatus).order_by(Event.start_time.desc()).all()
+            db.session.commit()
+            if(events != {}):
+                result = events_with_full_schema.dump([{'event': x[0], 'admin': x[1], 'status': x[2]} for x in events])
+                return jsonify(result)
+            return make_response('Count Not Found', 404)
 
-    except IOError:
-        print("I/O error")
-    except ValueError:
-        print("Value Error")
-    except:
-        print("Unexpected error")
-        raise
+        except IOError:
+            print("I/O error")
+        except ValueError:
+            print("Value Error")
+        except:
+            print("Unexpected error")
+            raise
+    else:
+        return make_response('Request Forbidden', 403)
 
 
 @ app.route('/get_incident_markers_by_province/<province>', methods=['GET'])
 def get_incident_markers_by_province(province):
-    try:
-        # we only consider patient who are currently suffering with disease recovered patients are disregarded
-        if(province == "all"):
-            # get all markers of the verified incidents
-            markers = Incident.query.filter(Incident.patient_status_id > 1, Incident.patient_status_id < 5).with_entities(Incident.location_lat, Incident.location_long, Incident.district, Incident.patient_status_id).all()
-            db.session.commit()
-            if(markers != {}):
-                return jsonify(markers)
-            return make_response('Markers Not Found', 404)
-        else:
-            markers = Incident.query.filter_by(province=province).filter(Incident.patient_status_id > 1, Incident.patient_status_id < 5).with_entities(Incident.location_lat, Incident.location_long, Incident.district, Incident.patient_status_id).all()
-            db.session.commit()
-            if(markers != {}):
-                return jsonify(markers)
-            return make_response('Markers Not Found', 404)
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        try:
+            # we only consider patient who are currently suffering with disease recovered patients are disregarded
+            if(province == "all"):
+                # get all markers of the verified incidents
+                markers = Incident.query.filter(Incident.patient_status_id > 1, Incident.patient_status_id < 5).with_entities(Incident.location_lat, Incident.location_long, Incident.district, Incident.patient_status_id).all()
+                db.session.commit()
+                if(markers != {}):
+                    return jsonify(markers)
+                return make_response('Markers Not Found', 404)
+            else:
+                markers = Incident.query.filter_by(province=province).filter(Incident.patient_status_id > 1, Incident.patient_status_id < 5).with_entities(Incident.location_lat, Incident.location_long, Incident.district, Incident.patient_status_id).all()
+                db.session.commit()
+                if(markers != {}):
+                    return jsonify(markers)
+                return make_response('Markers Not Found', 404)
 
-    except IOError:
-        print("I/O error")
-    except ValueError:
-        print("Value Error")
-    except:
-        print("Unexpected error")
-        raise 
+        except IOError:
+            print("I/O error")
+        except ValueError:
+            print("Value Error")
+        except:
+            print("Unexpected error")
+            raise 
+    else:
+        return make_response('Request Forbidden', 403)
 
 
 @ app.route('/get_province_names', methods=['GET'])
 def get_province_names():
-    try:
-        # returns all the provinces in the db
-        provinces = Province.query.order_by(Province.name.asc()).all()
-        db.session.commit()
-        if(provinces != {}):
-            result = provinces_schema.dump(provinces)
-            return jsonify(result)
-        return make_response('Provinces Not Found', 404)
+     # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        try:
+            # returns all the provinces in the db
+            provinces = Province.query.order_by(Province.name.asc()).all()
+            db.session.commit()
+            if(provinces != {}):
+                result = provinces_schema.dump(provinces)
+                return jsonify(result)
+            return make_response('Provinces Not Found', 404)
 
-    except IOError:
-        print("I/O error")
-    except ValueError:
-        print("Value Error")
-    except:
-        print("Unexpected error")
-        raise 
+        except IOError:
+            print("I/O error")
+        except ValueError:
+            print("Value Error")
+        except:
+            print("Unexpected error")
+            raise 
+    else:
+        return make_response('Request Forbidden', 403)
 
 @ app.route('/query_incidents', methods=['POST'])
 def query_incidents():
-    org_id = request.json['orgId']
-    patient_name = request.json['patientName']
-    province = request.json['province']
-    status = request.json['status']
-    date_range = request.json['dateRange']
-    duration = datetime.utcnow()
-    if(date_range == "weekly"):
-        # setting the duration upto last week
-        duration = duration - relativedelta(weeks=1)
-    elif(date_range == "monthly"):
-        # setting the duration upto last month
-        duration = duration - relativedelta(months=1)
-    elif(date_range == "yearly"):
-        # setting the duration upto last year
-        duration = duration - relativedelta(years=1)
-    
-    try:
-        # returns all the incident of an organization based on the parameters provided
-        if(date_range == "all"):
-            # remove date range from the query
-            if(status == "all"):
-                # remove patient status from the query
-                if(province == "all"):
-                # remove province from the query
-                    if(patient_name == ""):
-                        # remove patient name from the query
-                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
-                            Incident.org_id == org_id 
-                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        org_id = request.json['orgId']
+        patient_name = request.json['patientName']
+        province = request.json['province']
+        status = request.json['status']
+        date_range = request.json['dateRange']
+        duration = datetime.utcnow()
+        if(date_range == "weekly"):
+            # setting the duration upto last week
+            duration = duration - relativedelta(weeks=1)
+        elif(date_range == "monthly"):
+            # setting the duration upto last month
+            duration = duration - relativedelta(months=1)
+        elif(date_range == "yearly"):
+            # setting the duration upto last year
+            duration = duration - relativedelta(years=1)
+        
+        try:
+            # returns all the incident of an organization based on the parameters provided
+            if(date_range == "all"):
+                # remove date range from the query
+                if(status == "all"):
+                    # remove patient status from the query
+                    if(province == "all"):
+                    # remove province from the query
+                        if(patient_name == ""):
+                            # remove patient name from the query
+                            incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
+                                Incident.org_id == org_id 
+                                ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
+                        else:
+                            incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
+                                Incident.patient_name.ilike("%"+patient_name+"%"),
+                                Incident.org_id == org_id 
+                                ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
                     else:
-                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
-                            Incident.patient_name.ilike("%"+patient_name+"%"),
-                            Incident.org_id == org_id 
-                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
+                        if(patient_name == ""):
+                            # remove patient name from the query
+                            incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
+                                Incident.org_id == org_id, 
+                                Incident.province == province, 
+                                ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
+                        else:
+                            incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
+                                Incident.patient_name.ilike("%"+patient_name+"%"),
+                                Incident.org_id == org_id, 
+                                Incident.province == province, 
+                                ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
                 else:
-                    if(patient_name == ""):
-                        # remove patient name from the query
-                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
-                            Incident.org_id == org_id, 
-                            Incident.province == province, 
-                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
+                    if(province == "all"):
+                    # remove province from the query
+                        if(patient_name == ""):
+                            # remove patient name from the query
+                            incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
+                                Incident.org_id == org_id,
+                                Incident.patient_status_id == status,
+                                ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
+                        else:
+                            incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
+                                Incident.patient_name.ilike("%"+patient_name+"%"),
+                                Incident.org_id == org_id,
+                                Incident.patient_status_id == status, 
+                                ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
                     else:
-                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
-                            Incident.patient_name.ilike("%"+patient_name+"%"),
-                            Incident.org_id == org_id, 
-                            Incident.province == province, 
-                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
+                        if(patient_name == ""):
+                            # remove patient name from the query
+                            incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
+                                Incident.org_id == org_id, 
+                                Incident.province == province,
+                                Incident.patient_status_id == status, 
+                                ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
+                        else:
+                            incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
+                                Incident.patient_name.ilike("%"+patient_name+"%"),
+                                Incident.org_id == org_id, 
+                                Incident.province == province, 
+                                Incident.patient_status_id == status,
+                                ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
             else:
-                if(province == "all"):
-                # remove province from the query
-                    if(patient_name == ""):
-                        # remove patient name from the query
-                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
-                            Incident.org_id == org_id,
-                            Incident.patient_status_id == status,
-                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
+                if(status == "all"):
+                    # remove patient status from the query
+                    if(province == "all"):
+                    # remove province from the query
+                        if(patient_name == ""):
+                            # remove patient name from the query
+                            incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
+                                Incident.org_id == org_id,
+                                Incident.reported_time >= duration 
+                                ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
+                        else:
+                            incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
+                                Incident.patient_name.ilike("%"+patient_name+"%"),
+                                Incident.org_id == org_id,
+                                Incident.reported_time >= duration 
+                                ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
                     else:
-                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
-                            Incident.patient_name.ilike("%"+patient_name+"%"),
-                            Incident.org_id == org_id,
-                            Incident.patient_status_id == status, 
-                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
+                        if(patient_name == ""):
+                            # remove patient name from the query
+                            incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
+                                Incident.org_id == org_id, 
+                                Incident.province == province, 
+                                Incident.reported_time >= duration
+                                ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
+                        else:
+                            incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
+                                Incident.patient_name.ilike("%"+patient_name+"%"),
+                                Incident.org_id == org_id, 
+                                Incident.province == province, 
+                                Incident.reported_time >= duration
+                                ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
                 else:
-                    if(patient_name == ""):
-                        # remove patient name from the query
-                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
-                            Incident.org_id == org_id, 
-                            Incident.province == province,
-                            Incident.patient_status_id == status, 
-                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
+                    # remove patient status from the query
+                    if(province == "all"):
+                    # remove province from the query
+                        if(patient_name == ""):
+                            # remove patient name from the query
+                            incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
+                                Incident.org_id == org_id,
+                                Incident.patient_status_id == status,
+                                Incident.reported_time >= duration
+                                ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
+                        else:
+                            incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
+                                Incident.patient_name.ilike("%"+patient_name+"%"),
+                                Incident.org_id == org_id,
+                                Incident.patient_status_id == status, 
+                                Incident.reported_time >= duration
+                                ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
                     else:
-                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
-                            Incident.patient_name.ilike("%"+patient_name+"%"),
-                            Incident.org_id == org_id, 
-                            Incident.province == province, 
-                            Incident.patient_status_id == status,
-                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
-        else:
-            if(status == "all"):
-                # remove patient status from the query
-                if(province == "all"):
-                # remove province from the query
-                    if(patient_name == ""):
-                        # remove patient name from the query
-                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
-                            Incident.org_id == org_id,
-                            Incident.reported_time >= duration 
-                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
-                    else:
-                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
-                            Incident.patient_name.ilike("%"+patient_name+"%"),
-                            Incident.org_id == org_id,
-                            Incident.reported_time >= duration 
-                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
-                else:
-                    if(patient_name == ""):
-                        # remove patient name from the query
-                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
-                            Incident.org_id == org_id, 
-                            Incident.province == province, 
-                            Incident.reported_time >= duration
-                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
-                    else:
-                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
-                            Incident.patient_name.ilike("%"+patient_name+"%"),
-                            Incident.org_id == org_id, 
-                            Incident.province == province, 
-                            Incident.reported_time >= duration
-                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
-            else:
-                # remove patient status from the query
-                if(province == "all"):
-                # remove province from the query
-                    if(patient_name == ""):
-                        # remove patient name from the query
-                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
-                            Incident.org_id == org_id,
-                            Incident.patient_status_id == status,
-                            Incident.reported_time >= duration
-                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
-                    else:
-                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
-                            Incident.patient_name.ilike("%"+patient_name+"%"),
-                            Incident.org_id == org_id,
-                            Incident.patient_status_id == status, 
-                            Incident.reported_time >= duration
-                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
-                else:
-                    if(patient_name == ""):
-                        # remove patient name from the query
-                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
-                            Incident.org_id == org_id, 
-                            Incident.province == province,
-                            Incident.patient_status_id == status,
-                            Incident.reported_time >= duration 
-                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
-                    else:
-                        incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
-                            Incident.patient_name.ilike("%"+patient_name+"%"),
-                            Incident.org_id == org_id, 
-                            Incident.province == province, 
-                            Incident.patient_status_id == status,
-                            Incident.reported_time >= duration
-                            ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
+                        if(patient_name == ""):
+                            # remove patient name from the query
+                            incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
+                                Incident.org_id == org_id, 
+                                Incident.province == province,
+                                Incident.patient_status_id == status,
+                                Incident.reported_time >= duration 
+                                ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
+                        else:
+                            incidents = db.session.query(Incident, User, PatientStatus, Admin).filter(
+                                Incident.patient_name.ilike("%"+patient_name+"%"),
+                                Incident.org_id == org_id, 
+                                Incident.province == province, 
+                                Incident.patient_status_id == status,
+                                Incident.reported_time >= duration
+                                ).join(User).join(PatientStatus).join(Admin).order_by(Incident.reported_time.desc()).all()
 
-        db.session.commit()
-        if(incidents != {}):
-            result = incidents_with_user_schema.dump([{'incident': x[0], 'user': x[1], 'status': x[2], 'admin': x[3]} for x in incidents])
-            return jsonify(result)
-        return make_response('Incidents Not Found', 404)
+            db.session.commit()
+            if(incidents != {}):
+                result = incidents_with_user_schema.dump([{'incident': x[0], 'user': x[1], 'status': x[2], 'admin': x[3]} for x in incidents])
+                return jsonify(result)
+            return make_response('Incidents Not Found', 404)
 
-    except IOError:
-        print("I/O error")
-    except ValueError:
-        print("Value Error")
-    except:
-        print("Unexpected error")
-        raise 
+        except IOError:
+            print("I/O error")
+        except ValueError:
+            print("Value Error")
+        except:
+            print("Unexpected error")
+            raise 
+    else:
+        return make_response('Request Forbidden', 403)
 
 @ app.route('/get_patient_statuses', methods=['GET'])
 def get_patient_statuses():
-    # todo auth
-    # returns all the patient statuses in the db
-    patientStatus = PatientStatus.query.order_by(PatientStatus.id.asc()).all()
-    db.session.commit()
-    if(patientStatus != {}):
-        result = patient_statuses_schema.dump(patientStatus)
-        return jsonify(result)
-    return make_response('Patient Status Not Found', 404)
+     # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        # returns all the patient statuses in the db
+        patientStatus = PatientStatus.query.order_by(PatientStatus.id.asc()).all()
+        db.session.commit()
+        if(patientStatus != {}):
+            result = patient_statuses_schema.dump(patientStatus)
+            return jsonify(result)
+        return make_response('Patient Status Not Found', 404)
+    else:
+        return make_response('Request Forbidden', 403)
 
 @ app.route('/update_patient_status/<incident_id>/<new_status>', methods=['GET'])
 def update_patient_status(incident_id, new_status):
-    # todo auth
-    # returns the incident related to the id provided
-    try:
-        updateIncident = Incident.query.filter_by(id=incident_id).first()
-        if(updateIncident != {}):
-            updateIncident.patient_status_id = new_status
-            db.session.commit()
-            return make_response('Patient Status Changed', 200)
-        return make_response('Incident Not Found', 404)
+      # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        # returns the incident related to the id provided
+        try:
+            updateIncident = Incident.query.filter_by(id=incident_id).first()
+            if(updateIncident != {}):
+                updateIncident.patient_status_id = new_status
+                db.session.commit()
+                return make_response('Patient Status Changed', 200)
+            return make_response('Incident Not Found', 404)
 
-    except IOError:
-        print("I/O error")
-    except ValueError:
-        print("Value Error")
-    except:
-        print("Unexpected error")
-        raise
+        except IOError:
+            print("I/O error")
+        except ValueError:
+            print("Value Error")
+        except:
+            print("Unexpected error")
+            raise
+    else:
+        return make_response('Request Forbidden', 403)
+
 
 
 @ app.route('/get_monthly_incident_count/<org_id>', methods=['GET'])
 def get_monthly_incident_count(org_id):
-    # todo auth
-    # returns the count of VERIFIED monthly incidents reported of the organization
-    # this is used in metrics for visualization
-    try:
-        # initializing an array of 12 months with count 0
-        duration = datetime.utcnow()
-        duration = duration - relativedelta(years=1)
-        monthlyCountArray = []
-        for i in range(12):
-            monthObj = {
-                # using calendar API to generate month names
-                "name": calendar.month_name[i+1],
-                "count": 0
-
-            }
-            monthlyCountArray.append(monthObj)
-
-        monthlyCount = db.session.query(Incident.reported_time, func.count(Incident.reported_time)).filter(Incident.org_id==org_id, Incident.is_verified==1, Incident.reported_time >= duration).group_by(func.year(Incident.reported_time), func.month(Incident.reported_time)).all()
-        db.session.commit()
-        if(monthlyCount != {}):
-            for x in monthlyCount:
-                # reducing 1 from the actual month to fit into monthlyCountArray index
-                monthIndex = x[0].month - 1
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        # returns the count of VERIFIED monthly incidents reported of the organization
+        # this is used in metrics for visualization
+        try:
+            # initializing an array of 12 months with count 0
+            duration = datetime.utcnow()
+            duration = duration - relativedelta(years=1)
+            monthlyCountArray = []
+            for i in range(12):
                 monthObj = {
-                # using calendar API to generate month names
-                "name": calendar.month_name[monthIndex+1],
-                "count": x[1]
+                    # using calendar API to generate month names
+                    "name": calendar.month_name[i+1],
+                    "count": 0
 
                 }
-                # updating the count
-                monthlyCountArray[monthIndex] = monthObj
-            return jsonify(monthlyCountArray)
-        return make_response('Monthly Incident Count Not Found', 404)
+                monthlyCountArray.append(monthObj)
 
-    except IOError:
-        print("I/O error")
-    except ValueError:
-        print("Value Error")
-    except:
-        print("Unexpected error")
-        raise
+            monthlyCount = db.session.query(Incident.reported_time, func.count(Incident.reported_time)).filter(Incident.org_id==org_id, Incident.is_verified==1, Incident.reported_time >= duration).group_by(func.year(Incident.reported_time), func.month(Incident.reported_time)).all()
+            db.session.commit()
+            if(monthlyCount != {}):
+                for x in monthlyCount:
+                    # reducing 1 from the actual month to fit into monthlyCountArray index
+                    monthIndex = x[0].month - 1
+                    monthObj = {
+                    # using calendar API to generate month names
+                    "name": calendar.month_name[monthIndex+1],
+                    "count": x[1]
+
+                    }
+                    # updating the count
+                    monthlyCountArray[monthIndex] = monthObj
+                return jsonify(monthlyCountArray)
+            return make_response('Monthly Incident Count Not Found', 404)
+
+        except IOError:
+            print("I/O error")
+        except ValueError:
+            print("Value Error")
+        except:
+            print("Unexpected error")
+            raise
+    else:
+        return make_response('Request Forbidden', 403)
 
 
 @ app.route('/get_incident_age_group_count/<org_id>/<date_range>', methods=['GET'])
 def get_incident_age_group_count(org_id, date_range):
-    # todo auth
-    # returns the count of VERIFIED incidents age group count reported of the organization
-    # this is used in metrics for visualization
-    # age groups are as follow
-    # 0-2 years = babies
-    # 3-18 years = children
-    # 19-35 years = young adults
-    # 36-50 years = adults
-    # 51 and above = elders
-    try:
-        # initializing an array of age groups with count 0
-        duration = datetime.utcnow()
-        if(date_range == "weekly"):
-            # setting the duration upto last week
-            duration = duration - relativedelta(weeks=1)
-        elif(date_range == "monthly"):
-            # setting the duration upto last month
-            duration = duration - relativedelta(months=1)
-        elif(date_range == "yearly"):
-            # setting the duration upto last year
-            duration = duration - relativedelta(years=1)
-        ageCountArray = []
-        currentYear = datetime.now().year
-        babyCount = 0
-        childrenCount = 0
-        youngAdultCount = 0
-        adultCount = 0
-        seniorCount = 0
-        ageCount = {}
-        if(date_range == "all"):
-            ageCount = db.session.query(Incident.patient_dob, func.count(Incident.patient_dob)).filter(Incident.org_id==org_id, Incident.is_verified==1).group_by(func.year(Incident.patient_dob)).all()
-        else:
-            ageCount = db.session.query(Incident.patient_dob, func.count(Incident.patient_dob)).filter(Incident.org_id==org_id, Incident.is_verified==1, Incident.reported_time >= duration).group_by(func.year(Incident.patient_dob)).all()
-        db.session.commit()
-        if(ageCount != {}):
-            for x in ageCount:
-                # getting the current age of the patient
-                currentAge = currentYear - x[0].year 
-                if(currentAge > 0 and currentAge <=2):
-                    babyCount += x[1]
-                elif(currentAge > 2 and currentAge <=18):
-                    childrenCount += x[1]
-                elif(currentAge > 19 and currentAge <=35):
-                    youngAdultCount += x[1]
-                elif(currentAge > 36 and currentAge <=50):
-                    adultCount += x[1]
-                else:
-                    seniorCount += x[1]
+     # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        # returns the count of VERIFIED incidents age group count reported of the organization
+        # this is used in metrics for visualization
+        # age groups are as follow
+        # 0-2 years = babies
+        # 3-18 years = children
+        # 19-35 years = young adults
+        # 36-50 years = adults
+        # 51 and above = elders
+        try:
+            # initializing an array of age groups with count 0
+            duration = datetime.utcnow()
+            if(date_range == "weekly"):
+                # setting the duration upto last week
+                duration = duration - relativedelta(weeks=1)
+            elif(date_range == "monthly"):
+                # setting the duration upto last month
+                duration = duration - relativedelta(months=1)
+            elif(date_range == "yearly"):
+                # setting the duration upto last year
+                duration = duration - relativedelta(years=1)
+            ageCountArray = []
+            currentYear = datetime.now().year
+            babyCount = 0
+            childrenCount = 0
+            youngAdultCount = 0
+            adultCount = 0
+            seniorCount = 0
+            ageCount = {}
+            if(date_range == "all"):
+                ageCount = db.session.query(Incident.patient_dob, func.count(Incident.patient_dob)).filter(Incident.org_id==org_id, Incident.is_verified==1).group_by(func.year(Incident.patient_dob)).all()
+            else:
+                ageCount = db.session.query(Incident.patient_dob, func.count(Incident.patient_dob)).filter(Incident.org_id==org_id, Incident.is_verified==1, Incident.reported_time >= duration).group_by(func.year(Incident.patient_dob)).all()
+            db.session.commit()
+            if(ageCount != {}):
+                for x in ageCount:
+                    # getting the current age of the patient
+                    currentAge = currentYear - x[0].year 
+                    if(currentAge > 0 and currentAge <=2):
+                        babyCount += x[1]
+                    elif(currentAge > 2 and currentAge <=18):
+                        childrenCount += x[1]
+                    elif(currentAge > 19 and currentAge <=35):
+                        youngAdultCount += x[1]
+                    elif(currentAge > 36 and currentAge <=50):
+                        adultCount += x[1]
+                    else:
+                        seniorCount += x[1]
 
-            ageCountArray.append({
-                "name": "Babies",
-                "range": "0 - 2 years",
-                "count": babyCount
-            })
-            ageCountArray.append({
-                "name": "Children",
-                "range": "3 - 18 years",
-                "count": childrenCount
-            })
-            ageCountArray.append({
-                "name": "Young Adults",
-                "range": "19 - 35 years",
-                "count": youngAdultCount
-            })
-            ageCountArray.append({
-                "name": "Adults",
-                "range": "36 - 50 years",
-                "count": adultCount
-            })
-            ageCountArray.append({
-                "name": "Seniors",
-                "range": "51 years and above",
-                "count": seniorCount
-            })
-            return jsonify(ageCountArray)
-        return make_response('Age Incident Count Not Found', 404)
+                ageCountArray.append({
+                    "name": "Babies",
+                    "range": "0 - 2 years",
+                    "count": babyCount
+                })
+                ageCountArray.append({
+                    "name": "Children",
+                    "range": "3 - 18 years",
+                    "count": childrenCount
+                })
+                ageCountArray.append({
+                    "name": "Young Adults",
+                    "range": "19 - 35 years",
+                    "count": youngAdultCount
+                })
+                ageCountArray.append({
+                    "name": "Adults",
+                    "range": "36 - 50 years",
+                    "count": adultCount
+                })
+                ageCountArray.append({
+                    "name": "Seniors",
+                    "range": "51 years and above",
+                    "count": seniorCount
+                })
+                return jsonify(ageCountArray)
+            return make_response('Age Incident Count Not Found', 404)
 
-    except IOError:
-        print("I/O error")
-    except ValueError:
-        print("Value Error")
-    except:
-        print("Unexpected error")
-        raise
+        except IOError:
+            print("I/O error")
+        except ValueError:
+            print("Value Error")
+        except:
+            print("Unexpected error")
+            raise
+    else:
+        return make_response('Request Forbidden', 403)
 
 
 @ app.route('/get_incident_status_count/<org_id>/<date_range>', methods=['GET'])
 def get_incident_status_count(org_id, date_range):
-    # todo auth
-    # returns the count of VERIFIED incidents count according to the status of reported of the organization
-    # this is used in metrics for visualization
-    try:
-        # this is for date range filtering
-        duration = datetime.utcnow()
-        if(date_range == "weekly"):
-            # setting the duration upto last week
-            duration = duration - relativedelta(weeks=1)
-        elif(date_range == "monthly"):
-            # setting the duration upto last month
-            duration = duration - relativedelta(months=1)
-        elif(date_range == "yearly"):
-            # setting the duration upto last year
-            duration = duration - relativedelta(years=1)
-        # initializing array to count the incidents belong to a certain status
-        statusCountArray = []
-        pendingTreatmentCount = 0
-        underTreatmentCount = 0
-        recoveringCount = 0
-        recoveredCount = 0
-        deathCount = 0
-        statusCount = {}
-        if(date_range == "all"):
-            statusCount = db.session.query(Incident.patient_status_id, func.count(Incident.patient_status_id)).filter(Incident.org_id==org_id, Incident.is_verified==1).group_by(Incident.patient_status_id).all()
-        else:
-            statusCount = db.session.query(Incident.patient_status_id, func.count(Incident.patient_status_id)).filter(Incident.org_id==org_id, Incident.is_verified==1, Incident.reported_time >= duration).group_by(Incident.patient_status_id).all()
-        db.session.commit()
-        if(statusCount != {}): 
-            for x in statusCount:
-                status_id = x[0]
-                if(status_id == 2):
-                    pendingTreatmentCount = x[1]
-                elif(status_id == 3):
-                    underTreatmentCount = x[1]
-                elif(status_id == 4):
-                    recoveringCount = x[1]
-                elif(status_id == 5):
-                    recoveredCount = x[1]
-                elif(status_id ==6):
-                    deathCount = x[1]
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        # returns the count of VERIFIED incidents count according to the status of reported of the organization
+        # this is used in metrics for visualization
+        try:
+            # this is for date range filtering
+            duration = datetime.utcnow()
+            if(date_range == "weekly"):
+                # setting the duration upto last week
+                duration = duration - relativedelta(weeks=1)
+            elif(date_range == "monthly"):
+                # setting the duration upto last month
+                duration = duration - relativedelta(months=1)
+            elif(date_range == "yearly"):
+                # setting the duration upto last year
+                duration = duration - relativedelta(years=1)
+            # initializing array to count the incidents belong to a certain status
+            statusCountArray = []
+            pendingTreatmentCount = 0
+            underTreatmentCount = 0
+            recoveringCount = 0
+            recoveredCount = 0
+            deathCount = 0
+            statusCount = {}
+            if(date_range == "all"):
+                statusCount = db.session.query(Incident.patient_status_id, func.count(Incident.patient_status_id)).filter(Incident.org_id==org_id, Incident.is_verified==1).group_by(Incident.patient_status_id).all()
+            else:
+                statusCount = db.session.query(Incident.patient_status_id, func.count(Incident.patient_status_id)).filter(Incident.org_id==org_id, Incident.is_verified==1, Incident.reported_time >= duration).group_by(Incident.patient_status_id).all()
+            db.session.commit()
+            if(statusCount != {}): 
+                for x in statusCount:
+                    status_id = x[0]
+                    if(status_id == 2):
+                        pendingTreatmentCount = x[1]
+                    elif(status_id == 3):
+                        underTreatmentCount = x[1]
+                    elif(status_id == 4):
+                        recoveringCount = x[1]
+                    elif(status_id == 5):
+                        recoveredCount = x[1]
+                    elif(status_id ==6):
+                        deathCount = x[1]
 
-            statusCountArray.append({
-                "name": "Pending Treatment",
-                "count": pendingTreatmentCount
-            })
-            statusCountArray.append({
-                "name": "Under Treatment",
-                "count": underTreatmentCount
-            })
-            statusCountArray.append({
-                "name": "Recovering",
-                "count": recoveringCount
-            })
-            statusCountArray.append({
-                "name": "Recovered",
-                "count": recoveredCount
-            })
-            statusCountArray.append({
-                "name": "Death",
-                "count": deathCount
-            })
- 
-            return jsonify(statusCountArray)
-        return make_response('Status Incident Count Not Found', 404)
+                statusCountArray.append({
+                    "name": "Pending Treatment",
+                    "count": pendingTreatmentCount
+                })
+                statusCountArray.append({
+                    "name": "Under Treatment",
+                    "count": underTreatmentCount
+                })
+                statusCountArray.append({
+                    "name": "Recovering",
+                    "count": recoveringCount
+                })
+                statusCountArray.append({
+                    "name": "Recovered",
+                    "count": recoveredCount
+                })
+                statusCountArray.append({
+                    "name": "Death",
+                    "count": deathCount
+                })
 
-    except IOError:
-        print("I/O error")
-    except ValueError:
-        print("Value Error")
-    except:
-        print("Unexpected error")
-        raise
+                return jsonify(statusCountArray)
+            return make_response('Status Incident Count Not Found', 404)
+
+        except IOError:
+            print("I/O error")
+        except ValueError:
+            print("Value Error")
+        except:
+            print("Unexpected error")
+            raise
+    else:
+        return make_response('Request Forbidden', 403)
 
 
 @ app.route('/get_incident_verification_breakdown/<org_id>/<date_range>', methods=['GET'])
 def get_incident_verification_breakdown(org_id, date_range):
-    # todo auth
-    # returns the count of incidents count according to their status in the organization
-    # this is used in metrics for visualization
-    try:
-        # this is for date range filtering
-        duration = datetime.utcnow()
-        if(date_range == "weekly"):
-            # setting the duration upto last week
-            duration = duration - relativedelta(weeks=1)
-        elif(date_range == "monthly"):
-            # setting the duration upto last month
-            duration = duration - relativedelta(months=1)
-        elif(date_range == "yearly"):
-            # setting the duration upto last year
-            duration = duration - relativedelta(years=1)
-        # initializing array to count the incidents belong to a certain status
-        incidentBreakdownArray = []
-        pendingIncidentCount = 0
-        verifiedIncidentCount = 0
-        declinedIncidentCount = 0
-        incidentCount = {}
-        if(date_range == "all"):
-            incidentCount = db.session.query(Incident.is_verified, func.count(Incident.is_verified)).filter(Incident.org_id==org_id).group_by(Incident.is_verified).all()
-        else:
-            incidentCount = db.session.query(Incident.is_verified, func.count(Incident.is_verified)).filter(Incident.org_id==org_id, Incident.reported_time >= duration).group_by(Incident.is_verified).all()
-        db.session.commit()
-        if(incidentCount != {}): 
-            print(incidentCount)
-            for x in incidentCount:
-                verification = x[0]
-                if(verification == 0):
-                    pendingIncidentCount = x[1]
-                elif(verification == 1):
-                    verifiedIncidentCount = x[1]
-                elif(verification == 2):
-                    declinedIncidentCount = x[1]
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        # returns the count of incidents count according to their status in the organization
+        # this is used in metrics for visualization
+        try:
+            # this is for date range filtering
+            duration = datetime.utcnow()
+            if(date_range == "weekly"):
+                # setting the duration upto last week
+                duration = duration - relativedelta(weeks=1)
+            elif(date_range == "monthly"):
+                # setting the duration upto last month
+                duration = duration - relativedelta(months=1)
+            elif(date_range == "yearly"):
+                # setting the duration upto last year
+                duration = duration - relativedelta(years=1)
+            # initializing array to count the incidents belong to a certain status
+            incidentBreakdownArray = []
+            pendingIncidentCount = 0
+            verifiedIncidentCount = 0
+            declinedIncidentCount = 0
+            incidentCount = {}
+            if(date_range == "all"):
+                incidentCount = db.session.query(Incident.is_verified, func.count(Incident.is_verified)).filter(Incident.org_id==org_id).group_by(Incident.is_verified).all()
+            else:
+                incidentCount = db.session.query(Incident.is_verified, func.count(Incident.is_verified)).filter(Incident.org_id==org_id, Incident.reported_time >= duration).group_by(Incident.is_verified).all()
+            db.session.commit()
+            if(incidentCount != {}): 
+                for x in incidentCount:
+                    verification = x[0]
+                    if(verification == 0):
+                        pendingIncidentCount = x[1]
+                    elif(verification == 1):
+                        verifiedIncidentCount = x[1]
+                    elif(verification == 2):
+                        declinedIncidentCount = x[1]
 
-            incidentBreakdownArray.append({
-                "name": "Pending",
-                "count": pendingIncidentCount
-            })
-            incidentBreakdownArray.append({
-                "name": "Verified",
-                "count": verifiedIncidentCount
-            })
-            incidentBreakdownArray.append({
-                "name": "Declined",
-                "count": declinedIncidentCount
-            })
- 
-            return jsonify(incidentBreakdownArray)
-        return make_response('Incident Breakdown Not Found', 404)
+                incidentBreakdownArray.append({
+                    "name": "Pending",
+                    "count": pendingIncidentCount
+                })
+                incidentBreakdownArray.append({
+                    "name": "Verified",
+                    "count": verifiedIncidentCount
+                })
+                incidentBreakdownArray.append({
+                    "name": "Declined",
+                    "count": declinedIncidentCount
+                })
 
-    except IOError:
-        print("I/O error")
-    except ValueError:
-        print("Value Error")
-    except:
-        print("Unexpected error")
-        raise
+                return jsonify(incidentBreakdownArray)
+            return make_response('Incident Breakdown Not Found', 404)
+
+        except IOError:
+            print("I/O error")
+        except ValueError:
+            print("Value Error")
+        except:
+            print("Unexpected error")
+            raise
+    else:
+        return make_response('Request Forbidden', 403)
 
 
 @ app.route('/get_user_base_breakdown', methods=['GET'])
 def get_user_base_breakdown():
-    # todo auth
-    # returns the total number of admin and users in the system
-    # this is used in metrics for visualization
-    try:
-        userBreakdownArray = []
-        adminCount = -1
-        userCount = -1
-        userCount = db.session.query(User).count()
-        adminCount = db.session.query(Admin).count()
-        db.session.commit()
-        if(userCount != -1 and adminCount != -1): 
-            userBreakdownArray.append({
-                "name": "User",
-                "count": userCount
-            })
-            userBreakdownArray.append({
-                "name": "Admin",
-                "count": adminCount
-            })
- 
-            return jsonify(userBreakdownArray)
-        return make_response('User Breakdown Not Found', 404)
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        # returns the total number of admin and users in the system
+        # this is used in metrics for visualization
+        try:
+            userBreakdownArray = []
+            adminCount = -1
+            userCount = -1
+            userCount = db.session.query(User).count()
+            adminCount = db.session.query(Admin).count()
+            db.session.commit()
+            if(userCount != -1 and adminCount != -1): 
+                userBreakdownArray.append({
+                    "name": "User",
+                    "count": userCount
+                })
+                userBreakdownArray.append({
+                    "name": "Admin",
+                    "count": adminCount
+                })
 
-    except IOError:
-        print("I/O error")
-    except ValueError:
-        print("Value Error")
-    except:
-        print("Unexpected error")
-        raise
+                return jsonify(userBreakdownArray)
+            return make_response('User Breakdown Not Found', 404)
+
+        except IOError:
+            print("I/O error")
+        except ValueError:
+            print("Value Error")
+        except:
+            print("Unexpected error")
+            raise
+    else:
+        return make_response('Request Forbidden', 403)
 
 
 @ app.route('/get_province_vs_status_count/<date_range>', methods=['GET'])
 def get_province_vs_status_count(date_range):
-    # todo auth
-    # returns the count of different incident types in each province
-    # this is used in metrics for visualization
-    try:
-        # this is for date range filtering
-        duration = datetime.utcnow()
-        if(date_range == "weekly"):
-            # setting the duration upto last week
-            duration = duration - relativedelta(weeks=1)
-        elif(date_range == "monthly"):
-            # setting the duration upto last month
-            duration = duration - relativedelta(months=1)
-        elif(date_range == "yearly"):
-            # setting the duration upto last year
-            duration = duration - relativedelta(years=1)
-        # initializing array to count the incidents belong to a certain status
-        statusDict = {
-            "Pending Verification": 0,
-            "Pending Treatment": 0,
-            "Under Treatment": 0,
-            "Recovering": 0,
-            "Recovered": 0,
-            "Death": 0,
-            "Declined": 0,
-        }
-        cpDict = statusDict.copy()
-        cpDict["province"] = "Central"
-        epDict = statusDict.copy()
-        epDict["province"] = "Eastern"
-        ncDict = statusDict.copy()
-        ncDict["province"] = "North Central"
-        nwDict = statusDict.copy()
-        nwDict["province"] = "North Western"
-        npDict = statusDict.copy()
-        npDict["province"] = "Northern"
-        sgDict = statusDict.copy()
-        sgDict["province"] = "Sabaragamuwa"
-        spDict = statusDict.copy()
-        spDict["province"] = "Southern"
-        upDict = statusDict.copy()
-        upDict["province"] = "Uva"
-        wpDict = statusDict.copy()
-        wpDict["province"] = "Western"
-        provinceStatusArray = [cpDict, epDict, ncDict, nwDict, npDict, sgDict, spDict, upDict, wpDict]
-        incidentCount = {}
-        if(date_range == "all"):
-            incidentCount = db.session.query(Incident.province, PatientStatus.status, func.count(Incident.patient_status_id)).filter().join(PatientStatus).group_by(Incident.province, Incident.patient_status_id).all()
-        else:
-            incidentCount = db.session.query(Incident.province, PatientStatus.status, func.count(Incident.patient_status_id)).filter(Incident.reported_time >= duration).join(PatientStatus).group_by(Incident.province, Incident.patient_status_id).all()
-        db.session.commit()
-        if(incidentCount != {}): 
-            for x in incidentCount:
-                province = x[0]
-                status = x[1]
-                count = x[2]
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        # returns the count of different incident types in each province
+        # this is used in metrics for visualization
+        try:
+            # this is for date range filtering
+            duration = datetime.utcnow()
+            if(date_range == "weekly"):
+                # setting the duration upto last week
+                duration = duration - relativedelta(weeks=1)
+            elif(date_range == "monthly"):
+                # setting the duration upto last month
+                duration = duration - relativedelta(months=1)
+            elif(date_range == "yearly"):
+                # setting the duration upto last year
+                duration = duration - relativedelta(years=1)
+            # initializing array to count the incidents belong to a certain status
+            statusDict = {
+                "Pending Verification": 0,
+                "Pending Treatment": 0,
+                "Under Treatment": 0,
+                "Recovering": 0,
+                "Recovered": 0,
+                "Death": 0,
+                "Declined": 0,
+            }
+            cpDict = statusDict.copy()
+            cpDict["province"] = "Central"
+            epDict = statusDict.copy()
+            epDict["province"] = "Eastern"
+            ncDict = statusDict.copy()
+            ncDict["province"] = "North Central"
+            nwDict = statusDict.copy()
+            nwDict["province"] = "North Western"
+            npDict = statusDict.copy()
+            npDict["province"] = "Northern"
+            sgDict = statusDict.copy()
+            sgDict["province"] = "Sabaragamuwa"
+            spDict = statusDict.copy()
+            spDict["province"] = "Southern"
+            upDict = statusDict.copy()
+            upDict["province"] = "Uva"
+            wpDict = statusDict.copy()
+            wpDict["province"] = "Western"
+            provinceStatusArray = [cpDict, epDict, ncDict, nwDict, npDict, sgDict, spDict, upDict, wpDict]
+            incidentCount = {}
+            if(date_range == "all"):
+                incidentCount = db.session.query(Incident.province, PatientStatus.status, func.count(Incident.patient_status_id)).filter().join(PatientStatus).group_by(Incident.province, Incident.patient_status_id).all()
+            else:
+                incidentCount = db.session.query(Incident.province, PatientStatus.status, func.count(Incident.patient_status_id)).filter(Incident.reported_time >= duration).join(PatientStatus).group_by(Incident.province, Incident.patient_status_id).all()
+            db.session.commit()
+            if(incidentCount != {}): 
+                for x in incidentCount:
+                    province = x[0]
+                    status = x[1]
+                    count = x[2]
 
                 for item in provinceStatusArray:
                     if(item["province"] == province):
                         item[status] = count
 
-            return jsonify(provinceStatusArray)
-        return make_response('Incident Breakdown Not Found', 404)
+                return jsonify(provinceStatusArray)
+            return make_response('Incident Breakdown Not Found', 404)
 
-    except IOError:
-        print("I/O error")
-    except ValueError:
-        print("Value Error")
-    except:
-        print("Unexpected error")
-        raise
+        except IOError:
+            print("I/O error")
+        except ValueError:
+            print("Value Error")
+        except:
+            print("Unexpected error")
+            raise
+    else:
+        return make_response('Request Forbidden', 403)
 
 
 @ app.route('/login_admin_user', methods=['POST'])
@@ -1037,26 +1109,31 @@ def login_admin_user():
 
 @ app.route('/create_admin_user', methods=['POST'])
 def create_admin_user():
-    # signup function for admin users
-    try:
-        email = request.json['email'].encode("utf-8")
-        name  = request.json['name'].encode("utf-8")
-        contact  = request.json['contact'].encode("utf-8")
-        password  = request.json['password'].encode("utf-8")
-        org_id  = request.json['orgId'].encode("utf-8")
-        hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
-        new_admin = Admin(email, name, contact, hashed_password, org_id)
-        db.session.add(new_admin)
-        db.session.commit()
-        return user_schema.jsonify(new_admin)
+    ## checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        # signup function for admin users
+        try:
+            email = request.json['email'].encode("utf-8")
+            name  = request.json['name'].encode("utf-8")
+            contact  = request.json['contact'].encode("utf-8")
+            password  = request.json['password'].encode("utf-8")
+            org_id  = request.json['orgId'].encode("utf-8")
+            hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
+            new_admin = Admin(email, name, contact, hashed_password, org_id)
+            db.session.add(new_admin)
+            db.session.commit()
+            return user_schema.jsonify(new_admin)
 
-    except IOError:
-        print("I/O error")
-    except ValueError:
-        print("Value Error")
-    except:
-        print("Unexpected error")
-        raise
+        except IOError:
+            print("I/O error")
+        except ValueError:
+            print("Value Error")
+        except:
+            print("Unexpected error")
+            raise
+    else:
+        return make_response('Request Forbidden', 403)
 
 
 # running server
