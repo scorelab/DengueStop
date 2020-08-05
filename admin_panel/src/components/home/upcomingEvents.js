@@ -3,13 +3,13 @@ import EventService from "../../services/eventService";
 import EventCard from "./eventCard";
 import Moment from "react-moment";
 import { MDBCardBody, MDBCardTitle, MDBCardFooter } from "mdbreact";
-import { SessionContext } from "../../services/sessionService";
+import { getSession } from "../../services/sessionService";
 
 const UpcomingEvents = (props) => {
     const [events, setEvents] = useState([]);
     const setLastRefresh = props.setLastRefresh;
     const lastRefresh = props.lastRefresh;
-    const currentUser = useContext(SessionContext);
+    const currentUser = getSession();
 
     useEffect(() => {
         getEventData();
