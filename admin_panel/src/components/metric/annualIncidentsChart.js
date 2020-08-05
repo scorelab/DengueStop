@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import {
     LineChart,
     Line,
@@ -10,10 +10,10 @@ import {
 } from "recharts";
 import { MDBCard, MDBCardBody } from "mdbreact";
 import IncidentService from "../../services/incidentService";
-import { SessionContext } from "../../services/sessionService";
+import { getSession } from "../../services/sessionService";
 
 const AnnualIncidentsChart = () => {
-    const currentUser = useContext(SessionContext);
+    const currentUser = getSession();
     const incidentService = new IncidentService();
     const [annualIncidentCount, setAnnualIncidentCount] = useState([]);
 

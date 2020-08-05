@@ -16,7 +16,7 @@ import {
 import Truncate from "react-truncate";
 import IncidentService from "../../services/incidentService";
 import L from "leaflet";
-import { SessionContext } from "../../services/sessionService";
+import { SessionContext, getSession } from "../../services/sessionService";
 
 delete L.Icon.Default.prototype._getIconUrl;
 
@@ -118,7 +118,7 @@ const IncidentCard = (props) => {
 };
 
 const DeclineReportModal = (props) => {
-    const currentUser = useContext(SessionContext);
+    const currentUser = getSession();
     const [isOpen, setIsOpen] = useState(false);
     const setIncidents = props.setIncidents;
     const index = props.index;
@@ -183,7 +183,7 @@ const DeclineReportModal = (props) => {
 };
 
 const VerifyReportModal = (props) => {
-    const currentUser = useContext(SessionContext);
+    const currentUser = getSession();
     const [isOpen, setIsOpen] = useState(false);
     const setIncidents = props.setIncidents;
     const index = props.index;

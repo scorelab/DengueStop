@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import {
     MDBCard,
     MDBRow,
@@ -12,10 +12,10 @@ import {
 } from "mdbreact";
 import IncidentService from "../../services/incidentService";
 import AuthService from "../../services/authService";
-import { SessionContext } from "../../services/sessionService";
+import { getSession } from "../../services/sessionService";
 
 const CommunityStats = () => {
-    const currentUser = useContext(SessionContext);
+    const currentUser = getSession();
     const incidentService = new IncidentService();
     const userService = new AuthService();
     const [

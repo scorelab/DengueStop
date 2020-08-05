@@ -37,8 +37,6 @@ const Navbar = (props) => {
     };
 
     const logoutPrompt = () => {
-        console.log(logoutDialogue);
-
         setLogoutDialogue(true);
     };
 

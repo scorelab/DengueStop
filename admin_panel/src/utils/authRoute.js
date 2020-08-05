@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Route, Redirect } from "react-router-dom";
 import { getSession } from "../services/sessionService";
 
@@ -22,10 +22,6 @@ const AuthRoute = ({ component: Component, ...rest }) => {
             }
         />
     );
-
-    // const { isAuthUser } = props;
-    // if (isAuthUser) return <Redirect to="/home" />;
-    // else return <Redirect to="/login" />;
 };
 
 export default AuthRoute;

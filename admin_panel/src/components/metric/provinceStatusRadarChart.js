@@ -32,7 +32,6 @@ const ProvinceStatusRadarChart = () => {
         incidentService
             .getProvinceVsStatusCount(provinceStatusCountFilter)
             .then((res) => {
-                console.log(res);
                 setProvinceStatusCount(res);
             });
     }, [provinceStatusCountFilter]);

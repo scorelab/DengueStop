@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import EventService from "../../services/eventService";
 import EventCard from "./eventCard";
 import Moment from "react-moment";
