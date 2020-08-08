@@ -31,14 +31,21 @@ const EventCard = (props) => {
         <React.Fragment>
             <MDBCard className="m-2 mt-3 px-2 py-0 event-card">
                 <MDBRow>
+                    <MDBCol size="6" className="text-left">
+                        <span className="timestamp-text">
+                            {data.status.status}
+                        </span>
+                    </MDBCol>
+                    <MDBCol size="6" className="text-right">
+                        <span className="timestamp-text">
+                            <Moment fromNow>{data.event.start_time}</Moment>
+                        </span>
+                    </MDBCol>
+                </MDBRow>
+                <MDBRow>
                     <MDBCol size="7" className="text-left">
                         <span className="event-name-text">
                             {data.event.name}
-                        </span>
-                    </MDBCol>
-                    <MDBCol size="5" className="text-right">
-                        <span className="timestamp-text">
-                            <Moment fromNow>{data.event.start_time}</Moment>
                         </span>
                     </MDBCol>
                 </MDBRow>

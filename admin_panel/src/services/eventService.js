@@ -40,6 +40,25 @@ class EventService {
                 return null;
             });
     }
+
+    updateEventStatus(eventId, newStatus) {
+        var apiUrl =
+            "update_event_status/" +
+            eventId.toString() +
+            "/" +
+            newStatus.toString();
+        return FetchApi("GET", apiUrl)
+            .then((res) => {
+                if (res.status === 200) {
+                    return true;
+                }
+                return false;
+            })
+            .catch((err) => {
+                console.log("error : ", err);
+                return false;
+            });
+    }
 }
 
 export default EventService;

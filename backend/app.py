@@ -1092,7 +1092,7 @@ def login_admin_user():
                 }
                 secret_key = SECRET_KEY
                 token = jwt.encode({'user': loginAdmin.email, 'userId': loginAdmin.id, 'exp': datetime.utcnow(
-                ) + relativedelta(hours=1)}, secret_key)
+                ) + relativedelta(days=1)}, secret_key)
                 return jsonify({'token': token.decode('UTF-8'),'login_res': True, 'userData': loggedInUser})
             else:
                 return make_response({"login_res": False}, 200)
@@ -1302,6 +1302,30 @@ def query_events():
     else:
         return make_response('Request Forbidden', 403)
 
+
+@ app.route('/update_event_status/<event_id>/<new_status>', methods=['GET'])
+def update_event_status(event_id, new_status):
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        # returns the event related to the id provided
+        try:
+            updateEvent = Event.query.filter_by(id=event_id).first()
+            if(updateEvent != {}):
+                updateEvent.status_id = new_status
+                db.session.commit()
+                return make_response('Event Status Changed', 200)
+            return make_response('Event Not Found', 404)
+
+        except IOError:
+            print("I/O error")
+        except ValueError:
+            print("Value Error")
+        except:
+            print("Unexpected error")
+            raise
+    else:
+        return make_response('Request Forbidden', 403)
         
 # running server
 if __name__ == '__main__':
