@@ -1136,6 +1136,21 @@ def create_admin_user():
         return make_response('Request Forbidden', 403)
 
 
+@ app.route('/get_event_statuses', methods=['GET'])
+def get_event_statuses():
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        # returns all the patient statuses in the db
+        eventStatus = EventStatus.query.order_by(EventStatus.id.asc()).all()
+        db.session.commit()
+        if(eventStatus != {}):
+            result = event_statuses_schema.dump(eventStatus)
+            return jsonify(result)
+        return make_response('Event Status Not Found', 404)
+    else:
+        return make_response('Request Forbidden', 403)
+
 # running server
 if __name__ == '__main__':
     app.run(debug=True)

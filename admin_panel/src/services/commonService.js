@@ -30,6 +30,21 @@ class CommonService {
                 return null;
             });
     }
+
+    getEventStatuses() {
+        var apiUrl = "get_event_statuses";
+        return FetchApi("GET", apiUrl)
+            .then((res) => {
+                if (res.status === 200) {
+                    return res.data;
+                }
+                return null;
+            })
+            .catch((err) => {
+                console.log("error : ", err);
+                return null;
+            });
+    }
 }
 
 export default CommonService;
