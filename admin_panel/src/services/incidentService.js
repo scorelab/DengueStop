@@ -1,4 +1,5 @@
 import FetchApi from "../utils/apiProviderService";
+import { getSession } from "./sessionService";
 
 class IncidentService {
     getPendingIncidentsByOrgId(orgId) {
@@ -86,8 +87,8 @@ class IncidentService {
 
     queryIncidents(patientName, province, status, dateRange) {
         var apiUrl = "query_incidents";
-        // get org id from user service
-        var orgId = 1;
+        const currentUser = getSession();
+        var orgId = currentUser.org_id;
         var data = {
             orgId: orgId,
             patientName: patientName,

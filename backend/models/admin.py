@@ -45,7 +45,7 @@ class AdminLimitedSchema(ma.Schema):
     # admin limited schema
     # returns everything except password and salt of a admin
     class Meta:
-        fields = ('id', 'email', 'name', 'contact')
+        fields = ('id', 'email', 'name', 'contact', 'org_id')
 
 # init schema
 admin_schema = AdminSchema()
