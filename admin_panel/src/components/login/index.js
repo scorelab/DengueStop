@@ -7,6 +7,11 @@ import {
     MDBCol,
     MDBInput,
     MDBBtn,
+    MDBModal,
+    MDBModalBody,
+    MDBModalFooter,
+    MDBModalHeader,
+    MDBIcon,
 } from "mdbreact";
 import "./login.css";
 import AuthService from "../../services/authService";
@@ -16,6 +21,7 @@ const Login = (props) => {
     const authService = new AuthService();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [isWarningOpen, setIsWarningOpen] = useState(false);
 
     useEffect(() => {
         console.log(username);
@@ -35,19 +41,56 @@ const Login = (props) => {
             authService.loginAdminUser(username, password).then((res) => {
                 if (res && res.login_res === true) {
                     setSession(res);
-                    console.log(props);
                     props.history.push("/dash/home");
                 } else {
                     //show error message
+                    setIsWarningOpen(true);
                 }
             });
         } else {
-            alert("Provided Credentials Are in Invalid Format");
+            setIsWarningOpen(true);
         }
     };
 
     return (
         <MDBContainer className="login-main-container" fluid>
+            <MDBModal
+                modalStyle="danger"
+                className="text-white"
+                size="sm"
+                centered
+                position="top-center"
+                isOpen={isWarningOpen}
+                toggle={() => setIsWarningOpen(false)}
+            >
+                <MDBModalHeader
+                    className="text-center font-weight-bold"
+                    titleClass="w-100"
+                    tag="p"
+                >
+                    Access Denied
+                </MDBModalHeader>
+                <MDBModalBody className="text-center">
+                    <MDBIcon
+                        icon="times"
+                        size="4x"
+                        className="animated rotateIn"
+                    />
+                    <p>
+                        Username or Password you have entered is invalid. Please
+                        try again.
+                    </p>
+                </MDBModalBody>
+                <MDBModalFooter className="justify-content-center">
+                    <MDBBtn
+                        color="danger"
+                        outline
+                        onClick={() => setIsWarningOpen(false)}
+                    >
+                        Okay
+                    </MDBBtn>
+                </MDBModalFooter>
+            </MDBModal>
             <MDBRow className="h-100">
                 <MDBCol sm="1" md="1" lg="2"></MDBCol>
                 <MDBCol sm="10" md="10" lg="8">

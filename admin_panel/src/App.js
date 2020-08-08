@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import "./App.css";
 import { createBrowserHistory } from "history";
@@ -6,7 +6,6 @@ import Login from "./components/login";
 import Navbar from "./components/navbar";
 import AuthRoute from "./utils/authRoute";
 import { ProtectedHandler } from "./services/sessionService";
-import Home from "./components/home";
 
 const history = createBrowserHistory();
 
