@@ -17,13 +17,13 @@ class EventStatus(db.Model):
         # use the api endpoint to write these data to the database AFTER flask-migrate db migration
         objects = [
             # status 1
-            EventStatus('Upcoming Event'),
-            # status 2
-            EventStatus('Now Happening'),
-            # status 3
-            EventStatus('Finished Event'),
-            # status 4
             EventStatus('Pending Event'),
+            # status 2
+            EventStatus('Upcoming Event'),
+            # status 3
+            EventStatus('Now Happening'),
+            # status 4
+            EventStatus('Finished Event'),
             # status 5
             EventStatus('Cancelled Event'),
         ]

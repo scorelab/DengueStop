@@ -1092,7 +1092,7 @@ def login_admin_user():
                 }
                 secret_key = SECRET_KEY
                 token = jwt.encode({'user': loginAdmin.email, 'userId': loginAdmin.id, 'exp': datetime.utcnow(
-                ) + relativedelta(hours=1)}, secret_key)
+                ) + relativedelta(days=1)}, secret_key)
                 return jsonify({'token': token.decode('UTF-8'),'login_res': True, 'userData': loggedInUser})
             else:
                 return make_response({"login_res": False}, 200)
@@ -1136,6 +1136,197 @@ def create_admin_user():
         return make_response('Request Forbidden', 403)
 
 
+@ app.route('/get_event_statuses', methods=['GET'])
+def get_event_statuses():
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        # returns all the patient statuses in the db
+        eventStatus = EventStatus.query.order_by(EventStatus.id.asc()).all()
+        db.session.commit()
+        if(eventStatus != {}):
+            result = event_statuses_schema.dump(eventStatus)
+            return jsonify(result)
+        return make_response('Event Status Not Found', 404)
+    else:
+        return make_response('Request Forbidden', 403)
+
+
+
+@ app.route('/query_events', methods=['POST'])
+def query_events():
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        org_id = request.json['orgId']
+        event_name = request.json['eventName']
+        province = request.json['province']
+        status = request.json['status']
+        date_range = request.json['dateRange']
+        duration = datetime.utcnow()
+        if(date_range == "weekly"):
+            # setting the duration upto last week
+            duration = duration - relativedelta(weeks=1)
+        elif(date_range == "monthly"):
+            # setting the duration upto last month
+            duration = duration - relativedelta(months=1)
+        elif(date_range == "yearly"):
+            # setting the duration upto last year
+            duration = duration - relativedelta(years=1)
+
+        try:
+            # returns all the events based on the parameters provided
+            if(date_range == "all"):
+                # remove date range from the query
+                if(status == "all"):
+                    # remove event status from the query
+                    if(province == "all"):
+                    # remove province from the query
+                        if(event_name == ""):
+                            # remove event name from the query
+                            events = db.session.query(Event, OrgUnit, EventStatus).join(OrgUnit).join(EventStatus).order_by(Event.start_time.desc()).all()
+                        else:
+                            events = db.session.query(Event, OrgUnit, EventStatus).filter(
+                                Event.name.ilike("%"+event_name+"%")
+                                ).join(OrgUnit).join(EventStatus).order_by(Event.start_time.desc()).all()
+                    else:
+                        if(event_name == ""):
+                            # remove event name from the query
+                            events = db.session.query(Event, OrgUnit, EventStatus).join(OrgUnit).join(EventStatus).filter(
+                                OrgUnit.province == province, 
+                                ).order_by(Event.start_time.desc()).all()
+                        else:
+                            events = db.session.query(Event, OrgUnit, EventStatus).join(OrgUnit).join(EventStatus).filter(
+                                Event.name.ilike("%"+event_name+"%"),
+                                OrgUnit.province == province, 
+                                ).order_by(Event.start_time.desc()).all()
+                else:
+                    if(province == "all"):
+                    # remove province from the query
+                        if(event_name == ""):
+                            # remove event name from the query
+                            events = db.session.query(Event, OrgUnit, EventStatus).join(OrgUnit).join(EventStatus).filter(
+                                Event.status_id == status,
+                                ).order_by(Event.start_time.desc()).all()
+                        else:
+                            events = db.session.query(Event, OrgUnit, EventStatus).join(OrgUnit).join(EventStatus).filter(
+                                Event.name.ilike("%"+event_name+"%"),
+                                Event.status_id == status, 
+                                ).order_by(Event.start_time.desc()).all()
+                    else:
+                        if(event_name == ""):
+                            # remove event name from the query
+                            events = db.session.query(Event, OrgUnit, EventStatus).join(OrgUnit).join(EventStatus).filter(
+                                OrgUnit.province == province,
+                                Event.status_id == status, 
+                                ).order_by(Event.start_time.desc()).all()
+                        else:
+                            events = db.session.query(Event, OrgUnit, EventStatus).join(OrgUnit).join(EventStatus).filter(
+                                Event.name.ilike("%"+event_name+"%"),
+                                OrgUnit.province == province, 
+                                Event.status_id == status,
+                                ).order_by(Event.start_time.desc()).all()
+            else:
+                if(status == "all"):
+                    # remove event status from the query
+                    if(province == "all"):
+                    # remove province from the query
+                        if(event_name == ""):
+                            # remove event name from the query
+                            events = db.session.query(Event, OrgUnit, EventStatus).join(OrgUnit).join(EventStatus).filter(
+                                Event.start_time >= duration 
+                                ).order_by(Event.start_time.desc()).all()
+                        else:
+                            events = db.session.query(Event, OrgUnit, EventStatus).join(OrgUnit).join(EventStatus).filter(
+                                Event.name.ilike("%"+event_name+"%"),
+                                Event.start_time >= duration 
+                                ).order_by(Event.start_time.desc()).all()
+                    else:
+                        if(event_name == ""):
+                            # remove event name from the query
+                            events = db.session.query(Event, OrgUnit, EventStatus).join(OrgUnit).join(EventStatus).filter(
+                                OrgUnit.province == province, 
+                                Event.start_time >= duration
+                                ).order_by(Event.start_time.desc()).all()
+                        else:
+                            events = db.session.query(Event, OrgUnit, EventStatus).join(OrgUnit).join(EventStatus).filter(
+                                Event.name.ilike("%"+event_name+"%"),
+                                OrgUnit.province == province, 
+                                Event.start_time >= duration
+                                ).order_by(Event.start_time.desc()).all()
+                else:
+                    # remove event status from the query
+                    if(province == "all"):
+                    # remove province from the query
+                        if(event_name == ""):
+                            # remove event name from the query
+                            events = db.session.query(Event, OrgUnit, EventStatus).join(OrgUnit).join(EventStatus).filter(
+                                Event.status_id == status,
+                                Event.start_time >= duration
+                                ).order_by(Event.start_time.desc()).all()
+                        else:
+                            events = db.session.query(Event, OrgUnit, EventStatus).join(OrgUnit).join(EventStatus).filter(
+                                Event.name.ilike("%"+event_name+"%"),
+                                Event.status_id == status, 
+                                Event.start_time >= duration
+                                ).order_by(Event.start_time.desc()).all()
+                    else:
+                        if(event_name == ""):
+                            # remove event name from the query
+                            events = db.session.query(Event, OrgUnit, EventStatus).join(OrgUnit).join(EventStatus).filter(
+                                OrgUnit.province == province,
+                                Event.status_id == status,
+                                Event.start_time >= duration 
+                                ).order_by(Event.start_time.desc()).all()
+                        else:
+                            events = db.session.query(Event, OrgUnit, EventStatus).join(OrgUnit).join(EventStatus).filter(
+                                Event.name.ilike("%"+event_name+"%"),
+                                OrgUnit.province == province, 
+                                Event.status_id == status,
+                                Event.start_time >= duration
+                                ).order_by(Event.start_time.desc()).all()
+
+            db.session.commit()
+            if(events != {}):
+                result = events_with_full_schema.dump([{'event': x[0], 'org_unit': x[1], 'status': x[2]} for x in events])
+                return jsonify(result)
+            return make_response('Events Not Found', 404)
+
+        except IOError:
+            print("I/O error")
+        except ValueError:
+            print("Value Error")
+        except:
+            print("Unexpected error")
+            raise 
+    else:
+        return make_response('Request Forbidden', 403)
+
+
+@ app.route('/update_event_status/<event_id>/<new_status>', methods=['GET'])
+def update_event_status(event_id, new_status):
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        # returns the event related to the id provided
+        try:
+            updateEvent = Event.query.filter_by(id=event_id).first()
+            if(updateEvent != {}):
+                updateEvent.status_id = new_status
+                db.session.commit()
+                return make_response('Event Status Changed', 200)
+            return make_response('Event Not Found', 404)
+
+        except IOError:
+            print("I/O error")
+        except ValueError:
+            print("Value Error")
+        except:
+            print("Unexpected error")
+            raise
+    else:
+        return make_response('Request Forbidden', 403)
+        
 # running server
 if __name__ == '__main__':
     app.run(debug=True)

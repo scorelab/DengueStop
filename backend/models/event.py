@@ -3,6 +3,7 @@ from database import ma
 from sqlalchemy import ForeignKeyConstraint
 from models.admin import Admin, admin_limited_schema
 from models.event_status import EventStatus, event_status_schema
+from models.org_unit import org_unit_schema
 
 class Event(db.Model):
     # class corresponding to the event table in the database
@@ -19,7 +20,7 @@ class Event(db.Model):
     location_long = db.Column(db.Float, nullable=False)
     date_created = db.Column(db.DateTime, nullable=False)
     start_time = db.Column(db.DateTime, nullable=False)
-    duration = db.Column(db.Integer, nullable=False)
+    duration = db.Column(db.Float, nullable=False)
     coordinator_name = db.Column(db.String(45), nullable=False)
     coordinator_contact = db.Column(db.Integer, nullable=False)
     status_id = db.Column(db.Integer, nullable=False)
@@ -57,6 +58,7 @@ class EventFullInfoSchema(ma.Schema):
     event = ma.Nested(event_schema)
     admin = ma.Nested(admin_limited_schema)
     status = ma.Nested(event_status_schema)
+    org_unit = ma.Nested(org_unit_schema)
 
 
 
