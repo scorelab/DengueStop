@@ -18,10 +18,11 @@ const Event = () => {
         eventService
             .queryEvents(eventName, province, status, dateRange)
             .then((res) => {
-                console.log(res);
-
                 setEventArray(res);
                 setLastRefresh(Date());
+            })
+            .catch((err) => {
+                console.log(err);
             });
     };
 

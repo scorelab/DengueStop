@@ -12,7 +12,7 @@ class CommonService {
             })
             .catch((err) => {
                 console.log("error : ", err);
-                return null;
+                throw err;
             });
     }
 
@@ -27,7 +27,7 @@ class CommonService {
             })
             .catch((err) => {
                 console.log("error : ", err);
-                return null;
+                throw err;
             });
     }
 
@@ -42,7 +42,7 @@ class CommonService {
             })
             .catch((err) => {
                 console.log("error : ", err);
-                return null;
+                throw err;
             });
     }
 }
