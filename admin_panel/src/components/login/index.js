@@ -5,7 +5,6 @@ import {
     MDBCardBody,
     MDBRow,
     MDBCol,
-    MDBInput,
     MDBBtn,
     MDBModal,
     MDBModalBody,
@@ -26,8 +25,9 @@ const Login = (props) => {
     useEffect(() => {
         console.log(username);
     }, [username]);
-
+    // eslint-disable-next-line
     const validEmailRegex = RegExp(
+        // eslint-disable-next-line
         /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i
     );
 

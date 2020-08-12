@@ -4,12 +4,12 @@ import { Redirect } from "react-router-dom";
 export const setSession = (session) => {
     const token = session.token;
     const userData = JSON.stringify(session.userData);
-    localStorage.setItem("token", token);
-    localStorage.setItem("userData", userData);
+    sessionStorage.setItem("token", token);
+    sessionStorage.setItem("userData", userData);
 };
 
 export const getSession = () => {
-    const userData = localStorage.getItem("userData");
+    const userData = sessionStorage.getItem("userData");
 
     if (userData === undefined) {
         return {};
@@ -26,11 +26,11 @@ export const hasToken = () => {
 
 export const getToken = () => {
     // returns the token
-    return localStorage.getItem("token");
+    return sessionStorage.getItem("token");
 };
 
 export const endSession = () => {
-    localStorage.clear();
+    sessionStorage.clear();
 };
 
 export const ProtectedHandler = ({ history }) => {

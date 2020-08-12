@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Map, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import "./event.css";
 import {
     MDBCard,
     MDBRow,
@@ -20,6 +21,10 @@ import DataTable from "react-data-table-component";
 import Moment from "react-moment";
 import { getSession } from "../../services/sessionService";
 import EventService from "../../services/eventService";
+import { Formik, Form, Field } from "formik";
+import * as Yup from "yup";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const EventList = (props) => {
     const currentUser = getSession();
@@ -88,7 +93,10 @@ const EventList = (props) => {
 
     return (
         <MDBCard className="patient-table-container">
-            <NewEventModal isOpen={addEventModal} />
+            <NewEventModal
+                isOpen={addEventModal}
+                setIsOpen={setAddEventModal}
+            />
             <MDBRow className="w-100">
                 <MDBCol>
                     <MDBBtn
@@ -126,22 +134,250 @@ const EventList = (props) => {
 };
 
 const NewEventModal = (props) => {
-    const [isOpen, setIsOpen] = useState(false);
+    const isOpen = props.isOpen;
+    const setIsOpen = props.setIsOpen;
+    const [startDate, setStartDate] = useState(new Date());
+    const mapCenter = [7.9, 80.747452];
+    const [eventCoord, setEventCood] = useState([7.9, 80.747452]);
+    const eventService = new EventService();
 
     useEffect(() => {
         setIsOpen(props.isOpen);
     });
 
+    const addNewEvent = (eventData) => {
+        var eventObject = eventData;
+        eventObject.start_time = startDate;
+        eventObject.location_lat = eventCoord[0];
+        eventObject.location_long = eventCoord[1];
+        eventService.createEvent(eventObject);
+    };
+
+    const changeCoordinateOnClick = (event) => {
+        const lat = event.latlng.lat;
+        const long = event.latlng.lng;
+        setEventCood([lat, long]);
+    };
+
+    const changeCoordinateOnDrag = (event) => {
+        const lat = event.target._latlng.lat;
+        const long = event.target._latlng.lng;
+        setEventCood([lat, long]);
+    };
+
+    const NewEventSchema = Yup.object().shape({
+        name: Yup.string()
+            .min(2, "Too Short!")
+            .max(45, "Too Long!")
+            .required("Required"),
+        venue: Yup.string()
+            .min(2, "Too Short!")
+            .max(45, "Too Long!")
+            .required("Required"),
+        coordinator_name: Yup.string()
+            .min(2, "Too Short!")
+            .max(45, "Too Long!")
+            .required("Required"),
+        coordinator_contact: Yup.string()
+            .min(10, "Number too Short!")
+            .max(10, "Number too Long!")
+            .required("Required"),
+        description: Yup.string()
+            .min(5, "Too Short!")
+            .max(500, "Too Long!")
+            .required("Required"),
+    });
+
     return (
         <MDBModal size="lg" isOpen={isOpen} toggle={() => setIsOpen(false)}>
-            <MDBModalHeader>Add New Event</MDBModalHeader>
-            <MDBModalBody></MDBModalBody>
-            <MDBModalFooter>
-                <MDBBtn color="primary">Save Event</MDBBtn>
-                <MDBBtn color="secondary" onClick={() => setIsOpen(false)}>
-                    Close
-                </MDBBtn>
-            </MDBModalFooter>
+            <Formik
+                initialValues={{
+                    name: "",
+                    venue: "",
+                    duration: 0,
+                    coordinator_name: "",
+                    coordinator_contact: "",
+                    description: "",
+                }}
+                validationSchema={NewEventSchema}
+                onSubmit={(values, { setSubmitting }) => {
+                    addNewEvent(values);
+                    setSubmitting(false);
+                }}
+                validate={(values) => {
+                    const errors = {};
+                    if (values.duration <= 0) {
+                        errors.duration = "Duration should be more than 0";
+                    }
+                    return errors;
+                }}
+            >
+                {({ errors, touched }) => (
+                    <Form>
+                        <MDBModalHeader>Add New Event</MDBModalHeader>
+                        <MDBModalBody>
+                            <MDBRow>
+                                <MDBCol>
+                                    <div className="form-group">
+                                        <label>Event Name</label>
+                                        <Field
+                                            name="name"
+                                            type="text"
+                                            className="form-control"
+                                        />
+                                        {errors.name && touched.name ? (
+                                            <p className="event-form-invalid-text">
+                                                {errors.name}
+                                            </p>
+                                        ) : null}
+                                    </div>
+                                </MDBCol>
+                                <MDBCol>
+                                    <div className="form-group">
+                                        <label>Event Venue</label>
+                                        <Field
+                                            name="venue"
+                                            type="text"
+                                            className="form-control"
+                                        />
+                                        {errors.venue && touched.venue ? (
+                                            <p className="event-form-invalid-text">
+                                                {errors.venue}
+                                            </p>
+                                        ) : null}
+                                    </div>
+                                </MDBCol>
+                            </MDBRow>
+                            <MDBRow>
+                                <MDBCol>
+                                    <div className="form-group">
+                                        <label>Event Date/Time</label>
+                                        <br />
+                                        <DatePicker
+                                            minDate={new Date()}
+                                            className="event-date-picker form-control"
+                                            dateFormat="MMMM d, yyyy h:mm aa"
+                                            selected={startDate}
+                                            showTimeSelect
+                                            onChange={(date) =>
+                                                setStartDate(date)
+                                            }
+                                        ></DatePicker>
+                                    </div>
+                                </MDBCol>
+                                <MDBCol>
+                                    <div className="form-group">
+                                        <label>Duration</label>
+                                        <Field
+                                            name="duration"
+                                            type="number"
+                                            className="form-control"
+                                        />
+                                        {errors.duration && touched.duration ? (
+                                            <p className="event-form-invalid-text">
+                                                {errors.duration}
+                                            </p>
+                                        ) : null}
+                                    </div>
+                                </MDBCol>
+                            </MDBRow>
+                            <MDBRow>
+                                <MDBCol>
+                                    <div className="form-group">
+                                        <label>Event Coordinator Name</label>
+                                        <Field
+                                            name="coordinator_name"
+                                            type="text"
+                                            className="form-control"
+                                        />
+                                        {errors.coordinator_name &&
+                                        touched.coordinator_name ? (
+                                            <p className="event-form-invalid-text">
+                                                {errors.coordinator_name}
+                                            </p>
+                                        ) : null}
+                                    </div>
+                                </MDBCol>
+                                <MDBCol>
+                                    <div className="form-group">
+                                        <label>Event Coordinator Contact</label>
+                                        <Field
+                                            name="coordinator_contact"
+                                            type="text"
+                                            className="form-control"
+                                        />
+                                        {errors.coordinator_contact &&
+                                        touched.coordinator_contact ? (
+                                            <p className="event-form-invalid-text">
+                                                {errors.coordinator_contact}
+                                            </p>
+                                        ) : null}
+                                    </div>
+                                </MDBCol>
+                            </MDBRow>
+                            <MDBRow>
+                                <MDBCol>
+                                    <div className="form-group">
+                                        <label>Event Description</label>
+                                        <Field
+                                            component="textarea"
+                                            name="description"
+                                            type="text"
+                                            className="form-control"
+                                        />
+                                        {errors.description &&
+                                        touched.description ? (
+                                            <p className="event-form-invalid-text">
+                                                {errors.description}
+                                            </p>
+                                        ) : null}
+                                    </div>
+                                </MDBCol>
+                            </MDBRow>
+                            <MDBRow>
+                                <MDBCol>
+                                    <p className="text-center">
+                                        Mark the event location on the map below
+                                    </p>
+                                    <Map
+                                        className="map-container"
+                                        onclick={(event) =>
+                                            changeCoordinateOnClick(event)
+                                        }
+                                        center={mapCenter}
+                                        zoom={7}
+                                    >
+                                        <TileLayer
+                                            attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                        />
+                                        <Marker
+                                            draggable={true}
+                                            ondragend={(event) =>
+                                                changeCoordinateOnDrag(event)
+                                            }
+                                            position={eventCoord}
+                                        >
+                                            <Popup>Event Location</Popup>
+                                        </Marker>
+                                    </Map>
+                                </MDBCol>
+                            </MDBRow>
+                        </MDBModalBody>
+                        <MDBModalFooter>
+                            <MDBBtn type="submit" color="primary">
+                                Save Event
+                            </MDBBtn>
+                            <MDBBtn
+                                color="secondary"
+                                onClick={() => setIsOpen(false)}
+                            >
+                                Close
+                            </MDBBtn>
+                        </MDBModalFooter>
+                    </Form>
+                )}
+            </Formik>
         </MDBModal>
     );
 };

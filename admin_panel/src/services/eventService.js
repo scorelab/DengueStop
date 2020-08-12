@@ -42,7 +42,7 @@ class EventService {
     }
 
     updateEventStatus(eventId, newStatus) {
-        var apiUrl =
+        const apiUrl =
             "update_event_status/" +
             eventId.toString() +
             "/" +
@@ -57,6 +57,41 @@ class EventService {
             .catch((err) => {
                 console.log("error : ", err);
                 return false;
+            });
+    }
+
+    createEvent(eventObject) {
+        const apiUrl = "create_event";
+        const currentUser = getSession();
+        const orgId = currentUser.org_id;
+        const adminId = currentUser.id;
+        // status_id for sets the event to a pending event by default
+        const data = {
+            name: eventObject.name,
+            venue: eventObject.venue,
+            location_lat: eventObject.location_lat,
+            location_long: eventObject.location_long,
+            start_time: eventObject.start_time,
+            duration: eventObject.duration,
+            coordinator_name: eventObject.coordinator_name,
+            coordinator_contact: eventObject.coordinator_contact,
+            description: eventObject.description,
+            status_id: 4,
+            org_id: orgId,
+            created_by: adminId,
+        };
+        console.log(data);
+
+        return FetchApi("POST", apiUrl, data)
+            .then((res) => {
+                if (res.status === 200) {
+                    return res.data;
+                }
+                return null;
+            })
+            .catch((err) => {
+                console.log("error : ", err);
+                return null;
             });
     }
 }
