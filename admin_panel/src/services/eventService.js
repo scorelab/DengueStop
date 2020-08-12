@@ -76,10 +76,11 @@ class EventService {
             coordinator_name: eventObject.coordinator_name,
             coordinator_contact: eventObject.coordinator_contact,
             description: eventObject.description,
-            status_id: 4,
+            status_id: 1, //status 1 for pending event
             org_id: orgId,
             created_by: adminId,
         };
+        console.log(data);
         return FetchApi("POST", apiUrl, data)
             .then((res) => {
                 if (res.status === 200) {

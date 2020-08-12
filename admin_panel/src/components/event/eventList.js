@@ -159,6 +159,7 @@ const NewEventModal = (props) => {
         eventObject.start_time = startDate.getTime();
         eventObject.location_lat = eventCoord[0];
         eventObject.location_long = eventCoord[1];
+        console.log(eventObject);
         eventService
             .createEvent(eventObject)
             .then((res) => {

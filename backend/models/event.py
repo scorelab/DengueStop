@@ -29,7 +29,7 @@ class Event(db.Model):
     created_by = db.Column(db.Integer, nullable=False)
     description = db.Column(db.String(500), nullable=False)
 
-    def __init__(self, name, venue, location_lat, location_long, start_time, duration, coordinator_name, coordinator_contact, created_by, status_id, org_id, description):
+    def __init__(self, name, venue, location_lat, location_long, start_time, duration, coordinator_name, coordinator_contact, status_id, org_id, created_by, description):
         self.name = name
         self.venue = venue
         self.location_lat = location_lat

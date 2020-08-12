@@ -1335,6 +1335,7 @@ def create_event():
     auth_res = authenticate_token(request.headers['authorization'])
     if(auth_res != False):
         try:
+            print(request)
             name = request.json['name']
             venue = request.json['venue']
             location_lat = request.json['location_lat']
