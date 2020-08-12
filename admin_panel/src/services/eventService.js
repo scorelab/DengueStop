@@ -80,8 +80,6 @@ class EventService {
             org_id: orgId,
             created_by: adminId,
         };
-        console.log(data);
-
         return FetchApi("POST", apiUrl, data)
             .then((res) => {
                 if (res.status === 200) {

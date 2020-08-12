@@ -18,6 +18,7 @@
     "react-dom": "^16.13.1",
     "react-leaflet": "^2.7.0",
     "react-moment": "^0.9.7",
+    "react-notifications": "^1.6.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.1",
     "react-truncate": "^2.4.0",
