@@ -16,7 +16,7 @@ from sqlalchemy.sql import func
 from database import db
 from database import ma
 import jwt
-from datetime import datetime
+from datetime import datetime, timezone
 import calendar
 import bcrypt
 from dateutil.relativedelta import relativedelta
@@ -1326,7 +1326,46 @@ def update_event_status(event_id, new_status):
             raise
     else:
         return make_response('Request Forbidden', 403)
-        
+
+
+@app.route('/create_event', methods=['POST'])
+def create_event():
+    # this will create a new event
+     # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        try:
+            name = request.json['name']
+            venue = request.json['venue']
+            location_lat = request.json['location_lat']
+            location_long = request.json['location_long']
+            start_timestamp = request.json['start_time']
+            # converts time to python datetime format
+            start_time = datetime.fromtimestamp(start_timestamp/1000.0)
+            duration = request.json['duration']
+            coordinator_name = request.json['coordinator_name']
+            coordinator_contact = request.json['coordinator_contact']
+            status_id = request.json['status_id']
+            org_id = request.json['org_id']
+            created_by = request.json['created_by']
+            description = request.json['description']
+            new_event = Event(name, venue, location_lat, location_long, start_time, duration, coordinator_name,
+            coordinator_contact, status_id, org_id, created_by, description)
+            db.session.add(new_event)
+            db.session.commit()
+            return event_schema.jsonify(new_event)
+
+        except IOError:
+            print("I/O error")
+        except ValueError:
+            print("Value Error")
+        except:
+            print("Unexpected error")
+            raise
+    else:
+       return make_response('Request Forbidden', 403) 
+
+
 # running server
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,5 +1,6 @@
 from database import db
 from database import ma
+from datetime import datetime
 from sqlalchemy import ForeignKeyConstraint
 from models.admin import Admin, admin_limited_schema
 from models.event_status import EventStatus, event_status_schema
@@ -18,7 +19,7 @@ class Event(db.Model):
     venue = db.Column(db.String(45), nullable=False)
     location_lat = db.Column(db.Float, nullable=False)
     location_long = db.Column(db.Float, nullable=False)
-    date_created = db.Column(db.DateTime, nullable=False)
+    date_created = db.Column(db.DateTime, nullable=False, default=datetime.now)
     start_time = db.Column(db.DateTime, nullable=False)
     duration = db.Column(db.Float, nullable=False)
     coordinator_name = db.Column(db.String(45), nullable=False)
@@ -28,18 +29,18 @@ class Event(db.Model):
     created_by = db.Column(db.Integer, nullable=False)
     description = db.Column(db.String(500), nullable=False)
 
-    def __init__(self, name, venue, location_lat, location_long, date_created, start_time, duration, coordinator_name, coordinator_contact, status_id, org_id, description):
+    def __init__(self, name, venue, location_lat, location_long, start_time, duration, coordinator_name, coordinator_contact, created_by, status_id, org_id, description):
         self.name = name
         self.venue = venue
         self.location_lat = location_lat
         self.location_long = location_long
-        self.date_created = date_created
         self.start_time = start_time
         self.duration = duration
         self.coordinator_name = coordinator_name
         self.coordinator_contact = coordinator_contact
         self.status_id = status_id
         self.org_id = org_id
+        self.created_by = created_by
         self.description = description
 
 
