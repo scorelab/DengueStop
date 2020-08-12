@@ -3,6 +3,14 @@
     height: 94vh;
 }
 
+.ellipsis {
+    text-overflow: ellipsis;
+
+    /* Required for text-overflow to do anything */
+    white-space: nowrap;
+    overflow: hidden;
+}
+
 .main-card {
     border: 1px;
     max-width: 100%;

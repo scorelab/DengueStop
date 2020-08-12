@@ -43,8 +43,8 @@ const EventCard = (props) => {
                     </MDBCol>
                 </MDBRow>
                 <MDBRow>
-                    <MDBCol size="7" className="text-left">
-                        <span className="event-name-text">
+                    <MDBCol size="7" className="text-left ellipsis">
+                        <span className="event-name-text ellipsis">
                             {data.event.name}
                         </span>
                     </MDBCol>
