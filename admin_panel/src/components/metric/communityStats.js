@@ -17,7 +17,7 @@ import { getSession } from "../../services/sessionService";
 const CommunityStats = () => {
     const currentUser = getSession();
     const incidentService = new IncidentService();
-    const userService = new AuthService();
+    const authService = new AuthService();
     const [
         verificationBreakdownCount,
         setVerificationBreakdownCount,
@@ -42,38 +42,49 @@ const CommunityStats = () => {
     }, [verificationBreakdownCountFilter]);
 
     useEffect(() => {
-        const orgId = currentUser.org_id;
-        userService.getUserBaseBreakdown().then((res) => {
+        authService.getUserBaseBreakdown().then((res) => {
             setUserBaseBreakdownCount(res);
         });
     }, []);
 
     const extractCount = (type) => {
-        return verificationBreakdownCount.map((data, index) => {
-            if (data.name === type) {
-                return data.count;
-            }
-        });
+        if (
+            verificationBreakdownCount &&
+            verificationBreakdownCount.length > 0
+        ) {
+            return verificationBreakdownCount.map((data, index) => {
+                if (data.name === type) {
+                    return data.count;
+                }
+            });
+        }
     };
 
     const extractUserCount = (type) => {
-        return userBaseBreakdownCount.map((data, index) => {
-            if (data.name === type) {
-                return data.count;
-            }
-        });
+        if (userBaseBreakdownCount && userBaseBreakdownCount.length > 0) {
+            return userBaseBreakdownCount.map((data, index) => {
+                if (data.name === type) {
+                    return data.count;
+                }
+            });
+        }
     };
 
     const extractPercentage = (type) => {
         // calculates percentage
         var total = 0;
         var value = 0;
-        verificationBreakdownCount.map((data, index) => {
-            if (data.name === type) {
-                value = data.count;
-            }
-            total += data.count;
-        });
+        if (
+            verificationBreakdownCount &&
+            verificationBreakdownCount.length > 0
+        ) {
+            verificationBreakdownCount.map((data, index) => {
+                if (data.name === type) {
+                    value = data.count;
+                }
+                total += data.count;
+            });
+        }
         const percentage = ((value / total) * 100).toFixed(2);
         return percentage;
     };

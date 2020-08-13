@@ -27,3 +27,12 @@
 .modal-custom-dark-header {
     background-color: rgb(32, 32, 32);
 }
+
+.event-form-invalid-text {
+    color: #dc3545;
+    font-size: 80%;
+}
+
+.event-date-picker {
+    width: 20rem !important;
+}

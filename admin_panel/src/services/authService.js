@@ -12,7 +12,7 @@ class AuthService {
             })
             .catch((err) => {
                 console.log("error : ", err);
-                return null;
+                throw err;
             });
     }
 
@@ -31,11 +31,9 @@ class AuthService {
             })
             .catch((err) => {
                 console.log("error : ", err);
-                return null;
+                throw err;
             });
     }
-
-    logoutAdminUser() {}
 
     createAdminUser(adminObject) {}
 }
