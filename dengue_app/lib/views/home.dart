@@ -189,13 +189,7 @@ class TopToolBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Material(
-            color: Colors.transparent,
-            child: IconButton(
-              icon: Icon(Icons.sort, size: 30),
-              onPressed: () {},
-            ),
-          ),
+         
           Text('Events',
               style: TextStyle(
                   fontWeight: FontWeight.w600,
@@ -220,8 +214,6 @@ class TopToolBar extends StatelessWidget {
 }
 
 class EventCard extends StatelessWidget {
-  // todo might have to change to Stateful widget as we are changing the color/opacity based on the expiration of the event.
-
   final String eventName;
   final String eventCoordinator;
   final String eventContact;
@@ -297,18 +289,37 @@ class EventCard extends StatelessWidget {
               .status), //todo dynamically change opacity based on event status
           borderRadius: BorderRadius.all(Radius.circular(10.0)),
           border: Border.all(color: Colors.grey[700])),
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            Text("$eventName", style: eventNameStyle),
-            Text("$venue", style: eventDetailsStyle),
-            Text("$eventCoordinator | $eventContact", style: eventDetailsStyle),
-            Text("$formattedTimestamp | $duration hours",
-                style: eventDetailsStyle)
-          ],
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            Navigator.pushNamed(context, 'event', arguments: {
+              "eventName": eventName,
+              "eventCoordinator": eventCoordinator,
+              "eventContact": eventContact,
+              "eventDate": eventDate,
+              "duration": duration,
+              "locationLat": locationLat,
+              "locationLong": locationLong,
+              "venue": venue,
+              "status": status
+            });
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Text("$eventName", style: eventNameStyle),
+                Text("$venue", style: eventDetailsStyle),
+                Text("$eventCoordinator | $eventContact",
+                    style: eventDetailsStyle),
+                Text("$formattedTimestamp | $duration hours",
+                    style: eventDetailsStyle)
+              ],
+            ),
+          ),
         ),
       ),
     );
