@@ -21,6 +21,7 @@ import calendar
 import bcrypt
 from dateutil.relativedelta import relativedelta
 import os
+import datetime as dt
 
 # init app
 app = Flask(__name__)
@@ -29,7 +30,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 # database
 # to supress the warning on the terminal, specify this line
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:test1234@localhost/dengue_stop'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://newuser:Password#1234@localhost/dengue_stop'
 SECRET_KEY = "thisisasecretkeythatmustbechangedlater"
 # init extensions
 db.init_app(app)
@@ -71,10 +72,11 @@ def create_user():
         last_name = request.json['lastName']
         nic_number = request.json['nicNumber']
         email = request.json['email']
-        password = request.json['password']
+        password = request.json['password'].encode("utf-8")
+        hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
         salt = request.json['salt']
         new_user = User(telephone, first_name, last_name,
-                        nic_number, email, password, salt)
+                        nic_number, email, hashed_password, salt)
         db.session.add(new_user)
         db.session.commit()
         return user_schema.jsonify(new_user)
@@ -98,11 +100,11 @@ def login_user():
         result = user_schema.dump(current_user)
         if(result != {}):
             # checking whether the hashed password matches the database
-            if(password == result['password']):
+            if(bcrypt.checkpw(password.encode("utf-8"), result['password'].encode("utf-8"))):
                 # returning a jwt to the app
                 secret_key = SECRET_KEY
-                token = jwt.encode({'user': username, 'userId': result['id'], 'exp': datetime.datetime.utcnow(
-                ) + datetime.timedelta(hours=1)}, secret_key)
+                token = jwt.encode({'user': username, 'userId': result['id'], 'exp': dt.datetime.utcnow(
+                ) + dt.timedelta(hours=1)}, secret_key)
                 userData = {'id': result['id'], 'first_name': result['first_name'], 'last_name': result['last_name'],
                             'email': result['email'], 'telephone': result['telephone'], 'nic_number': result['nic_number']}
                 return jsonify({'token': token.decode('UTF-8'), 'userData': userData})

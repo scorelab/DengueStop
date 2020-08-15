@@ -11,7 +11,7 @@ class User(db.Model):
     last_name = db.Column(db.String(45), nullable=False)
     nic_number = db.Column(db.String(20), nullable=True)
     email = db.Column(db.String(45), nullable=True)
-    password = db.Column(db.String(45), nullable=False)
+    password = db.Column(db.String(70), nullable=False)
     salt = db.Column(db.String(45), nullable=False)
 
     def __init__(self, telephone, first_name, last_name, nic_number, email, password, salt):
