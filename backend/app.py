@@ -30,7 +30,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 # database
 # to supress the warning on the terminal, specify this line
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://newuser:Password#1234@localhost/dengue_stop'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:test1234@localhost/dengue_stop'
 SECRET_KEY = "thisisasecretkeythatmustbechangedlater"
 # init extensions
 db.init_app(app)
