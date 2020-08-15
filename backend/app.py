@@ -101,8 +101,8 @@ def login_user():
             if(password == result['password']):
                 # returning a jwt to the app
                 secret_key = SECRET_KEY
-                token = jwt.encode({'user': username, 'userId': result['id'], 'exp': datetime.datetime.utcnow(
-                ) + datetime.timedelta(hours=1)}, secret_key)
+                token = jwt.encode({'user': username, 'userId': result['id'], 'exp': datetime.utcnow(
+                ) + relativedelta(days=1)}, secret_key)
                 userData = {'id': result['id'], 'first_name': result['first_name'], 'last_name': result['last_name'],
                             'email': result['email'], 'telephone': result['telephone'], 'nic_number': result['nic_number']}
                 return jsonify({'token': token.decode('UTF-8'), 'userData': userData})
@@ -169,6 +169,20 @@ def update_user():
             raise
 
     return make_response('Request Forbidden', 403)
+
+@ app.route('/get_all_events', methods=['GET'])
+def get_all_events():
+    # checking for authentication
+    auth_res = authenticate_token(request.headers['authorization'])
+    if(auth_res != False):
+        # returns all the events excluding upcoming events
+        events = Event.query.filter(Event.status_id > 1).order_by(Event.start_time.desc()).all()
+        db.session.commit()
+        result = events_schema.dump(events)
+        return jsonify(result)
+    else:
+        return make_response('Request Forbidden', 403)
+        
 
 @app.route('/report_incident', methods=['POST'])
 # endpoint to add a new report

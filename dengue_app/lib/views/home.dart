@@ -1,5 +1,8 @@
+import 'package:dengue_app/models/event.dart';
+import 'package:dengue_app/services/event_service.dart';
 import 'package:flutter/material.dart';
 import 'package:dengue_app/services/user_service.dart';
+import 'package:intl/intl.dart';
 
 class Home extends StatelessWidget {
   @override
@@ -39,7 +42,7 @@ class Home extends StatelessWidget {
               children: <Widget>[
                 Expanded(
                   flex: 9,
-                  child: EventList(),
+                  child: Events(),
                 ),
                 Expanded(
                   flex: 3,
@@ -52,13 +55,21 @@ class Home extends StatelessWidget {
   }
 }
 
-class EventList extends StatefulWidget {
+class Events extends StatefulWidget {
 //  generates the list of scrollable events in the top half of the screen
   @override
   _EventsState createState() => _EventsState();
 }
 
-class _EventsState extends State<EventList> {
+class _EventsState extends State<Events> {
+  final EventService eventService = EventService();
+  Future<List<Event>> futureEventList;
+  @override
+  void initState() {
+    super.initState();
+    futureEventList = eventService.getAllEvents();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -69,19 +80,51 @@ class _EventsState extends State<EventList> {
           TopToolBar(),
           SizedBox(height: 10.0),
           Expanded(
+            child: FutureBuilder(
+                future: Future.wait([futureEventList]),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return EventList(eventList: snapshot.data[0]);
+                  } else if (snapshot.hasError) {
+                    return Text("${snapshot.error}");
+                  } else {
+                    return Text("Something else");
+                  }
+                }),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class EventList extends StatelessWidget {
+  final List<Event> eventList;
+  EventList({this.eventList});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          SizedBox(height: 10.0),
+          Expanded(
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 10.0),
               child: ListView.builder(
-                  itemCount: 10,
+                  itemCount: eventList.length,
                   itemBuilder: (context, index) {
-                    // todo pass data to event card from backend
-                    // todo calculate and parse time formats according to the required format
                     return EventCard(
-                      eventName: "Dengue Awareness Programme",
-                      eventCoordinator: "PHI Silva",
-                      eventDate: "26th May 2020",
-                      startTime: "10.30 am",
-                      endTime: "12.00 pm",
+                      eventName: eventList[index].name,
+                      eventCoordinator: eventList[index].coordinatorName,
+                      eventDate: eventList[index].startTime,
+                      duration: eventList[index].duration,
+                      locationLat: eventList[index].locationLat,
+                      locationLong: eventList[index].locationLong,
+                      status: eventList[index].statusId,
+                      venue: eventList[index].venue,
+                      eventContact: eventList[index].coordinatorContact,
                     );
                   }),
             ),
@@ -146,13 +189,7 @@ class TopToolBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Material(
-            color: Colors.transparent,
-            child: IconButton(
-              icon: Icon(Icons.sort, size: 30),
-              onPressed: () {},
-            ),
-          ),
+         
           Text('Events',
               style: TextStyle(
                   fontWeight: FontWeight.w600,
@@ -177,49 +214,112 @@ class TopToolBar extends StatelessWidget {
 }
 
 class EventCard extends StatelessWidget {
-  // todo might have to change to Stateful widget as we are changing the color/opacity based on the expiration of the event.
-  // styles for event name label
-  final TextStyle eventNameStyle = TextStyle(
-      fontSize: 18.0, fontWeight: FontWeight.w700, color: Colors.white);
-  // styles for event details
-  final TextStyle eventDetailsStyle = TextStyle(
-      fontSize: 16.0, fontWeight: FontWeight.w500, color: Colors.white);
-
   final String eventName;
   final String eventCoordinator;
-  final String eventDate;
-  final String startTime;
-  final String endTime;
+  final String eventContact;
+  final DateTime eventDate;
+  final int status;
+  final double duration;
+  final double locationLat;
+  final double locationLong;
+  final String venue;
 
   EventCard(
       {this.eventName,
       this.eventCoordinator,
+      this.eventContact,
       this.eventDate,
-      this.startTime,
-      this.endTime});
+      this.duration,
+      this.locationLat,
+      this.locationLong,
+      this.venue,
+      this.status});
+
+  Color changeEventTextColor(statusId) {
+    switch (statusId) {
+      case 2:
+        return Colors.white;
+      case 3:
+        return Colors.white.withOpacity(0.2);
+      case 4:
+        return Colors.white;
+      case 5:
+        return Colors.white.withOpacity(0.5);
+      default:
+        return Colors.white;
+    }
+  }
+
+  Color changeEventBoxColor(statusId) {
+    switch (statusId) {
+      case 2:
+        return Colors.teal[900].withOpacity(0.5);
+      case 3:
+        return Colors.black.withOpacity(0.3);
+      case 4:
+        return Colors.black.withOpacity(0.5);
+      case 5:
+        return Colors.red[900].withOpacity(0.5);
+      default:
+        return Colors.black;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    String formattedTimestamp =
+        DateFormat('dd/MM/yyyy @ h:mm a').format(this.eventDate);
+    // styles for event name label
+    final TextStyle eventNameStyle = TextStyle(
+        fontSize: 18.0,
+        fontWeight: FontWeight.w700,
+        color: changeEventTextColor(this.status));
+    // styles for event details
+    final TextStyle eventDetailsStyle = TextStyle(
+        fontSize: 16.0,
+        fontWeight: FontWeight.w500,
+        color: changeEventTextColor(this.status));
+
     return Container(
       // separation between event cards
       margin: EdgeInsets.only(bottom: 15.0),
-      height: 100,
+      height: 150,
       decoration: BoxDecoration(
-          color: Colors.black.withOpacity(
-              0.5), //todo dynamically change opacity based on event status
+          color: changeEventBoxColor(this
+              .status), //todo dynamically change opacity based on event status
           borderRadius: BorderRadius.all(Radius.circular(10.0)),
           border: Border.all(color: Colors.grey[700])),
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            Text("$eventName", style: eventNameStyle),
-            Text("$eventCoordinator", style: eventDetailsStyle),
-            Text("$eventDate | $startTime to $endTime",
-                style: eventDetailsStyle)
-          ],
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            Navigator.pushNamed(context, 'event', arguments: {
+              "eventName": eventName,
+              "eventCoordinator": eventCoordinator,
+              "eventContact": eventContact,
+              "eventDate": eventDate,
+              "duration": duration,
+              "locationLat": locationLat,
+              "locationLong": locationLong,
+              "venue": venue,
+              "status": status
+            });
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Text("$eventName", style: eventNameStyle),
+                Text("$venue", style: eventDetailsStyle),
+                Text("$eventCoordinator | $eventContact",
+                    style: eventDetailsStyle),
+                Text("$formattedTimestamp | $duration hours",
+                    style: eventDetailsStyle)
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -292,9 +392,7 @@ class DrawerButton extends StatelessWidget {
           } else if (buttonType == 'profile') {
             // routing to profile screen
             Navigator.pushNamed(context, 'profile');
-          } else {
-            // todo handle the error
-          }
+          } else {}
         },
       ),
     );
