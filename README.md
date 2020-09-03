@@ -11,7 +11,11 @@ This instructions consist of 3 sections for Community Flutter App, Flask Backend
 Clone the repository
 `git clone https://github.com/scorelab/DengueStop.git`
 
+![cloning-repo](step-1.gif)
+
 ## Flutter Community App
+
+![flutter-setup](step-2.gif)
 
 1. Install Flutter  
    Follow the official [guide](https://flutter.dev/docs/get-started/install) from the flutter team.
@@ -42,8 +46,14 @@ Clone the repository
     ```
     flutter run
     ```
-
+#### Note - If the flutter application fails to connect to the local flask server, try the following command in the terminal
+    adb reverse tcp:5000 tcp:5000
+![adb-setup](adb-reverse.gif)   
+    
+    
 ## Flask Backend
+
+![flask-setup](step-3.gif)
 
 1. Install Python3
 
@@ -65,6 +75,8 @@ Clone the repository
     ```
 
 ## React Admin Panel
+
+![react-setup](step-4.gif)
 
 1. Go to `admin_panel` folder
 
