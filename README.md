@@ -1,6 +1,8 @@
 # Dengue-Stop
+[![Build Status](https://travis-ci.com/scorelab/dengue-stop.svg?branch=master)](https://travis-ci.com/scorelab/dengue-stop)
 
 Dengue-Stop provides a simple and effective way to report and discover dengue incidents around your area, with the help of community.
+
 
 # Installation
 
