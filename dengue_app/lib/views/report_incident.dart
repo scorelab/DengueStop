@@ -488,6 +488,7 @@ class _DistrictDropdownState extends State<DistrictDropdown> {
             .where((element) => element.provinceId == widget.selectedProvince.id)
             .toList()
             .first;
+        widget.setDistrictFunction(selectedDistrict);
       });
     }
   }
