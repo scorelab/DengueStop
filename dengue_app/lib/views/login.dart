@@ -79,6 +79,7 @@ class _LoginFormState extends State<LoginForm> {
   final _loginFormKey = GlobalKey<FormState>();
   final telephoneController = TextEditingController();
   final passwordController = TextEditingController();
+  bool _obscureText = true;
   // uses focus node to change focus from telephone field to password field on the press of enter in the keyboard
   FocusNode passwordFocusNode = new FocusNode();
   // styling for form labels
@@ -179,7 +180,7 @@ class _LoginFormState extends State<LoginForm> {
                 'Welcome to Dengue-Stop',
                 style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.w700),
               ),
-              SizedBox(height: MediaQuery.of(context).size.height/20),
+              SizedBox(height: MediaQuery.of(context).size.height / 20),
               Text('Telephone Number', style: formLabelStyle),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 15.0),
@@ -191,33 +192,47 @@ class _LoginFormState extends State<LoginForm> {
                   onEditingComplete: () =>
                       FocusScope.of(context).requestFocus(passwordFocusNode),
                   inputFormatters: [
-                    WhitelistingTextInputFormatter.digitsOnly,
+                    FilteringTextInputFormatter.digitsOnly,
                     LengthLimitingTextInputFormatter(10),
                   ],
                   controller: telephoneController,
                 ),
               ),
               //using mediaquery to make it responsive and remove the overflow issue
-              SizedBox(height: MediaQuery.of(context).size.height/40),
+              SizedBox(height: MediaQuery.of(context).size.height / 40),
               Text('Password', style: formLabelStyle),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 15.0),
                 child: TextFormField(
                   // unfocussing the password text field on pressing enter allowing the user to login
                   textInputAction: TextInputAction.done,
-                  obscureText: true,
+                  obscureText: _obscureText,
                   focusNode: passwordFocusNode,
                   validator: validatePassword,
                   onEditingComplete: () => FocusScope.of(context).unfocus(),
                   inputFormatters: [
                     LengthLimitingTextInputFormatter(40),
                     // resticting whitespaces
-                    BlacklistingTextInputFormatter(RegExp('[ *]'))
+                    FilteringTextInputFormatter.deny(RegExp('[ *]'))
+                    // BlacklistingTextInputFormatter()
                   ],
                   controller: passwordController,
+                  decoration: InputDecoration(
+                      suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureText
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            // Update the state i.e. toogle the state of passwordVisible variable
+                            setState(() {
+                              _obscureText = !_obscureText;
+                            });
+                          })),
                 ),
               ),
-              SizedBox(height: MediaQuery.of(context).size.height/20),
+              SizedBox(height: MediaQuery.of(context).size.height / 20),
               SizedBox(
                 width: double.infinity,
                 height: 70,
@@ -242,7 +257,7 @@ class _LoginFormState extends State<LoginForm> {
                   ),
                 ),
               ),
-              SizedBox(height: MediaQuery.of(context).size.height/20),
+              SizedBox(height: MediaQuery.of(context).size.height / 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
