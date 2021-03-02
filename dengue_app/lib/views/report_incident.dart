@@ -478,7 +478,22 @@ class _DistrictDropdownState extends State<DistrictDropdown> {
     return null;
   }
 
-  // todo fix bug on changing already selected dropdowns
+
+  @override
+  void didUpdateWidget(DistrictDropdown oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.selectedProvince != oldWidget.selectedProvince) {
+      setState(() {
+        selectedDistrict = widget.districtList
+            .where((element) => element.provinceId == widget.selectedProvince.id)
+            .toList()
+            .first;
+        widget.setDistrictFunction(selectedDistrict);
+      });
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<District>(
