@@ -98,6 +98,8 @@ class _SignupFormState extends State<SignupForm> {
   final telephoneController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   // styling for form labels
   TextStyle formLabelStyle = TextStyle(
       fontSize: 18.0,
@@ -302,7 +304,7 @@ class _SignupFormState extends State<SignupForm> {
                   keyboardType: TextInputType.number,
                   // allowing only numbers to be typed
                   inputFormatters: [
-                    WhitelistingTextInputFormatter.digitsOnly,
+                    FilteringTextInputFormatter.digitsOnly,
                     LengthLimitingTextInputFormatter(10),
                   ],
                 ),
@@ -312,37 +314,63 @@ class _SignupFormState extends State<SignupForm> {
                 child: TextFormField(
                     // changing focus to the confirm password text field on pressing enter
                     textInputAction: TextInputAction.done,
-                    obscureText: true,
+                    obscureText: _obscurePassword,
                     focusNode: passwordFocusNode,
                     onEditingComplete: () => FocusScope.of(context)
                         .requestFocus(confirmPasswordFocusNode),
                     decoration: InputDecoration(
-                        labelText: 'Password', labelStyle: formLabelStyle),
+                        labelText: 'Password',
+                        labelStyle: formLabelStyle,
+                        suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              // Update the state i.e. toogle the state of passwordVisible variable
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            })),
                     validator: validatePassword,
                     controller: passwordController, // limiting characters to 40
                     inputFormatters: [
                       LengthLimitingTextInputFormatter(40),
                       // resticting whitespaces
-                      BlacklistingTextInputFormatter(RegExp('[ *]'))
+                      FilteringTextInputFormatter.deny(RegExp('[ *]'))
                     ]),
               ),
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 15.0),
                 child: TextFormField(
                     textInputAction: TextInputAction.done,
-                    obscureText: true,
+                    obscureText: _obscureConfirmPassword,
                     focusNode: confirmPasswordFocusNode,
                     onEditingComplete: () => FocusScope.of(context).unfocus(),
                     decoration: InputDecoration(
                         labelText: 'Confirm Password',
-                        labelStyle: formLabelStyle),
+                        labelStyle: formLabelStyle,
+                        suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscureConfirmPassword
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              // Update the state i.e. toogle the state of passwordVisible variable
+                              setState(() {
+                                _obscureConfirmPassword =
+                                    !_obscureConfirmPassword;
+                              });
+                            })),
                     validator: validatePassword,
                     controller: confirmPasswordController,
                     // limiting characters to 40
                     inputFormatters: [
                       LengthLimitingTextInputFormatter(40),
                       // resticting whitespaces
-                      BlacklistingTextInputFormatter(RegExp('[ *]'))
+                      FilteringTextInputFormatter.deny(RegExp('[ *]'))
                     ]),
               ),
               SizedBox(height: 30.0),
