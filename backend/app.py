@@ -11,6 +11,7 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from sqlalchemy.sql import func
 
+import config
 from database import db, ma
 from models.admin import Admin, admin_schema, admins_schema
 from models.alert import Alert, alert_schema, alerts_schema
@@ -35,8 +36,8 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 # database
 # to supress the warning on the terminal, specify this line
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:123@localhost/dengue_stop'
-SECRET_KEY = "thisisasecretkeythatmustbechangedlater"
+app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql://{config.DB_USERNAME}:{config.DB_PASSWORD}@{config.DB_HOST}/{config.DB_DATABASE}'
+SECRET_KEY = config.SECRET_KEY
 # init extensions
 db.init_app(app)
 ma.init_app(app)
