@@ -1,8 +1,8 @@
-"""init migration
+"""empty message
 
-Revision ID: 7a11382d2cbd
+Revision ID: 8123a3d8dafb
 Revises: 
-Create Date: 2020-06-25 00:52:11.805004
+Create Date: 2021-03-19 00:56:42.616850
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '7a11382d2cbd'
+revision = '8123a3d8dafb'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -61,8 +61,7 @@ def upgrade():
     sa.Column('email', sa.String(length=45), nullable=False),
     sa.Column('name', sa.String(length=45), nullable=False),
     sa.Column('contact', sa.String(length=10), nullable=False),
-    sa.Column('password', sa.String(length=45), nullable=False),
-    sa.Column('salt', sa.String(length=45), nullable=False),
+    sa.Column('password', sa.String(length=70), nullable=False),
     sa.Column('org_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['org_id'], ['org_unit.id'], ),
     sa.PrimaryKeyConstraint('id'),
@@ -96,7 +95,7 @@ def upgrade():
     sa.Column('location_long', sa.Float(), nullable=False),
     sa.Column('date_created', sa.DateTime(), nullable=False),
     sa.Column('start_time', sa.DateTime(), nullable=False),
-    sa.Column('duration', sa.Integer(), nullable=False),
+    sa.Column('duration', sa.Float(), nullable=False),
     sa.Column('coordinator_name', sa.String(length=45), nullable=False),
     sa.Column('coordinator_contact', sa.Integer(), nullable=False),
     sa.Column('status_id', sa.Integer(), nullable=False),
