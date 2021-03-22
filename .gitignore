@@ -1,11 +1,3 @@
 ###### backend ######
 # Environments
-/backend/venv/
-/backend/__pycache__
-/backend/.pytest_cache
-/backend/.vscode
-/backend/models/__pycache__
-/backend/services/__pycache__
-/backend/tests/__pycache__
-/backend/tests/.pytest_cache 
 /admin_panel/node_modules

@@ -1,26 +1,33 @@
 # importing models for flask-migrate to realize models and create tables according to models
+import calendar
+import os
+from datetime import datetime, timezone
+
+import bcrypt
+import jwt
+from dateutil.relativedelta import relativedelta
+from flask import Flask, jsonify, make_response, request
+from flask_cors import CORS
+from flask_migrate import Migrate
+from sqlalchemy.sql import func
+
+import config
+from database import db, ma
 from models.admin import Admin, admin_schema, admins_schema
 from models.alert import Alert, alert_schema, alerts_schema
-from models.event_status import EventStatus, event_status_schema, event_statuses_schema
-from models.event import Event, event_schema, events_schema, event_with_full_schema, events_with_full_schema
-from models.incident import Incident, incident_schema, incidents_schema, incident_with_user_schema, incidents_with_user_schema
-from models.org_unit import OrgUnit, org_unit_schema, org_units_schema
-from models.patient_status import PatientStatus, patient_status_schema, patient_statuses_schema
-from models.user import User, user_schema, users_schema
-from models.province import Province, province_schema, provinces_schema
 from models.district import District, district_schema, districts_schema
-from flask import Flask, request, jsonify, make_response
-from flask_migrate import Migrate
-from flask_cors import CORS
-from sqlalchemy.sql import func
-from database import db
-from database import ma
-import jwt
-from datetime import datetime, timezone
-import calendar
-import bcrypt
-from dateutil.relativedelta import relativedelta
-import os
+from models.event import (Event, event_schema, event_with_full_schema,
+                          events_schema, events_with_full_schema)
+from models.event_status import (EventStatus, event_status_schema,
+                                 event_statuses_schema)
+from models.incident import (Incident, incident_schema,
+                             incident_with_user_schema, incidents_schema,
+                             incidents_with_user_schema)
+from models.org_unit import OrgUnit, org_unit_schema, org_units_schema
+from models.patient_status import (PatientStatus, patient_status_schema,
+                                   patient_statuses_schema)
+from models.province import Province, province_schema, provinces_schema
+from models.user import User, user_schema, users_schema
 
 # init app
 app = Flask(__name__)
@@ -29,8 +36,8 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 # database
 # to supress the warning on the terminal, specify this line
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:test1234@localhost/dengue_stop'
-SECRET_KEY = "thisisasecretkeythatmustbechangedlater"
+app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql://{config.DB_USERNAME}:{config.DB_PASSWORD}@{config.DB_HOST}/{config.DB_DATABASE}'
+SECRET_KEY = config.SECRET_KEY
 # init extensions
 db.init_app(app)
 ma.init_app(app)
@@ -42,12 +49,16 @@ migrate = Migrate(app, db)
 # # ONCE THE POPULATION IS DONE. MAKE SURE TO COMMENT OR REMOVE THIS ENDPOINT
 # # BEFORE RUNNING THIS ENDPOINT MAKE SURE TO PROPERLY ADD DATA NEEDED FOR PREPOPULAITON
 # def pre_populate_database():
-#     Province.prePopulateProvince()
-#     District.prePopulateDistrict()
-#     PatientStatus.prePopulatePatientStatus()
-#     EventStatus.prePopulateEventStatus()
-#     OrgUnit.prePopulateOrgUnit()
-#     Admin.prePopulateAdminUser()
+#     try:
+#         Province.prePopulateProvince()
+#         District.prePopulateDistrict()
+#         PatientStatus.prePopulatePatientStatus()
+#         EventStatus.prePopulateEventStatus()
+#         OrgUnit.prePopulateOrgUnit()
+#         Admin.prePopulateAdminUser()
+#         return make_response(jsonify({'message':'success!'}),200)
+#     except:
+#         return make_response(jsonify({'message':'something went wrong!'}), 500)
 
 def authenticate_token(token):
     try:

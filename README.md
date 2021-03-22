@@ -65,13 +65,22 @@ Clone the repository
     cd backend/
     ```
 
-3. If you're running the backend for the first time, run the `init.sh` script to install the required dependencies from the `requirements.txt` file. If not, skip to the 3rd step.
+3. Create a `.env` file according to the `.env.sample sample` file in the backend app root.
+    ```dosini
+    DB_USERNAME=root
+    DB_PASSWORD=password
+    DB_DATABASE=dengue_stop
+    DB_HOST=localhost
+    SECRET_KEY=secretkey
+    ```
+
+4. If you're running the backend for the first time, run the `init.sh` script to install the required dependencies from the `requirements.txt` file. If not, skip to the 3rd step.
 
     ```
     sh init.sh
     ```
 
-4. Start the flask server by running the `start.sh` script. This will run the `app.py` file. Flask server will run at `http://127.0.0.1:5000` by default.
+5. Start the flask server by running the `start.sh` script. This will run the `app.py` file. Flask server will run at `http://127.0.0.1:5000` by default.
     ```
     sh start.sh
     ```
